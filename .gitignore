@@ -1,0 +1,13 @@
+# scratch, drafts, personal
+notes/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# derived
+out/*
+!out/.gitkeep
+
+# editor
+.idea/
