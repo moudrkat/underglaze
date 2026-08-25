@@ -22,13 +22,14 @@ def paint(ink, size=SIZE):
     return Image.fromarray(img).resize((size, size), Image.LANCZOS)
 
 
-def framed(ink, top, left, right):
-    W, H = SIZE + 80, SIZE + 152
+def framed(ink, left, right):
+    """Tile plus the two numbers that change. The equation lives on the page,
+    not burnt into the frames -- it was being shown twice."""
+    W, H = SIZE + 80, SIZE + 108
     im = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(im)
-    d.text((40, 32), top, font=font("DejaVuSans.ttf", 19), fill=DARK)
-    im.paste(paint(ink), (40, 76))
-    y = 76 + SIZE + 18
+    im.paste(paint(ink), (40, 36))
+    y = 36 + SIZE + 18
     d.text((40, y), left, font=font("DejaVuSans-Bold.ttf", 21), fill=INK)
     d.text((W - 40, y + 3), right, anchor="ra", font=font("DejaVuSans.ttf", 16), fill=GREY)
     return im
@@ -56,10 +57,7 @@ if __name__ == "__main__":
     frames = []
     for t in ts:
         G = knob(F, t)
-        frames.append(framed(tile(G),
-                             "aₘₙ(t) = (1+t)/2 · aₘₙ  +  (1−t)/2 · aₙₘ",
-                             "χ = %.3f" % chi(G),
-                             "t = %.2f" % t))
+        frames.append(framed(tile(G), "χ = %.3f" % chi(G), "t = %.2f" % t))
     mb = gif("web/chirality.gif", frames, 90)
     print("chirality.gif  %d frames  %.1f MB" % (len(frames), mb))
 
@@ -72,9 +70,7 @@ if __name__ == "__main__":
     for K in Ks:
         ink = tile(F, K)
         iou = (ink & ref).sum() / max((ink | ref).sum(), 1)
-        grow.append(framed(ink,
-                           "f > ½,   f = Σ aₘₙ [ cos 2π(mx+ny) + cos 2π(−nx+my) ]",
-                           "%s cosines" % f"{cosines(K):,}".replace(",", " "),
+        grow.append(framed(ink, "%s cosines" % f"{cosines(K):,}".replace(",", " "),
                            "%.0f %% of the tile" % (100 * iou)))
     seq = [grow[0]] * 5 + grow + [grow[-1]] * 16
     mb = gif("web/drawn_by_cosines.gif", seq, 115)
