@@ -1,14 +1,16 @@
 # underglaze
 
 A blue kitchen tile in a deep valley under the Krkonoše — the kind that is in
-every other Czech house. The pattern is
-*cibulák* — Meissen's Zwiebelmuster, 1739, itself a copy of Chinese blue-and-
-white. The "onions" are not onions. They are peaches and pomegranates, drawn by
-European painters who had never seen either.
+every other Czech house. Everyone here calls this pattern *cibulák*, after Meissen's
+Zwiebelmuster.
 
-It has been copied for nearly three centuries through steadily worse channels —
-hand-painting, transfer print, screen print, finally a bathroom wall — and it
-still comes out looking like itself.
+Audited motif by motif against a marked Meissen plate, it is not. Zwiebelmuster has five
+motifs — bamboo, aster, peony, peach, and the "onion" that is really a pomegranate. This
+tile has the aster, the hooked stems and the serrated leaves, and none of the fruit.
+
+**It is an onion pattern with no onion in it.** A Czechoslovak wall tile, 15 × 15 cm,
+back marked VH20, maker unknown, carrying the flowers of a design whose fruit did not
+survive the trip.
 
 **This project is about why.**
 
