@@ -1,6 +1,7 @@
 # underglaze
 
-A blue kitchen tile, the kind that is in every other Czech flat. The pattern is
+A blue kitchen tile in a deep valley under the Krkonoše — the kind that is in
+every other Czech house. The pattern is
 *cibulák* — Meissen's Zwiebelmuster, 1739, itself a copy of Chinese blue-and-
 white. The "onions" are not onions. They are peaches and pomegranates, drawn by
 European painters who had never seen either.
