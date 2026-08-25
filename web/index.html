@@ -88,8 +88,12 @@ f(x, y) &nbsp;=&nbsp; Σ<sub>m,n</sub> &nbsp; a<sub>mn</sub> &nbsp;[&nbsp; cos 2
 Put the origin on the four-fold centre and C4 forces every a<sub>mn</sub> real, so no sine
 terms exist. Largest imaginary part found in the whole spectrum: 2.6 × 10<sup>−17</sup>.</small>
 </div>
-<figure><img src="drawn_by_cosines.gif" alt="the tile appearing as the cutoff rises">
-<figcaption>Every frame is the same sum, keeping only m²+n² ≤ K². The cutoff rises; nothing is drawn.</figcaption></figure>
+<div class="knob">
+<img id="cutimg" src="" alt="the tile at the chosen cutoff">
+<input type="range" id="cutr" min="0" max="24" value="24" step="1" aria-label="the tile at the chosen cutoff">
+<div class="kends"><span>K = 1</span><span>K = 200</span></div>
+<p class="kread" id="cutout"></p>
+</div>
 
 <h2>Now turn one of the coefficients</h2>
 <p>p4 has no mirrors, so (m,&nbsp;n) and (n,&nbsp;m) are different orbits and need not carry
@@ -106,11 +110,10 @@ a<sub>mn</sub>(t) &nbsp;=&nbsp; (1+t)/2 · a<sub>mn</sub> &nbsp;+&nbsp; (1−t)/
 </div>
 
 <div class="knob">
-<img id="kimg" src="chi/t20.png" alt="the tile at the chosen chirality">
-<input type="range" id="krange" min="0" max="30" value="20" step="1"
-       aria-label="chirality">
+<img id="kimg" src="" alt="the tile at the chosen chirality">
+<input type="range" id="kr" min="0" max="30" value="20" step="1" aria-label="chirality">
 <div class="kends"><span>p4m · mirrors, no handedness</span><span>past the tile</span></div>
-<p class="kread">t = <b id="kt">1.00</b> &nbsp;·&nbsp; χ = <b id="kchi">0.199</b><em id="knote"> — this is the tile</em></p>
+<p class="kread" id="kout"></p>
 </div>
 <p><b>The plant turns into a snowflake.</b> Things that grow are chiral — a tendril
 winds one way, a shell one way. Things that crystallise have mirrors. χ measures how far
@@ -142,6 +145,16 @@ m<sub>t+1</sub> &nbsp;=&nbsp; [ &nbsp;G<sub>ℓ</sub> ∗ m<sub>t</sub> &nbsp;&g
 <small>Blur, then re-threshold. This is the Merriman–Bence–Osher scheme (1992);
 it converges to motion by mean curvature.</small>
 </div>
+<div class="knob">
+<img id="kilimg" src="" alt="the tile after one firing">
+<input type="range" id="kilr" min="0" max="24" value="0" step="1" aria-label="the tile after one firing">
+<div class="kends"><span>ℓ = 0, unfired</span><span>ℓ = 2.4 mm</span></div>
+<p class="kread" id="kilout"></p>
+</div>
+<p style="margin-top:16px"><b>A real firing sits in the first three steps of that slider.</b>
+Across the plausible E<sub>a</sub>, one Meissen high firing gives ℓ between 0.007 and 0.29 mm
+— at most 0.96 px here. Everything past that is hotter than any kiln. Which is the point:
+<b>one firing barely touches the tile.</b> The damage below is not one firing, it is sixty.</p>
 <figure><img src="strip.png" alt="sixty generations of copying and firing">
 <figcaption>Generations 0, 1, 3, 8, 20, 60. Perimeter 40&nbsp;744 → 6&nbsp;210 monotonically;
 166 ink regions → 13. Curvature flow has no non-trivial fixed point: it does not preserve
@@ -168,36 +181,43 @@ the Meissen museum calls the “onion” a Chinese melon, Czech sources a pomegr
 
 </div>
 <script>
-const CHI = [0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989];
-const kimg=document.getElementById('kimg'), kr=document.getElementById('krange');
-const kt=document.getElementById('kt'), kc=document.getElementById('kchi'), kn=document.getElementById('knote');
-const pre=CHI.map((_,i)=>{const im=new Image(); im.src='chi/t'+String(i).padStart(2,'0')+'.png'; return im;});
-kr.addEventListener('input',()=>{
-  const i=+kr.value, t=1.5*i/30;
-  kimg.src=pre[i].src;
-  kt.textContent=t.toFixed(2);
-  kc.textContent=CHI[i].toFixed(3);
-  kn.textContent = i===20 ? ' — this is the tile' : (i===0 ? ' — a snowflake' : (i>20 ? ' — no tile was ever painted like this' : ''));
+function wire(id, dir, pre, n, read){
+  const img=document.getElementById(id+'img'), r=document.getElementById(id+'r'),
+        out=document.getElementById(id+'out');
+  const pre_=[...Array(n)].map((_,i)=>{const im=new Image();
+    im.src=dir+'/'+pre+String(i).padStart(2,'0')+'.png'; return im;});
+  const show=()=>{const i=+r.value; img.src=pre_[i].src; out.innerHTML=read(i);};
+  r.addEventListener('input',show); show();
+}
+const CHI=[0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989], KIL=[{"l": 0.0, "mm": 0.0, "ink": 0.2089}, {"l": 0.33, "mm": 0.099, "ink": 0.2089}, {"l": 0.67, "mm": 0.201, "ink": 0.2086}, {"l": 1.0, "mm": 0.299, "ink": 0.2081}, {"l": 1.33, "mm": 0.398, "ink": 0.2065}, {"l": 1.67, "mm": 0.5, "ink": 0.2025}, {"l": 2.0, "mm": 0.599, "ink": 0.198}, {"l": 2.33, "mm": 0.698, "ink": 0.1926}, {"l": 2.67, "mm": 0.799, "ink": 0.1865}, {"l": 3.0, "mm": 0.898, "ink": 0.1816}, {"l": 3.33, "mm": 0.997, "ink": 0.1766}, {"l": 3.67, "mm": 1.099, "ink": 0.1724}, {"l": 4.0, "mm": 1.198, "ink": 0.1689}, {"l": 4.33, "mm": 1.296, "ink": 0.1652}, {"l": 4.67, "mm": 1.398, "ink": 0.1614}, {"l": 5.0, "mm": 1.497, "ink": 0.1583}, {"l": 5.33, "mm": 1.596, "ink": 0.156}, {"l": 5.67, "mm": 1.698, "ink": 0.1531}, {"l": 6.0, "mm": 1.796, "ink": 0.1501}, {"l": 6.33, "mm": 1.895, "ink": 0.1471}, {"l": 6.67, "mm": 1.997, "ink": 0.1443}, {"l": 7.0, "mm": 2.096, "ink": 0.1411}, {"l": 7.33, "mm": 2.195, "ink": 0.1382}, {"l": 7.67, "mm": 2.296, "ink": 0.1359}, {"l": 8.0, "mm": 2.395, "ink": 0.1328}], CUT=[{"K": 1, "cos": 3, "iou": 0.0}, {"K": 2, "cos": 7, "iou": 0.0}, {"K": 4, "cos": 25, "iou": 0.2698}, {"K": 7, "cos": 75, "iou": 0.3941}, {"K": 10, "cos": 159, "iou": 0.4495}, {"K": 14, "cos": 307, "iou": 0.4896}, {"K": 18, "cos": 505, "iou": 0.5362}, {"K": 23, "cos": 827, "iou": 0.5791}, {"K": 29, "cos": 1315, "iou": 0.6359}, {"K": 35, "cos": 1927, "iou": 0.6901}, {"K": 42, "cos": 2763, "iou": 0.7222}, {"K": 49, "cos": 3763, "iou": 0.7608}, {"K": 57, "cos": 5095, "iou": 0.7963}, {"K": 66, "cos": 6837, "iou": 0.8284}, {"K": 75, "cos": 8833, "iou": 0.8566}, {"K": 85, "cos": 11351, "iou": 0.8739}, {"K": 95, "cos": 14173, "iou": 0.8915}, {"K": 106, "cos": 17633, "iou": 0.9081}, {"K": 118, "cos": 21855, "iou": 0.925}, {"K": 130, "cos": 26539, "iou": 0.9382}, {"K": 143, "cos": 32105, "iou": 0.9502}, {"K": 156, "cos": 38213, "iou": 0.96}, {"K": 170, "cos": 45393, "iou": 0.9727}, {"K": 185, "cos": 53751, "iou": 0.9829}, {"K": 200, "cos": 62815, "iou": 0.9917}];
+const sp=n=>n.toLocaleString('en-US').replace(/,/g,'\u2009');
+wire('k','chi','t',31,i=>{
+  const t=(1.5*i/30).toFixed(2);
+  const n = i===20 ? ' — this is the tile' : i===0 ? ' — a snowflake'
+          : i>20 ? ' — no tile was ever painted like this' : '';
+  return 't = <b>'+t+'</b> &nbsp;·&nbsp; \u03c7 = <b>'+CHI[i].toFixed(3)+'</b><em>'+n+'</em>';
 });
-const PTS = [{"c": 25, "i": 0.2698}, {"c": 99, "i": 0.4047}, {"c": 221, "i": 0.4536}, {"c": 399, "i": 0.5119}, {"c": 629, "i": 0.5602}, {"c": 897, "i": 0.5918}, {"c": 1227, "i": 0.6262}, {"c": 1605, "i": 0.6628}, {"c": 2027, "i": 0.6922}, {"c": 2513, "i": 0.7148}, {"c": 3039, "i": 0.7377}, {"c": 3607, "i": 0.7561}, {"c": 4249, "i": 0.7744}, {"c": 4923, "i": 0.7929}, {"c": 5645, "i": 0.8098}, {"c": 7253, "i": 0.8355}, {"c": 9063, "i": 0.8571}, {"c": 11067, "i": 0.8734}, {"c": 13283, "i": 0.8875}, {"c": 15709, "i": 0.8991}, {"c": 18313, "i": 0.9123}, {"c": 21133, "i": 0.9222}, {"c": 24151, "i": 0.9304}, {"c": 27347, "i": 0.9406}, {"c": 30765, "i": 0.9471}, {"c": 34389, "i": 0.9545}, {"c": 38213, "i": 0.96}, {"c": 42231, "i": 0.9662}, {"c": 46455, "i": 0.9743}, {"c": 50883, "i": 0.98}, {"c": 55505, "i": 0.9852}, {"c": 60325, "i": 0.9896}, {"c": 65361, "i": 0.9932}, {"c": 70583, "i": 0.9955}, {"c": 76007, "i": 0.9974}, {"c": 81627, "i": 0.9986}, {"c": 87461, "i": 0.9998}];
-const svg = document.querySelector('.chart'), tip = document.getElementById('tip');
-const cross = svg.querySelector('.cross'), hit = svg.querySelector('.chit');
+wire('cut','cut','k',CUT.length,i=>
+  'K = <b>'+CUT[i].K+'</b> &nbsp;·&nbsp; <b>'+sp(CUT[i].cos)+'</b> cosines &nbsp;·&nbsp; <b>'
+  +(100*CUT[i].iou).toFixed(0)+' %</b> of the tile');
+wire('kil','kiln','s',KIL.length,i=>
+  '\u2113 = <b>'+KIL[i].l.toFixed(2)+'</b> px = <b>'+KIL[i].mm.toFixed(2)+'</b> mm'
+  +(i===0?'<em> — unfired</em>':''));
+const PTS=[{"c": 25, "i": 0.2698}, {"c": 99, "i": 0.4047}, {"c": 221, "i": 0.4536}, {"c": 399, "i": 0.5119}, {"c": 629, "i": 0.5602}, {"c": 897, "i": 0.5918}, {"c": 1227, "i": 0.6262}, {"c": 1605, "i": 0.6628}, {"c": 2027, "i": 0.6922}, {"c": 2513, "i": 0.7148}, {"c": 3039, "i": 0.7377}, {"c": 3607, "i": 0.7561}, {"c": 4249, "i": 0.7744}, {"c": 4923, "i": 0.7929}, {"c": 5645, "i": 0.8098}, {"c": 7253, "i": 0.8355}, {"c": 9063, "i": 0.8571}, {"c": 11067, "i": 0.8734}, {"c": 13283, "i": 0.8875}, {"c": 15709, "i": 0.8991}, {"c": 18313, "i": 0.9123}, {"c": 21133, "i": 0.9222}, {"c": 24151, "i": 0.9304}, {"c": 27347, "i": 0.9406}, {"c": 30765, "i": 0.9471}, {"c": 34389, "i": 0.9545}, {"c": 38213, "i": 0.96}, {"c": 42231, "i": 0.9662}, {"c": 46455, "i": 0.9743}, {"c": 50883, "i": 0.98}, {"c": 55505, "i": 0.9852}, {"c": 60325, "i": 0.9896}, {"c": 65361, "i": 0.9932}, {"c": 70583, "i": 0.9955}, {"c": 76007, "i": 0.9974}, {"c": 81627, "i": 0.9986}, {"c": 87461, "i": 0.9998}];
+const svg=document.querySelector('.chart'), tip=document.getElementById('tip');
+const cross=svg.querySelector('.cross'), hit=svg.querySelector('.chit');
 const L=58,R=120,T=18,B=40,W=820,H=300,XMAX=90000;
-const sx=c=>L+(c/XMAX)*(W-L-R), sy=i=>T+(1-i)*(H-T-B);
-svg.addEventListener('pointermove', e=>{
-  const b=svg.getBoundingClientRect(), x=(e.clientX-b.left)/b.width*W;
+const sx=c=>L+(c/XMAX)*(W-L-R), sy=v=>T+(1-v)*(H-T-B);
+svg.addEventListener('pointermove',e=>{
+  const bb=svg.getBoundingClientRect(), x=(e.clientX-bb.left)/bb.width*W;
   let best=PTS[0];
   for(const p of PTS) if(Math.abs(sx(p.c)-x)<Math.abs(sx(best.c)-x)) best=p;
-  cross.setAttribute('x1',sx(best.c)); cross.setAttribute('x2',sx(best.c));
-  cross.style.opacity=1;
+  cross.setAttribute('x1',sx(best.c)); cross.setAttribute('x2',sx(best.c)); cross.style.opacity=1;
   hit.setAttribute('cx',sx(best.c)); hit.setAttribute('cy',sy(best.i)); hit.style.opacity=1;
   tip.style.opacity=1;
-  tip.textContent = best.c.toLocaleString('fr').replace(/\u202f/g,'\u00a0')
-                  + ' cosines  ·  ' + (100*best.i).toFixed(1) + ' %';
+  tip.textContent=sp(best.c)+' cosines  ·  '+(100*best.i).toFixed(1)+' %';
   const f=svg.closest('figure').getBoundingClientRect();
   tip.style.left=(e.clientX-f.left+14)+'px'; tip.style.top=(e.clientY-f.top-34)+'px';
 });
-svg.addEventListener('pointerleave', ()=>{
-  cross.style.opacity=0; hit.style.opacity=0; tip.style.opacity=0;
-});
+svg.addEventListener('pointerleave',()=>{cross.style.opacity=0;hit.style.opacity=0;tip.style.opacity=0;});
 </script></body></html>
