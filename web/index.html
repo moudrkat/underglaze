@@ -112,10 +112,27 @@ a<sub>mn</sub>(t) &nbsp;=&nbsp; (1+t)/2 · a<sub>mn</sub> &nbsp;+&nbsp; (1−t)/
 <div class="kends"><span>p4m · mirrors, no handedness</span><span>past the tile</span></div>
 <p class="kread">t = <b id="kt">1.00</b> &nbsp;·&nbsp; χ = <b id="kchi">0.199</b><em id="knote"> — this is the tile</em></p>
 </div>
-<p><b>The plant turns into a snowflake.</b> Things that grow are chiral — a tendril winds
-one way, a shell one way. Things that crystallise have mirrors. Take the handedness out of
-a botanical pattern and it stops looking grown and starts looking frozen. χ measures how
-much of that is left.</p>
+<p><b>The plant turns into a snowflake.</b> Things that grow are chiral — a tendril
+winds one way, a shell one way. Things that crystallise have mirrors. χ measures how far
+from mirrors this pattern sits.</p>
+<p>χ is defined on the coefficients, so it is worth checking that it shows up in the
+picture. Correlating each rendered tile against its own mirror:</p>
+<table>
+<tr><th>t</th><th>χ</th><th>mirror corr.</th><th>rot 90° corr.</th></tr>
+<tr><td>0.00</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
+<tr><td>0.25</td><td>0.014</td><td>0.393</td><td>1.000</td></tr>
+<tr><td>1.00</td><td>0.199</td><td>0.254</td><td>1.000</td></tr>
+<tr><td>1.50</td><td>0.399</td><td>0.237</td><td>1.000</td></tr>
+</table>
+<p style="margin-top:20px">At t = 0 the mirror correlation is exactly 1, so χ = 0 really is
+p4m and not merely a statement about coefficients. The quarter-turn correlation stays at 1
+throughout: the knob never breaks p4.</p>
+<p><b>But χ saturates, and the picture saturates sooner.</b> Nearly all of the handedness
+appears in the first fifth of the slider — t = 0 → 0.25 takes the mirror correlation from
+1.000 to 0.393. From t = 1 to t = 1.5, χ doubles while the picture moves 0.254 → 0.237.
+Past the tile the number changes and the tile barely does. Whether a larger χ looks
+<i>more twisted</i> is not measured here and is not claimed: the skeleton of this pattern
+has no segment longer than 27 px, so there is no curve on which to measure a curl.</p>
 
 <h2>What the firing does</h2>
 <p>Cobalt spreads into the molten glaze over ℓ = √(2∫D dt). One generation of copying
