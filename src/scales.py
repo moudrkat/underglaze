@@ -33,7 +33,10 @@ def D(T, Ea):
 # the integral is dominated by the top, but the ramps are not free and we do
 # not get to assume that -- we integrate.
 MEISSEN = [(1000, 0), (1400, 2*3600), (1400, 3*3600), (1000, 5*3600)]
-DECAL   = [(400, 0), (800, 20*60), (800, 50*60), (400, 80*60)]
+# 820 C is not a guess: RAKO's current Cibulak 15x15 tile is sold as
+# "dekor vypalovany pri 820 C". The 15x15 cm size is from the same spec, and
+# it is what feasibility() below assumes.
+DECAL   = [(400, 0), (820, 20*60), (820, 50*60), (400, 80*60)]
 
 
 def integrate(schedule, Ea, n=200_000):
@@ -74,7 +77,10 @@ def table():
 
 
 def feasibility(tile_mm=150.0, tile_px=1760.0):
-    """Can the photo we already have even see this?"""
+    """Can the photo we already have even see this?
+
+    tile_mm is documented, not assumed: RAKO Cibulak is a 15x15 cm tile.
+    """
     px_per_mm = tile_px / tile_mm
     um_per_px = 1e3 / px_per_mm
     print()

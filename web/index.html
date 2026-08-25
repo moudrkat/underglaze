@@ -1,106 +1,153 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>underglaze</title>
+<title>How many cosines does one painted tile take?</title>
 <style>
 :root{--paper:#f7f5f0;--ink:#213660;--dark:#282c34;--grey:#8b8880;--rule:#e0dcd3}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--dark);
  font:17px/1.6 Georgia,'DejaVu Serif',serif;-webkit-font-smoothing:antialiased}
 .wrap{max-width:900px;margin:0 auto;padding:70px 26px 120px}
-h1{font-size:42px;line-height:1.1;margin:0 0 44px;letter-spacing:-.02em;font-weight:400}
+h1{font-size:40px;line-height:1.12;margin:0 0 10px;letter-spacing:-.02em;font-weight:400}
 h1 b{color:var(--ink);font-weight:400}
+.dek{color:var(--grey);font-size:19px;margin:0 0 46px}
 h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);
  font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:700;
- border-top:1px solid var(--rule);padding-top:13px;margin:70px 0 24px}
+ border-top:1px solid var(--rule);padding-top:13px;margin:66px 0 22px}
 p{max-width:58ch;margin:0 0 18px}
-.eq{background:#fff;border:1px solid var(--rule);border-radius:4px;
- padding:26px 24px;margin:0 0 20px;text-align:center;
- font:20px/2 'DejaVu Sans',system-ui,sans-serif;color:var(--ink);overflow-x:auto}
-.eq small{display:block;font-size:13px;color:var(--grey);margin-top:10px;line-height:1.6}
+.eq{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:24px 22px;
+ margin:0 0 20px;text-align:center;font:19px/2 'DejaVu Sans',system-ui,sans-serif;
+ color:var(--ink);overflow-x:auto}
+.eq small{display:block;font-size:13px;color:var(--grey);margin-top:9px;line-height:1.6}
 img{max-width:100%;height:auto;display:block;border-radius:3px}
 figure{margin:0 0 10px}
-figcaption{font-family:'DejaVu Sans',system-ui,sans-serif;font-size:13px;
- color:var(--grey);margin-top:9px}
+figcaption{font-family:'DejaVu Sans',system-ui,sans-serif;font-size:13px;color:var(--grey);margin-top:9px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
 table{border-collapse:collapse;font-family:'DejaVu Sans Mono',monospace;font-size:14px;width:100%;max-width:560px}
 td,th{padding:6px 16px 6px 0;text-align:right;border-bottom:1px solid var(--rule)}
 th{color:var(--grey);font-weight:400}
 td:first-child,th:first-child{text-align:left}
-.big{font-family:'DejaVu Sans',system-ui,sans-serif;font-size:15px;color:var(--dark)}
-.big b{color:var(--ink);font-size:26px;font-weight:700;vertical-align:-2px}
-@media(max-width:700px){.two{grid-template-columns:1fr}h1{font-size:31px}.eq{font-size:15px}}
+.hero{font-family:'DejaVu Sans',system-ui,sans-serif;margin:0 0 26px}
+.hero b{display:block;color:var(--ink);font-size:64px;line-height:1;font-weight:700;letter-spacing:-.02em}
+.hero span{color:var(--grey);font-size:15px}
+.chart{width:100%;height:auto;overflow:visible;font-family:'DejaVu Sans',system-ui,sans-serif}
+.chart .grid line{stroke:var(--rule);stroke-width:1}
+.chart .line{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.chart .dot{fill:var(--ink);stroke:var(--paper);stroke-width:2}
+.chart .ax{fill:var(--grey);font-size:12px}
+.chart .mk{fill:var(--dark);font-size:13px;font-weight:700}
+.chart .mks{fill:var(--grey);font-size:11.5px}
+.chart .cross{stroke:var(--grey);stroke-width:1;stroke-dasharray:3 3}
+.chart .chit{fill:var(--ink);stroke:var(--paper);stroke-width:2}
+#tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--rule);
+ border-radius:4px;padding:6px 10px;font:12.5px/1.5 'DejaVu Sans',system-ui,sans-serif;
+ color:var(--dark);opacity:0;transition:opacity .1s;white-space:nowrap}
+@media(max-width:700px){.two{grid-template-columns:1fr}h1{font-size:30px}.eq{font-size:15px}.hero b{font-size:46px}}
 </style></head><body><div class="wrap">
 
-<h1>A kitchen tile, written as a <b>sum of cosines</b>.</h1>
+<h1>How many cosines does it take to draw <b>one painted tile</b>?</h1>
+<p class="dek">It sounds like the opening of a joke. It has an answer.</p>
 
 <div class="two">
 <figure><img src="photo.jpg" alt="the tile, photographed">
 <figcaption>Photographed on a wall in a valley under the Krkonoše.</figcaption></figure>
-<figure><img src="drawn_last.png" alt="the tile, reconstructed from cosines">
-<figcaption>Reconstructed. 15 383 terms, 95 % agreement.</figcaption></figure>
+<figure><img src="drawn_last.png" alt="the tile, rebuilt from cosines">
+<figcaption>Rebuilt from cosines. Nothing was drawn.</figcaption></figure>
 </div>
 
-<h2>The symmetry, measured first</h2>
+<p class="hero" style="margin-top:34px"><b>62&nbsp;815</b>
+<span>cosines for 99&nbsp;% agreement &nbsp;·&nbsp; 32&nbsp;551 for 95&nbsp;% &nbsp;·&nbsp; 16&nbsp;975 for 90&nbsp;%</span></p>
+
+<h2>The symmetry, measured before anything else</h2>
 <p>Correlate the tile with itself under each symmetry of the square.</p>
 <table>
 <tr><th>rotation</th><th></th><th>mirror</th><th></th></tr>
 <tr><td>90°</td><td>+0.536</td><td>vertical</td><td>+0.158</td></tr>
 <tr><td>180°</td><td>+0.480</td><td>horizontal</td><td>+0.189</td></tr>
 <tr><td>270°</td><td>+0.536</td><td>diagonal</td><td>+0.169</td></tr>
-<tr><td>shifted 37 px</td><td>+0.120</td><td>antidiagonal</td><td>+0.190</td></tr>
+<tr><td>shifted 37&nbsp;px</td><td>+0.120</td><td>antidiagonal</td><td>+0.190</td></tr>
 <tr><td>shuffled</td><td>−0.002</td><td></td><td></td></tr>
 </table>
-<p style="margin-top:20px">Mirrors sit at the level of a meaningless shift. The group is
-<b>p4</b>: four&#8209;fold rotation, no reflections.</p>
+<p style="margin-top:20px">Mirrors sit at the level of a meaningless shift. The group is <b>p4</b>:
+four&#8209;fold rotation, no reflections.</p>
 
 <h2>The equation</h2>
 <div class="eq">
 f(x, y) &nbsp;=&nbsp; Σ<sub>m,n</sub> &nbsp; a<sub>mn</sub> &nbsp;[&nbsp; cos 2π(mx+ny)/L &nbsp;+&nbsp; cos 2π(−nx+my)/L &nbsp;]
 <br><span style="font-size:17px">blue where &nbsp; f(x, y) &gt; ½</span>
-<small>The bracket is unchanged by a quarter turn, which is what p4 means.<br>
-Put the origin on the four-fold centre and C4 forces every a<sub>mn</sub> real:
-no sine terms exist. Largest imaginary part found: 2.6 × 10<sup>−17</sup>.</small>
+<small>The bracket is unchanged by a quarter turn. That is all p4 means.<br>
+Put the origin on the four-fold centre and C4 forces every a<sub>mn</sub> real, so no sine
+terms exist. Largest imaginary part found in the whole spectrum: 2.6 × 10<sup>−17</sup>.</small>
 </div>
-<p>The a<sub>mn</sub> are measured off the photograph, not chosen.</p>
-<table>
-<tr><th>m, n</th><th>a<sub>mn</sub></th><th>m, n</th><th>a<sub>mn</sub></th></tr>
-<tr><td>−3, 0</td><td>+0.0654</td><td>−3, −2</td><td>−0.0259</td></tr>
-<tr><td>−4, 1</td><td>+0.0445</td><td>−1, −1</td><td>+0.0226</td></tr>
-<tr><td>−3, −3</td><td>+0.0380</td><td>−3, 2</td><td>−0.0217</td></tr>
-<tr><td>−2, 0</td><td>−0.0337</td><td>−4, −4</td><td>+0.0202</td></tr>
-</table>
+<figure><img src="drawn_by_cosines.gif" alt="the tile appearing as the cutoff rises">
+<figcaption>Every frame is the same sum, keeping only m²+n² ≤ K². The cutoff rises; nothing is drawn.</figcaption></figure>
 
-<h2>Raise the cutoff</h2>
-<figure><img src="drawn_by_cosines.gif" alt="the tile drawing itself from cosines">
-<figcaption>Every frame is the same sum, keeping only m² + n² ≤ K².
-Nothing is drawn; the cutoff is raised.</figcaption></figure>
-
-<h2>Chirality</h2>
+<h2>Now turn one of the coefficients</h2>
 <p>p4 has no mirrors, so (m,&nbsp;n) and (n,&nbsp;m) are different orbits and need not carry
-the same coefficient. In p4m they would be equal.</p>
+the same coefficient. Making them equal is the transpose, so the knob is one line:</p>
 <div class="eq">
-χ &nbsp;=&nbsp; Σ (a<sub>mn</sub> − a<sub>nm</sub>)² &nbsp;/&nbsp; Σ (a<sub>mn</sub>² + a<sub>nm</sub>²)
+a<sub>mn</sub>(t) &nbsp;=&nbsp; (1+t)/2 · a<sub>mn</sub> &nbsp;+&nbsp; (1−t)/2 · a<sub>nm</sub>
+<small>t = 1 is the tile. t = 0 forces a<sub>mn</sub> = a<sub>nm</sub>, which is p4m.</small>
 </div>
-<p class="big">Measured: &nbsp;<b>χ = 0.199</b> &nbsp; — a mirror would give 0. Every tendril
-curls the same way, and this is how much.</p>
+<figure><img src="chirality.gif" alt="the tile losing and regaining its handedness">
+<figcaption>χ = Σ(a<sub>mn</sub> − a<sub>nm</sub>)² / Σ(a<sub>mn</sub>² + a<sub>nm</sub>²). The tile measures χ = 0.199.</figcaption></figure>
+<p><b>The plant turns into a snowflake.</b> Things that grow are chiral — a tendril winds
+one way, a shell one way. Things that crystallise have mirrors. Take the handedness out of
+a botanical pattern and it stops looking grown and starts looking frozen. χ measures how
+much of that is left.</p>
 
-<h2>What the firing does to it</h2>
-<p>Cobalt spreads into the molten glaze over ℓ = √(2∫D dt), so one generation of
-copying and firing is:</p>
+<h2>What the firing does</h2>
+<p>Cobalt spreads into the molten glaze over ℓ = √(2∫D dt). One generation of copying
+and firing is then:</p>
 <div class="eq">
 m<sub>t+1</sub> &nbsp;=&nbsp; [ &nbsp;G<sub>ℓ</sub> ∗ m<sub>t</sub> &nbsp;&gt;&nbsp; ½&nbsp; ]
-<small>Blur then re-threshold is the Merriman–Bence–Osher scheme (1992).
-It converges to motion by mean curvature.</small>
+<small>Blur, then re-threshold. This is the Merriman–Bence–Osher scheme (1992);
+it converges to motion by mean curvature.</small>
 </div>
 <figure><img src="strip.png" alt="sixty generations of copying and firing">
-<figcaption>Generations 0, 1, 3, 8, 20, 60. Perimeter 40 744 → 6 210, monotonically;
-166 ink regions → 13.</figcaption></figure>
-<p>Curvature flow has no non-trivial fixed point. It does not preserve a pattern,
-it removes one.</p>
+<figcaption>Generations 0, 1, 3, 8, 20, 60. Perimeter 40&nbsp;744 → 6&nbsp;210 monotonically;
+166 ink regions → 13. Curvature flow has no non-trivial fixed point: it does not preserve
+a pattern, it removes one.</figcaption></figure>
+
+<h2>The cost of detail</h2>
+<figure style="position:relative"><svg viewBox="0 0 820 300" class="chart" role="img" aria-label="agreement with the tile against number of cosine terms">
+<g class="grid"><line x1="58" y1="199.5" x2="700" y2="199.5"/><line x1="58" y1="139.0" x2="700" y2="139.0"/><line x1="58" y1="78.5" x2="700" y2="78.5"/><line x1="58" y1="18.0" x2="700" y2="18.0"/></g><text x="48" y="203.5" class="ax" text-anchor="end">25%</text><text x="48" y="143.0" class="ax" text-anchor="end">50%</text><text x="48" y="82.5" class="ax" text-anchor="end">75%</text><text x="48" y="22.0" class="ax" text-anchor="end">100%</text><text x="58.0" y="286" class="ax" text-anchor="middle">0</text><text x="236.3" y="286" class="ax" text-anchor="middle">25 000</text><text x="414.7" y="286" class="ax" text-anchor="middle">50 000</text><text x="593.0" y="286" class="ax" text-anchor="middle">75 000</text>
+<path d="M 58.2 194.7 L 58.7 162.1 L 59.6 150.2 L 60.8 136.1 L 62.5 124.4 L 64.4 116.8 L 66.8 108.5 L 69.4 99.6 L 72.5 92.5 L 75.9 87.0 L 79.7 81.5 L 83.7 77.0 L 88.3 72.6 L 93.1 68.1 L 98.3 64.0 L 109.7 57.8 L 122.6 52.6 L 136.9 48.6 L 152.8 45.2 L 170.1 42.4 L 188.6 39.2 L 208.7 36.8 L 230.3 34.8 L 253.1 32.4 L 277.5 30.8 L 303.3 29.0 L 330.6 27.7 L 359.2 26.2 L 389.4 24.2 L 421.0 22.8 L 453.9 21.6 L 488.3 20.5 L 524.2 19.6 L 561.5 19.1 L 600.2 18.6 L 640.3 18.3 L 681.9 18.0" class="line"/><circle cx="179.1" cy="41.2" r="4.5" class="dot"/><text x="190.1" y="37.2" class="mk">90 %</text><text x="190.1" y="53.2" class="mks">16 975 cosines</text><circle cx="290.2" cy="29.9" r="4.5" class="dot"/><text x="301.2" y="25.9" class="mk">95 %</text><text x="301.2" y="41.9" class="mks">32 551 cosines</text><circle cx="506.1" cy="19.9" r="4.5" class="dot"/><text x="517.1" y="15.9" class="mk">99 %</text><text x="517.1" y="31.9" class="mks">62 815 cosines</text>
+<line class="cross" x1="0" y1="18" x2="0" y2="260" style="opacity:0"/>
+<circle class="chit" r="5" style="opacity:0"/></svg>
+<figcaption>The last 9&nbsp;% costs three times what the first 90&nbsp;% did. Fine detail is
+expensive — and it is exactly what the kiln removes.</figcaption></figure>
+<div id="tip"></div>
 
 <h2>Open</h2>
-<p>E<sub>a</sub> for Co²⁺ in a glaze melt is unpinned: over 200–300 kJ/mol the predicted
-edge width moves by a factor of 40, so no single bleed length is quoted here. The
-pattern's identification with any named historical design is unverified.</p>
+<p>E<sub>a</sub> for Co²⁺ in a glaze melt is unpinned: over 200–300 kJ/mol the predicted edge
+width moves by a factor of 40, so no bleed length is quoted here. The cosine counts are
+relative to the photograph's own resolution — a sharper photograph would need more.</p>
+<p style="color:var(--grey);font-size:14.5px">Tile 15×15 cm, decor fired at 820 °C
+(RAKO <i>Cibulák</i> spec). The onion pattern is Meissen, c.&nbsp;1730, after a Chinese
+Kangxi original; sources disagree on the date (1738–39 is also given) and on the fruit —
+the Meissen museum calls the “onion” a Chinese melon, Czech sources a pomegranate.</p>
 
-</div></body></html>
+</div>
+<script>
+const PTS = [{"c": 25, "i": 0.2698}, {"c": 99, "i": 0.4047}, {"c": 221, "i": 0.4536}, {"c": 399, "i": 0.5119}, {"c": 629, "i": 0.5602}, {"c": 897, "i": 0.5918}, {"c": 1227, "i": 0.6262}, {"c": 1605, "i": 0.6628}, {"c": 2027, "i": 0.6922}, {"c": 2513, "i": 0.7148}, {"c": 3039, "i": 0.7377}, {"c": 3607, "i": 0.7561}, {"c": 4249, "i": 0.7744}, {"c": 4923, "i": 0.7929}, {"c": 5645, "i": 0.8098}, {"c": 7253, "i": 0.8355}, {"c": 9063, "i": 0.8571}, {"c": 11067, "i": 0.8734}, {"c": 13283, "i": 0.8875}, {"c": 15709, "i": 0.8991}, {"c": 18313, "i": 0.9123}, {"c": 21133, "i": 0.9222}, {"c": 24151, "i": 0.9304}, {"c": 27347, "i": 0.9406}, {"c": 30765, "i": 0.9471}, {"c": 34389, "i": 0.9545}, {"c": 38213, "i": 0.96}, {"c": 42231, "i": 0.9662}, {"c": 46455, "i": 0.9743}, {"c": 50883, "i": 0.98}, {"c": 55505, "i": 0.9852}, {"c": 60325, "i": 0.9896}, {"c": 65361, "i": 0.9932}, {"c": 70583, "i": 0.9955}, {"c": 76007, "i": 0.9974}, {"c": 81627, "i": 0.9986}, {"c": 87461, "i": 0.9998}];
+const svg = document.querySelector('.chart'), tip = document.getElementById('tip');
+const cross = svg.querySelector('.cross'), hit = svg.querySelector('.chit');
+const L=58,R=120,T=18,B=40,W=820,H=300,XMAX=90000;
+const sx=c=>L+(c/XMAX)*(W-L-R), sy=i=>T+(1-i)*(H-T-B);
+svg.addEventListener('pointermove', e=>{
+  const b=svg.getBoundingClientRect(), x=(e.clientX-b.left)/b.width*W;
+  let best=PTS[0];
+  for(const p of PTS) if(Math.abs(sx(p.c)-x)<Math.abs(sx(best.c)-x)) best=p;
+  cross.setAttribute('x1',sx(best.c)); cross.setAttribute('x2',sx(best.c));
+  cross.style.opacity=1;
+  hit.setAttribute('cx',sx(best.c)); hit.setAttribute('cy',sy(best.i)); hit.style.opacity=1;
+  tip.style.opacity=1;
+  tip.textContent = best.c.toLocaleString('fr').replace(/\u202f/g,'\u00a0')
+                  + ' cosines  ·  ' + (100*best.i).toFixed(1) + ' %';
+  const f=svg.closest('figure').getBoundingClientRect();
+  tip.style.left=(e.clientX-f.left+14)+'px'; tip.style.top=(e.clientY-f.top-34)+'px';
+});
+svg.addEventListener('pointerleave', ()=>{
+  cross.style.opacity=0; hit.style.opacity=0; tip.style.opacity=0;
+});
+</script></body></html>

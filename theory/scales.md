@@ -21,15 +21,15 @@ edge width after firing
   Meissen high fire      200             288.2 um   0.739 mm
   Meissen high fire      250              45.6 um   0.117 mm
   Meissen high fire      300               7.3 um   0.019 mm
-  modern decal/print     200               2.8 um   0.007 mm
-  modern decal/print     250               0.2 um   0.000 mm
+  modern decal/print     200               3.4 um   0.009 mm
+  modern decal/print     250               0.2 um   0.001 mm
   modern decal/print     300               0.0 um   0.000 mm
 
 can we measure it, with data/tile_single.jpg?
   tile 150 mm across, 1760 px  ->  11.7 px/mm, 85 um/px
   Meissen high fire      Ea=200  edge   0.739 mm =   8.67 px
   Meissen high fire      Ea=300  edge   0.019 mm =   0.22 px
-  modern decal/print     Ea=200  edge   0.007 mm =   0.08 px
+  modern decal/print     Ea=200  edge   0.009 mm =   0.10 px
   modern decal/print     Ea=300  edge   0.000 mm =   0.00 px
   -> at 85 um/px only the Ea=200 end is resolved. This photo can say
      'sharp' but cannot measure a bleed length.
