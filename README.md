@@ -1,93 +1,38 @@
 # underglaze
 
-A blue kitchen tile in a deep valley under the Krkonoše — the kind that is in
-every other Czech house. Everyone here calls this pattern *cibulák*, after Meissen's
-Zwiebelmuster.
+![the equation painted over the tile](docs/overlay.gif)
 
-Audited motif by motif against a marked Meissen plate, it is not. Zwiebelmuster has five
-motifs — bamboo, aster, peony, peach, and the "onion" that is really a pomegranate. This
-tile has the aster, the hooked stems and the serrated leaves, and none of the fruit.
-
-**It is an onion pattern with no onion in it.** A Czechoslovak wall tile, 15 × 15 cm,
-back marked VH20, maker unknown, carrying the flowers of a design whose fruit did not
-survive the trip.
-
-**This project is about why.**
-
-## The claim
-
-The finest line a blue-and-white painter can draw is not set by the brush. It
-is set by how far cobalt diffuses into the molten glaze while the kiln sits at
-peak. Draw finer than that and the fire erases it.
-
-So the copy chain has a **physical low-pass filter** in it, and its cutoff is a
-diffusion length. Every generation of copyists who drew too fine had the detail
-taken back out by the kiln. The motif is round and heavy because thin did not
-survive. The pattern is an attractor, and the basin is shaped by `D`.
-
-## The equation
+A kitchen tile in a deep valley under the Krkonoše, written as a sum of cosines.
 
 ```
-f(x, y) = Σ  exp( −|k_mn|² ∫D dt ) · [ c_mn C_mn(x, y)  +  s_mn S_mn(x, y) ]
-         m,n
-
-C_mn = cos(2π(mx+ny)/L) + cos(2π(−nx+my)/L)
-S_mn = sin(2π(mx+ny)/L) + sin(2π(−nx+my)/L)
-
-blue where f > θ
+f(x,y) = Σ a_mn [ cos 2π(mx+ny)/L  +  cos 2π(−nx+my)/L ]     blue where f > ½
 ```
 
-Two halves, and they were found from two different directions:
+**62 815 cosines for 99 % of it.** Every `a_mn` measured off the photograph, none chosen.
 
-- `C_mn`, `S_mn` are the harmonics invariant under **p4** — the symmetry the
-  tile actually has (measured, see below). Not p4m: there are no mirrors.
-- `exp(−|k|² ∫D dt)` is the **diffusion propagator**. It is not a stylistic
-  blur. It is the kiln.
+**[Drag the three knobs →](https://unt1l1f1nd-underglaze.static.hf.space)**
 
-Which means the "watch it appear out of nothing" animation is not an effect
-laid over the tile. Running `∫D dt` from large down to zero **replays the
-firing backwards**.
+### Two things that fell out
 
-## Two tracks
+Put the origin on the tile's four-fold centre and C4 plus reality force every coefficient
+**real** — there are no sine terms at all. The group is **p4**: rotations +0.52, mirrors
++0.18, against a +0.12 meaningless-shift control. So `a_mn` and `a_nm` are free to differ,
+and making them equal turns the plant into a snowflake.
 
-**A — the kiln.** `src/scales.py`. What survives a firing, and can we measure
-it. Status: first table done, see `theory/scales.md`.
+And it is **not** cibulák. Zwiebelmuster has five motifs; audited against a marked Meissen
+plate this tile has the aster and none of the fruit. *An onion pattern with no onion in it.*
 
-**B — the group.** `src/symmetry.py`. Which wallpaper group, what the chirality
-is worth, and the render. Status: group identified, basis not built yet.
-
-## What is settled
-
-**The tile is p4, and it is chiral.** Measured on `data/tile_single.jpg` by
-correlating the tile against each symmetry of the square:
+### Files
 
 ```
-rotations  90 +0.536   180 +0.480   270 +0.536      mean +0.517
-mirrors     V +0.158     H +0.189   D +0.169  A +0.190   mean +0.176
-controls    shuffled -0.002        shift 37 px +0.120
+src/fourier.py    the series — the written cos form matches the FFT to 5e-15
+src/symmetry.py   which wallpaper group, measured before anything was drawn
+src/chirality.py  one knob: a_mn(t) = (1+t)/2 a_mn + (1−t)/2 a_nm
+src/kiln.py       blur + re-threshold = Merriman–Bence–Osher = curvature flow
+src/scales.py     how far cobalt diffuses in a firing, and whether it is measurable
+src/curl.py       a failed measurement, kept — see below
 ```
 
-Mirrors sit at the level of a meaningless shift; rotations are three times
-higher. So the curl in the tendrils is real structure, not drawing slop — and
-it lives entirely in the `S_mn` terms, which a mirror would kill.
-
-## What is not settled
-
-**`Ea` for Co²⁺ in a glaze melt, and it matters more than anything else here.**
-Across the plausible range 200–300 kJ/mol the predicted edge width moves by a
-factor of **40** (0.74 mm → 0.019 mm). Any single number quoted for the bleed
-length right now is decoration. What *is* robust is the contrast: at every `Ea`,
-a 1400 °C high fire bleeds 2–5 orders of magnitude more than an 800 °C decal
-fire.
-
-That inverts the experiment, and for the better. We do not measure a line to
-confirm the physics — **we measure a line to invert for the firing.** The edge
-of a brush stroke is a record of the kiln that fired it.
-
-## Next
-
-1. A real value for `D0`, `Ea` from the silicate-melt literature.
-2. A macro photo of an actual underglaze piece — a *cibulák* plate or cup, the
-   frame filled with ~2 cm of it. `data/tile_single.jpg` is 85 µm/px, which can
-   only say "sharp"; it cannot measure a bleed. ~20 µm/px can.
-3. Build the p4 basis, fit `c_mn`, `s_mn` to the tile, render.
+`Ea` for Co²⁺ in a glaze melt is unpinned and moves the predicted edge width by 40×, so no
+bleed length is quoted. `curl.py` tried to show that a larger chirality looks *more twisted*
+and could not: the skeleton of this pattern has no segment longer than 27 px.
