@@ -38,6 +38,16 @@ td:first-child,th:first-child{text-align:left}
 .chart .mks{fill:var(--grey);font-size:11.5px}
 .chart .cross{stroke:var(--grey);stroke-width:1;stroke-dasharray:3 3}
 .chart .chit{fill:var(--ink);stroke:var(--paper);stroke-width:2}
+.knob{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:22px 24px 16px;margin:0 0 20px}
+.knob img{margin:0 auto 18px;width:min(100%,460px);image-rendering:auto}
+.knob input[type=range]{width:100%;accent-color:var(--ink);height:22px;cursor:grab}
+.knob input[type=range]:active{cursor:grabbing}
+.kends{display:flex;justify-content:space-between;font-family:'DejaVu Sans',system-ui,sans-serif;
+ font-size:12px;color:var(--grey);margin-top:-2px}
+.kread{font-family:'DejaVu Sans',system-ui,sans-serif;font-size:15px;color:var(--dark);
+ margin:16px 0 0;text-align:center}
+.kread b{color:var(--ink);font-variant-numeric:tabular-nums}
+.kread em{color:var(--grey);font-style:normal;font-size:13px}
 #tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--rule);
  border-radius:4px;padding:6px 10px;font:12.5px/1.5 'DejaVu Sans',system-ui,sans-serif;
  color:var(--dark);opacity:0;transition:opacity .1s;white-space:nowrap}
@@ -88,8 +98,20 @@ the same coefficient. Making them equal is the transpose, so the knob is one lin
 a<sub>mn</sub>(t) &nbsp;=&nbsp; (1+t)/2 · a<sub>mn</sub> &nbsp;+&nbsp; (1−t)/2 · a<sub>nm</sub>
 <small>t = 1 is the tile. t = 0 forces a<sub>mn</sub> = a<sub>nm</sub>, which is p4m.</small>
 </div>
-<figure><img src="chirality.gif" alt="the tile losing and regaining its handedness">
-<figcaption>χ = Σ(a<sub>mn</sub> − a<sub>nm</sub>)² / Σ(a<sub>mn</sub>² + a<sub>nm</sub>²). The tile measures χ = 0.199.</figcaption></figure>
+<div class="two" style="margin-bottom:14px">
+<figure><img src="chi_real.png" alt="the tile as it is">
+<figcaption><b>χ = 0.199</b> — the tile. A plant.</figcaption></figure>
+<figure><img src="chi_zero.png" alt="the same tile with its handedness removed">
+<figcaption><b>χ = 0</b> — a<sub>mn</sub> = a<sub>nm</sub>. A snowflake.</figcaption></figure>
+</div>
+
+<div class="knob">
+<img id="kimg" src="chi/t20.png" alt="the tile at the chosen chirality">
+<input type="range" id="krange" min="0" max="30" value="20" step="1"
+       aria-label="chirality">
+<div class="kends"><span>p4m · mirrors, no handedness</span><span>past the tile</span></div>
+<p class="kread">t = <b id="kt">1.00</b> &nbsp;·&nbsp; χ = <b id="kchi">0.199</b><em id="knote"> — this is the tile</em></p>
+</div>
 <p><b>The plant turns into a snowflake.</b> Things that grow are chiral — a tendril winds
 one way, a shell one way. Things that crystallise have mirrors. Take the handedness out of
 a botanical pattern and it stops looking grown and starts looking frozen. χ measures how
@@ -129,6 +151,17 @@ the Meissen museum calls the “onion” a Chinese melon, Czech sources a pomegr
 
 </div>
 <script>
+const CHI = [0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989];
+const kimg=document.getElementById('kimg'), kr=document.getElementById('krange');
+const kt=document.getElementById('kt'), kc=document.getElementById('kchi'), kn=document.getElementById('knote');
+const pre=CHI.map((_,i)=>{const im=new Image(); im.src='chi/t'+String(i).padStart(2,'0')+'.png'; return im;});
+kr.addEventListener('input',()=>{
+  const i=+kr.value, t=1.5*i/30;
+  kimg.src=pre[i].src;
+  kt.textContent=t.toFixed(2);
+  kc.textContent=CHI[i].toFixed(3);
+  kn.textContent = i===20 ? ' — this is the tile' : (i===0 ? ' — a snowflake' : (i>20 ? ' — no tile was ever painted like this' : ''));
+});
 const PTS = [{"c": 25, "i": 0.2698}, {"c": 99, "i": 0.4047}, {"c": 221, "i": 0.4536}, {"c": 399, "i": 0.5119}, {"c": 629, "i": 0.5602}, {"c": 897, "i": 0.5918}, {"c": 1227, "i": 0.6262}, {"c": 1605, "i": 0.6628}, {"c": 2027, "i": 0.6922}, {"c": 2513, "i": 0.7148}, {"c": 3039, "i": 0.7377}, {"c": 3607, "i": 0.7561}, {"c": 4249, "i": 0.7744}, {"c": 4923, "i": 0.7929}, {"c": 5645, "i": 0.8098}, {"c": 7253, "i": 0.8355}, {"c": 9063, "i": 0.8571}, {"c": 11067, "i": 0.8734}, {"c": 13283, "i": 0.8875}, {"c": 15709, "i": 0.8991}, {"c": 18313, "i": 0.9123}, {"c": 21133, "i": 0.9222}, {"c": 24151, "i": 0.9304}, {"c": 27347, "i": 0.9406}, {"c": 30765, "i": 0.9471}, {"c": 34389, "i": 0.9545}, {"c": 38213, "i": 0.96}, {"c": 42231, "i": 0.9662}, {"c": 46455, "i": 0.9743}, {"c": 50883, "i": 0.98}, {"c": 55505, "i": 0.9852}, {"c": 60325, "i": 0.9896}, {"c": 65361, "i": 0.9932}, {"c": 70583, "i": 0.9955}, {"c": 76007, "i": 0.9974}, {"c": 81627, "i": 0.9986}, {"c": 87461, "i": 0.9998}];
 const svg = document.querySelector('.chart'), tip = document.getElementById('tip');
 const cross = svg.querySelector('.cross'), hit = svg.querySelector('.chit');
