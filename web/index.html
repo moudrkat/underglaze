@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>underglaze</title>
+<style>
+:root{--paper:#f7f5f0;--ink:#213660;--dark:#282c34;--grey:#8b8880;--rule:#ddd9d0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--dark);
+ font:17px/1.65 Georgia,'DejaVu Serif',serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:64px 28px 120px}
+h1{font-size:52px;line-height:1.05;margin:0 0 6px;letter-spacing:-.02em}
+h1 span{color:var(--ink)}
+.sub{color:var(--grey);font-size:19px;margin:0 0 54px}
+h2{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);
+ font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:700;
+ border-top:1px solid var(--rule);padding-top:14px;margin:64px 0 22px}
+p{max-width:62ch;margin:0 0 20px}
+b{color:var(--ink)}
+figure{margin:0 0 12px}
+img{max-width:100%;height:auto;display:block;border-radius:3px}
+figcaption{font-family:'DejaVu Sans',system-ui,sans-serif;font-size:13.5px;
+ color:var(--grey);margin-top:10px;max-width:70ch}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+pre{background:#fff;border:1px solid var(--rule);border-radius:4px;padding:20px 22px;
+ overflow-x:auto;font:14.5px/1.7 'DejaVu Sans Mono',monospace;color:var(--ink)}
+table{border-collapse:collapse;font-family:'DejaVu Sans Mono',monospace;font-size:14px}
+td,th{padding:6px 20px 6px 0;text-align:right;border-bottom:1px solid var(--rule)}
+th{color:var(--grey);font-weight:400;text-align:right}
+td:first-child,th:first-child{text-align:left}
+.note{border-left:3px solid var(--ink);padding:2px 0 2px 20px;color:#4a4f58}
+@media(max-width:760px){.two{grid-template-columns:1fr}h1{font-size:36px}}
+</style></head><body><div class="wrap">
+
+<h1>Why is old porcelain <span>never finely drawn?</span></h1>
+<p class="sub">A kitchen tile in Prague, and the diffusion constant that shaped it.</p>
+
+<p>This is <b>cibulák</b> — Meissen's <i>Zwiebelmuster</i>, 1739, itself a copy of Chinese
+blue&#8209;and&#8209;white. The onions are not onions. They are peaches and pomegranates,
+drawn by European painters who had never seen either. It has been copied for nearly
+three centuries through steadily worse channels, and it still comes out looking like itself.</p>
+
+<h2>The tile</h2>
+<div class="two">
+<figure><img src="photo.jpg" alt="the photographed tile">
+<figcaption>Photographed on the wall.</figcaption></figure>
+<figure><img src="mask.png" alt="the extracted ink">
+<figcaption>Ink extracted. The tile is <b>p4</b> — four&#8209;fold rotation, and
+<b>no mirrors</b>: rotations correlate +0.52, mirrors +0.18 against a +0.12 shift control.
+It is chiral. Every tendril curls the same way.</figcaption></figure>
+</div>
+
+<h2>One firing</h2>
+<p>Cobalt is one of very few pigments that survives 1400&nbsp;°C, which is the real reason
+almost all high&#8209;fired underglaze on earth is blue. But while it survives, it
+<b>spreads</b> — into the molten glaze, over a length ℓ&nbsp;=&nbsp;√(2∫D&nbsp;dt).
+Draw a line thinner than ℓ and the fire takes it back.</p>
+
+<h2>Many firings</h2>
+<pre>diffuse    cobalt spreads in the glaze          → Gaussian blur, σ = ℓ
+threshold  the next copyist inks what she sees  → back to black and white</pre>
+<p>Blurring and re&#8209;thresholding is not a metaphor for copying. It is the
+<b>Merriman–Bence–Osher scheme</b> (1992), and it converges to <b>motion by mean
+curvature</b>. Every boundary moves inward in proportion to its own curvature. Thin
+tendrils are all curvature and die first; round blobs are the fixed points.</p>
+<figure><img src="strip.png" alt="six generations of copying and firing">
+<figcaption>Generations 0, 1, 3, 8, 20, 60. <b>The very first firing removes exactly the
+stippled halos and the hatching inside the petals</b> — precisely what real antique
+blue&#8209;and&#8209;white also lacks. Then it keeps going.</figcaption></figure>
+
+<h2>The result is negative, and that is the point</h2>
+<p>Curvature flow has no non&#8209;trivial fixed point. Left alone it does not preserve the
+design, it <b>eats</b> it — eight generations to lose the identity, sixty to reach nine
+blobs. Yet cibulák survived three centuries. So the physics is not what preserved it.</p>
+<p class="note">The kiln explains why there is <b>no fine detail</b> in blue&#8209;and&#8209;white.
+It cannot explain why there is <b>still a pattern</b>. For that you need someone who
+re&#8209;inks not what she sees, but what she knows it is supposed to be.</p>
+
+<figure><img src="copy_and_fire.gif" alt="the same tile fired sixty times, with and without memory">
+<figcaption>Identical physics on both sides. The only difference is a memory term
+λ pulling each generation toward a stored pattern — a copyist who knows what a cibulák is.</figcaption></figure>
+
+<h2>What the memory buys</h2>
+<p>The thinnest stroke that survives goes as <b>λ<sup>−1/2</sup></b>: measured exponent
+−0.48 across a decade of λ, against −0.50 expected. Halving the width of the finest
+detail a tradition can carry costs four times the memory.</p>
+<table>
+<tr><th>λ</th><th>surviving stroke</th><th>IoU with original</th></tr>
+<tr><td>0.00</td><td>26.0 px</td><td>0.49</td></tr>
+<tr><td>0.05</td><td>18.1 px</td><td>0.61</td></tr>
+<tr><td>0.10</td><td>13.1 px</td><td>0.70</td></tr>
+<tr><td>0.20</td><td>9.3 px</td><td>0.83</td></tr>
+<tr><td>0.40</td><td>6.5 px</td><td>—</td></tr>
+</table>
+<p style="margin-top:22px"><b>Not established:</b> how this scales with σ. Over the range
+tested the joint fit gives σ<sup>0.70</sup>λ<sup>−0.55</sup> with 17&nbsp;% rms, and at
+large σ the width metric measures blobs rather than strokes, because by then nothing
+survived to measure. The λ exponent is solid; the σ exponent is not.</p>
+<p><b>Also not established:</b> the activation energy of Co²⁺ in a glaze melt. Over the
+plausible 200–300 kJ/mol the predicted edge width moves by a factor of <b>40</b>. Any single
+number for the bleed length would be decoration. The robust part is the contrast: at every
+E<sub>a</sub>, a 1400&nbsp;°C firing bleeds 2–5 orders of magnitude more than an 800&nbsp;°C one.</p>
+
+</div></body></html>
