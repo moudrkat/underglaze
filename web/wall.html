@@ -377,6 +377,19 @@ function suggest(on){
 qi.addEventListener('focus',()=>suggest(true));
 qi.addEventListener('keydown',e=>{ if(e.key==='Enter'){ wall.ask(e.target.value); e.target.blur(); }});
 document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi) suggest(false); });
+// When nobody has touched it for a while, a tile wakes up and runs its own
+// slider. Everything it says while it does is a measured reading, so the page
+// is never saying anything it cannot back up.
+let lastTouch = Date.now();
+['pointerdown','keydown','input'].forEach(e =>
+  addEventListener(e, () => { lastTouch = Date.now(); }, true));
+setInterval(() => {
+  if (running || Date.now() - lastTouch < 12000) return;
+  lastTouch = Date.now();
+  const k = Object.keys(TILE);
+  wall.run(k[Math.floor(Math.random() * k.length)], 110);
+}, 3000);
+
 let exi=0; setInterval(()=>{ if(document.activeElement!==qi && !qi.value){
   const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; } }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
