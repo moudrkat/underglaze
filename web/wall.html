@@ -298,6 +298,8 @@ window.wall = {
     stopped=false; running=true;
     const btn=document.getElementById('play'); if(btn) btn.innerHTML='&#9632;';
     this.close();
+    document.getElementById('bub').classList.remove('on');
+    document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
     document.querySelectorAll('.mut').forEach(m=>m.classList.remove('on'));
     ids.forEach(i=>{ document.querySelector('[data-tile="'+i+'"]').classList.add('speaking');
                      if(ids.length<=3) this.line(i); });
@@ -319,6 +321,16 @@ window.wall = {
       if(byWord==='_help') return this.about();
       if(byWord==='_surprise'){ const k=Object.keys(TILE);
         return this.run(k[Math.floor(Math.random()*k.length)]); }
+      // The words decide, but the model may add a second tile when the question
+      // reaches across two -- "how do you survive the fire and the years?" is
+      // the kiln to a phrase rule and the kiln plus the copying to the model.
+      if(this._model){
+        try{
+          const many = await this.choose(q);
+          if(many && many.length > 1 && many.some(m => m.tile === byWord))
+            return this.runMany(many.map(m => m.tile));
+        }catch(e){}
+      }
       return this.run(byWord); }
     if(this._model){
       try{
