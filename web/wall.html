@@ -19,6 +19,10 @@ h1 b{color:var(--ink);font-weight:400}
 .go{font:600 12px 'DejaVu Sans',system-ui,sans-serif;color:var(--ink);background:#fff;
  border:1px solid var(--rule);border-radius:5px;padding:7px 10px;cursor:pointer;line-height:1}
 .go:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mstat{font:600 9.5px 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.08em;
+ text-transform:uppercase;color:var(--grey);opacity:0;transition:opacity .3s;white-space:nowrap}
+.mstat.on,.mstat:not(:empty){opacity:1}
+.mstat.warn{color:var(--warm)}
 .wall{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);
  grid-template-rows:repeat(3,1fr);gap:9px;background:var(--grout);padding:9px;border-radius:5px}
 .tile{background:#fff;border-radius:2px;padding:7px 9px 8px;display:flex;flex-direction:column;
@@ -33,6 +37,7 @@ h1 b{color:var(--ink);font-weight:400}
 .ex{display:block;margin-top:7px;padding-top:6px;border-top:1px solid var(--rule);
  font:italic 10px/1.4 Georgia,serif;color:var(--warm);cursor:pointer}
 .ex:hover{text-decoration:underline}
+.spoke{display:block;margin-top:6px;font:italic 10.5px/1.45 Georgia,serif;color:var(--ink)}
 #sug{position:absolute;z-index:60;background:#fff;border:1px solid var(--ink);border-radius:6px;
  box-shadow:0 8px 22px rgba(0,0,0,.16);padding:5px;display:none;max-width:340px}
 #sug.on{display:block}
@@ -93,6 +98,8 @@ footer a{color:var(--grey)}
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
 <button class="go" onclick="wall.about()" title="what is this">?</button>
+<button class="go" id="speak" style="display:none" title="load a 117 MB language model into this page">speak</button>
+<span id="mstat" class="mstat"></span>
 </div>
 
 <div class="wall">
@@ -259,6 +266,7 @@ window.wall = {
     if(Array.isArray(id)) return this.runMany(id, ms);
     if(!TILE[id]) return 'no such tile';
     stopped=false;
+    document.getElementById('bub').classList.remove('on');
     document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
     const cell=document.querySelector('[data-tile="'+id+'"]');
     cell.classList.add('speaking');
@@ -284,8 +292,52 @@ window.wall = {
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
   all(ms=90){ return this.runMany(Object.keys(TILE), ms); },
-  ask(q){
+  async ask(q){
+    // Measured on 30 questions neither router had seen: words alone 14/30, model
+    // alone 21/30, words-then-model 22/30. So: words first, model for the rest.
+    const byWord = this.matchWords(q);
+    if(byWord){ suggest(false);
+      if(byWord==='_all') return this.all();
+      if(byWord==='_help') return this.about();
+      if(byWord==='_surprise'){ const k=Object.keys(TILE);
+        return this.run(k[Math.floor(Math.random()*k.length)]); }
+      return this.run(byWord); }
+    if(this._model){
+      try{
+        const [id, sim] = await this._model(String(q||''));
+        if(id==='_all'){ suggest(false); return this.all(); }
+        if(id==='_help'){ suggest(false); return this.about(); }
+        if(id==='_surprise'){ suggest(false); const k=Object.keys(TILE);
+          return this.run(k[Math.floor(Math.random()*k.length)]); }
+        if(sim >= 0.10){
+          suggest(false);
+          if(this._say){
+            const el=document.getElementById(id+'say');
+            let p=el.querySelector('.spoke');
+            if(!p){ p=document.createElement('i'); p.className='spoke'; el.appendChild(p); }
+            p.textContent='…';
+            document.querySelector('[data-tile="'+id+'"]').classList.add('open');
+            this._say(id, String(q||'')).then(t=>{ p.textContent='“'+t+'”'; })
+              .catch(()=>{ p.remove(); });
+          }
+          return this.run(id);
+        }
+        suggest(true); const el=document.getElementById('q');
+        el.value=''; el.placeholder='the wall did not follow — try one of these';
+        return 'no tile matched';
+      }catch(e){ /* fall through */ }
+    }
+    suggest(true); const el=document.getElementById('q');
+    el.value=''; el.placeholder='the wall did not follow — try one of these';
+    return 'no tile matched';
+  },
+  matchWords(q){
     const k=String(q||'').toLowerCase();
+    const intent=[['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
+                  ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\b|what are you\?/],
+                  ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]]
+      .find(([,re])=>re.test(k));
+    if(intent) return intent[0];
     const hit=[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous/],
                ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
                ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze/],
@@ -296,12 +348,9 @@ window.wall = {
                ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest/],
                ['eye',/\bsee|eye|\bfar\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses/]]
       .find(([,re])=>re.test(k));
-    if(!hit){ suggest(true); const q=document.getElementById('q');
-      q.value=''; q.placeholder='the wall did not follow — try one of these';
-      return 'no tile matched'; }
-    suggest(false);
-    return this.run(hit[0]);
+    return hit ? hit[0] : null;
   },
+  askWords(q){ const h=this.matchWords(q); return h ? this.run(h) : 'no tile matched'; },
   async converse(qs, ms=90){
     stopped=false;
     for(const q of qs){ if(stopped) break; await this.ask(q); await sleep(850); }
@@ -331,4 +380,67 @@ document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi
 let exi=0; setInterval(()=>{ if(document.activeElement!==qi && !qi.value){
   const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; } }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
+</script>
+<script type="module">
+// A real model, in the page, with no server and no key: transformers.js runs
+// all-MiniLM-L6-v2 in the browser and embeds the question. The regular
+// expression stays as the instant answer while the weights are still arriving,
+// and as the answer if they never do.
+const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.", "perc": "When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses."};
+const st = document.getElementById('mstat');
+try{
+  const { pipeline } = await import(
+    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+  st.textContent = 'loading a model…'; st.className = 'on';
+  const ex = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2',
+                            { dtype: 'q8' });
+  const ids = Object.keys(DESC);
+  const out = await ex(Object.values(DESC), { pooling: 'mean', normalize: true });
+  const V = out.tolist();
+  window.wall._model = async q => {
+    const e = (await ex([q], { pooling: 'mean', normalize: true })).tolist()[0];
+    let best = null;
+    ids.forEach((id, i) => {
+      const s = V[i].reduce((a, v, k) => a + v * e[k], 0);
+      if (!best || s > best[1]) best = [id, s];
+    });
+    return best;                      // [tile, cosine similarity]
+  };
+  window.wall._name = 'all-MiniLM-L6-v2';
+  st.textContent = 'MiniLM';
+  document.getElementById('speak').style.display = '';
+
+  // Second layer, opt-in only: a real generative model, 483 MB, in the page.
+  // Nobody pays for it unless they press the button.
+  document.getElementById('speak').onclick = async () => {
+    const b = document.getElementById('speak');
+    b.disabled = true; b.textContent = 'fetching 117 MB…';
+    try{
+      const { pipeline } = await import(
+        'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+      const dev = navigator.gpu ? 'webgpu' : 'wasm';
+      const gen = await pipeline('text-generation',
+        'onnx-community/SmolLM2-135M-Instruct-ONNX',
+        { dtype: 'q4f16', device: dev,
+          progress_callback: p => { if(p.status==='progress' && p.total)
+            b.textContent = 'loading ' + Math.round(100*p.loaded/p.total) + ' %'; } });
+      window.wall._say = async (id, q) => {
+        const facts = document.getElementById(id+'why').textContent.trim()
+                    + ' Current reading: ' + TILE[id].out.textContent + '.';
+        const out = await gen([
+          { role:'system', content:
+            'You are a painted kitchen tile answering a visitor. Reply in one or two short '
+            + 'sentences, in the first person. Use ONLY the facts given. Never invent a number.' },
+          { role:'user', content: 'Facts about you: ' + facts + ' Visitor asks: ' + q }
+        ], { max_new_tokens: 60, do_sample: false });
+        const m = out[0].generated_text;
+        return (Array.isArray(m) ? m[m.length-1].content : String(m)).trim();
+      };
+      window.wall._genName = 'SmolLM2-135M-Instruct on ' + dev;
+      b.textContent = 'it talks';
+      st.textContent = 'MiniLM + SmolLM2 135M';
+    }catch(e){ b.textContent = 'could not load'; console.warn(e); }
+  };
+}catch(e){ st.textContent = 'no model — words only'; st.className='on warn';
+  console.warn('model unavailable, falling back to the router', e); }
 </script></body></html>

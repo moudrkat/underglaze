@@ -127,6 +127,42 @@ HARD = [
 ]
 
 
+# A third set, written after both routers existed and shown to neither while it was
+# being written. This is the only set where the regular expression and the model are
+# on equal footing, so it is the only one whose comparison means anything.
+FRESH = [
+ ("is the pattern the same the whole way round?", "chi"),
+ ("would it look different in a mirror?", "chi"),
+ ("what would happen in a very hot oven?", "kil"),
+ ("does heat ruin the drawing?", "kil"),
+ ("do the shapes ever touch each other?", "perc"),
+ ("at what point is it all one blob?", "perc"),
+ ("can I read you from the other side of the kitchen?", "eye"),
+ ("do I lose anything standing further away?", "eye"),
+ ("does it repeat if I look closer?", "frac"),
+ ("is there detail all the way down?", "frac"),
+ ("how much information is in you?", "cut"),
+ ("what is the shortest description of you?", "cut"),
+ ("when were you made?", "copy"),
+ ("has this design been passed down?", "copy"),
+ ("swap half of you for something else, are you still there?", "ship"),
+ ("what is essential about you?", "ship"),
+ ("what would a neural network pay attention to?", "attn"),
+ ("can a computer tell you apart from another tile?", "attn"),
+ ("how many waves are you made of?", "cut"),
+ ("does the firing soften your edges?", "kil"),
+ ("is your ink one continuous region?", "perc"),
+ ("do you have a preferred direction?", "chi"),
+ ("what survives if I shrink you?", "eye"),
+ ("are you rough at every magnification?", "frac"),
+ ("who drew the original?", "copy"),
+ ("could I fake you?", "ship"),
+ ("what would embeddings make of you?", "attn"),
+ ("does the kiln change your shape?", "kil"),
+ ("how far can I stand and still see the dots?", "eye"),
+ ("are your petals one piece with the stems?", "perc"),
+]
+
 def route(q):
     k = q.lower()
     for tile, pat in ROUTES:
@@ -154,7 +190,8 @@ def main():
     print("router sync: %s\n" % check_sync())
     b1 = score(CASES, "written with the router open")
     b2 = score(HARD, "written blind")
-    bad = [("open",) + t for t in b1] + [("blind",) + t for t in b2]
+    b3 = score(FRESH, "fresh, tuned on by neither")
+    bad = [("open",) + t for t in b1] + [("blind",) + t for t in b2] + [("fresh",) + t for t in b3]
     print()
     if bad:
         print("  %-6s %-48s %-6s %-6s" % ("set", "question", "want", "got"))
