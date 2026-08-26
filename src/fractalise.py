@@ -179,3 +179,32 @@ def build_page_assets(webdir="web"):
     save(ink_of(frill(tile, seed, H=0.5, wobble=20)), os.path.join(webdir, "frac_frilled.png"))
     save(ink_of(stack(seed, H=0.7)), os.path.join(webdir, "frac_mould.png"))
     print("wrote %s/fractal.gif (%.1f MB), frac_frilled.png, frac_mould.png" % (webdir, mb))
+
+
+def build_slider(webdir="web", n=26, top=26.0, H=0.5):
+    """Precomputed frames for the page's fourth slider.
+
+    Same contract as the other three: <dir>/<prefix><NN>.png, palette-quantised,
+    460 px, read by wire() in index.html. A slider beats the gif -- it stops
+    where the reader wants it, and the whole sweep is smaller than one gif.
+    """
+    d = os.path.join(webdir, "frac")
+    os.makedirs(d, exist_ok=True)
+    F = coefficients()
+    seed = norm(upsample(F, 8))
+    tile = upsample(F, 200)
+    g = steepness(tile)
+    S = norm(stack(seed, H=H))
+
+    steps = list(np.linspace(0, top, n))
+    for i, w in enumerate(steps):
+        mask = np.roll(ink_of(tile + w * g * S), (N2 // 2, N2 // 2), axis=(0, 1))
+        rgb = np.where(mask[..., None], np.array(INK_RGB, np.uint8),
+                       np.array(PAPER_RGB, np.uint8))
+        im = Image.fromarray(rgb).resize((460, 460), Image.LANCZOS)
+        im.quantize(colors=16, method=Image.MAXCOVERAGE).save(
+            os.path.join(d, "w%02d.png" % i), optimize=True)
+    kb = sum(os.path.getsize(os.path.join(d, f)) for f in os.listdir(d)) / 1000
+    print("wrote %d frames to %s, %.0f kB total  (wobble 0-%.0f px, H=%.2f)"
+          % (n, d, kb, top, H))
+    return [round(w, 1) for w in steps]
