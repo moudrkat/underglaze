@@ -44,6 +44,8 @@ img.wide{max-width:100%;height:auto;display:block;border-radius:3px}
 .chart{width:100%;height:auto;overflow:visible;font-family:'DejaVu Sans',system-ui,sans-serif}
 .chart .grid line{stroke:var(--rule);stroke-width:1}
 .chart .line{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.chart .line2{fill:none;stroke:#b0554a;stroke-width:2;stroke-linejoin:round}
+.chart .line3{fill:none;stroke:var(--grey);stroke-width:1.5;stroke-dasharray:5 4;stroke-linejoin:round}
 .chart .dot{fill:var(--ink);stroke:var(--paper);stroke-width:2}
 .chart .ax{fill:var(--grey);font-size:12px}
 .chart .mk{fill:var(--dark);font-size:13px;font-weight:700}
@@ -84,12 +86,14 @@ f &nbsp;=&nbsp; Σ &nbsp;a<sub>mn</sub>&nbsp;[&nbsp;cos 2π(mx+ny) &nbsp;+&nbsp;
 <p class="cap">On a wall in a valley under the Krkonoše.</p></div>
 <div><img class="wide" src="chi_real.png" alt="rebuilt from cosines">
 <p class="cap">Rebuilt from the equation.</p></div>
-</div></details>
+</div>
+<p class="cap">Source: the author's own photograph, <i>data/tile_single.jpg</i>. The tile is Czechoslovak, 15 × 15 cm.</p></details>
 
 <details><summary>why there are no sines</summary>
 <p>Put the origin on the tile's four-fold centre. A real image with C4 symmetry there has
 purely real Fourier coefficients — reality gives F(−k) = conj F(k), C4 gives F(−k) = F(k),
-and nothing imaginary survives. Largest imaginary part found: 2.6 × 10<sup>−17</sup>.</p></details>
+and nothing imaginary survives. Largest imaginary part found: 2.6 × 10<sup>−17</sup>.</p>
+<p class="cap">Derived and checked in <i>src/fourier.py</i>.</p></details>
 
 <details><summary>the symmetry, measured first</summary>
 <table>
@@ -100,7 +104,8 @@ and nothing imaginary survives. Largest imaginary part found: 2.6 × 10<sup>−1
 <tr><td>shifted 37 px</td><td>+0.120</td><td>antidiagonal</td><td>+0.190</td></tr>
 <tr><td>shuffled</td><td>−0.002</td><td></td><td></td></tr>
 </table>
-<p>Mirrors sit at the level of a meaningless shift. The group is <b>p4</b>.</p></details>
+<p>Mirrors sit at the level of a meaningless shift. The group is <b>p4</b>.</p>
+<p class="cap">Measured by <i>src/symmetry.py</i>. Group names follow Schattschneider, <i>The plane symmetry groups: their recognition and notation</i>, Amer. Math. Monthly <b>85</b> (1978) 439–450; and <i>International Tables for Crystallography</i>, Vol. A.</p></details>
 
 <details><summary>the plant and the snowflake</summary>
 <div class="pair">
@@ -116,6 +121,7 @@ and the pattern crystallises. Things that grow are chiral; things that crystalli
 <tr><td>1.00</td><td>0.199</td><td>0.254</td><td>1.000</td></tr>
 <tr><td>1.50</td><td>0.399</td><td>0.237</td><td>1.000</td></tr>
 </table>
+<p class="cap">Measured by <i>src/chirality.py</i>.</p>
 <p>Almost all the handedness appears in the first fifth of that slider. Past the tile, χ doubles
 and the picture barely moves. Whether a larger χ looks <i>more twisted</i> is not measured and
 not claimed.</p></details>
@@ -129,11 +135,105 @@ motion by mean curvature.</small></div>
 <p>A real firing is the first three steps of that third slider — across the plausible
 E<sub>a</sub>, one high firing gives ℓ between 0.007 and 0.29 mm. One firing barely touches the
 tile. Curvature flow has no non-trivial fixed point, so left alone it does not preserve a
-pattern, it removes one.</p></details>
+pattern, it removes one.</p>
+<p class="cap">Scheme: Merriman, Bence &amp; Osher, <i>Diffusion generated motion by mean curvature</i>, UCLA CAM Report 92-18 (1992); also in <i>Computational Crystal Growers Workshop</i>, ed. J. E. Taylor, AMS (1992) 73–83. Run here by <i>src/kiln.py</i>; the firing schedules and diffusion lengths by <i>src/scales.py</i>.</p></details>
 
 <details><summary>the cost of detail</summary>
 <svg viewBox="0 0 820 300" class="chart" role="img" aria-label="agreement against number of cosines"><g class="grid"><line x1="58" y1="199.5" x2="700" y2="199.5"/><line x1="58" y1="139.0" x2="700" y2="139.0"/><line x1="58" y1="78.5" x2="700" y2="78.5"/><line x1="58" y1="18.0" x2="700" y2="18.0"/></g><text x="48" y="203.5" class="ax" text-anchor="end">25%</text><text x="48" y="143.0" class="ax" text-anchor="end">50%</text><text x="48" y="82.5" class="ax" text-anchor="end">75%</text><text x="48" y="22.0" class="ax" text-anchor="end">100%</text><text x="58.0" y="286" class="ax" text-anchor="middle">0</text><text x="236.3" y="286" class="ax" text-anchor="middle">25 000</text><text x="414.7" y="286" class="ax" text-anchor="middle">50 000</text><text x="593.0" y="286" class="ax" text-anchor="middle">75 000</text><path d="M 58.2 194.7 L 58.7 162.1 L 59.6 150.2 L 60.8 136.1 L 62.5 124.4 L 64.4 116.8 L 66.8 108.5 L 69.4 99.6 L 72.5 92.5 L 75.9 87.0 L 79.7 81.5 L 83.7 77.0 L 88.3 72.6 L 93.1 68.1 L 98.3 64.0 L 109.7 57.8 L 122.6 52.6 L 136.9 48.6 L 152.8 45.2 L 170.1 42.4 L 188.6 39.2 L 208.7 36.8 L 230.3 34.8 L 253.1 32.4 L 277.5 30.8 L 303.3 29.0 L 330.6 27.7 L 359.2 26.2 L 389.4 24.2 L 421.0 22.8 L 453.9 21.6 L 488.3 20.5 L 524.2 19.6 L 561.5 19.1 L 600.2 18.6 L 640.3 18.3 L 681.9 18.0" class="line"/><circle cx="179.1" cy="41.2" r="4.5" class="dot"/><text x="190.1" y="75.2" class="mk">90 %</text><text x="190.1" y="91.2" class="mks">16 975 cosines</text><circle cx="290.2" cy="29.9" r="4.5" class="dot"/><text x="301.2" y="25.9" class="mk">95 %</text><text x="301.2" y="41.9" class="mks">32 551 cosines</text><circle cx="506.1" cy="19.9" r="4.5" class="dot"/><text x="517.1" y="15.9" class="mk">99 %</text><text x="517.1" y="31.9" class="mks">62 815 cosines</text></svg>
-<p class="cap">The last 9 % costs three times what the first 90 % did.</p></details>
+<p class="cap">The last 9 % costs three times what the first 90 % did. Agreement is intersection-over-union against the thresholded photograph; counted by <i>src/build_assets.py</i>.</p></details>
+
+<details><summary>is it a fractal?</summary>
+<p>Someone asked. A fractal is a shape that does not care how far you zoom in — a snowflake
+edge has the same notches at every magnification. That is measurable. Lay a grid of boxes of
+side ε over the outline, count how many boxes it touches, shrink the boxes, count again:</p>
+
+<div class="eq">
+D &nbsp;=&nbsp; lim<sub>ε→0</sub> &nbsp; log N(ε) &nbsp;/&nbsp; log(1/ε)
+<small>Halve the box and a straight line needs twice as many boxes, so D = 1. A filled area
+needs four times, so D = 2. A fractal falls in between — and gives back the <i>same</i> D at
+every ε. That last part is the whole test.</small></div>
+
+<p>So measure D separately at each zoom rather than fitting one number across all of them:</p>
+<svg viewBox="0 0 820 300" class="chart" role="img" aria-label="roughness measured separately at each zoom"><g class="grid"><line x1="58" y1="209.5" x2="660" y2="209.5"/><line x1="58" y1="162.1" x2="660" y2="162.1"/><line x1="58" y1="118.3" x2="660" y2="118.3"/><line x1="58" y1="27.1" x2="660" y2="27.1"/></g><text x="48" y="213.5" class="ax" text-anchor="end">1.0</text><text x="48" y="166.1" class="ax" text-anchor="end">1.26</text><text x="48" y="122.3" class="ax" text-anchor="end">1.5</text><text x="48" y="31.1" class="ax" text-anchor="end">2.0</text><text x="58.0" y="272" class="ax" text-anchor="middle">2</text><text x="158.3" y="272" class="ax" text-anchor="middle">4</text><text x="258.7" y="272" class="ax" text-anchor="middle">8</text><text x="359.0" y="272" class="ax" text-anchor="middle">16</text><text x="459.3" y="272" class="ax" text-anchor="middle">32</text><text x="559.7" y="272" class="ax" text-anchor="middle">64</text><text x="660.0" y="272" class="ax" text-anchor="middle">128</text><text x="359.0" y="298" class="ax" text-anchor="middle">how far you zoom out  (box size, pixels)</text><path d="M 58.0 228.0 L 158.3 213.4 L 258.7 195.2 L 359.0 147.3 L 459.3 99.0 L 559.7 80.8 L 660.0 36.2" class="line"/><text x="672.0" y="40.2" class="mk">this tile</text><path d="M 58.0 168.7 L 158.3 162.5 L 258.7 157.7 L 359.0 154.9 L 459.3 141.2 L 559.7 131.1 L 660.0 147.8" class="line2"/><text x="672.0" y="151.8" class="mk">a real fractal</text><path d="M 58.0 216.8 L 158.3 212.2 L 258.7 206.0 L 359.0 186.4 L 459.3 138.8 L 559.7 107.6 L 660.0 73.4" class="line3"/><text x="672.0" y="77.4" class="mk">smooth curves</text></svg>
+<p class="cap">Box-counting dimension, one zoom level at a time. A fractal holds one value.
+The tile does not — and neither does the dashed line, which is this same tile rebuilt from
+cosines, and therefore made of provably smooth curves.</p>
+
+<p>The tile climbs from 1.0 to 1.9, tracking the smooth control the whole way. That climb is
+not roughness, it is the boxes getting big enough to cover everything. Fit one number across
+all zooms at once and you get 1.34, which looks satisfyingly fractal and means nothing,
+because the guaranteed-smooth control gives it too.</p>
+
+<p>Second test, the same one the mirrors got. Zooming is a symmetry like any other, so
+correlate the tile against a magnified view of itself around the four-fold centre:</p>
+<table>
+<tr><th>zoom</th><th></th><th>for comparison</th><th></th></tr>
+<tr><td>× 1.19</td><td>+0.172</td><td>rotation 90°</td><td>+0.536</td></tr>
+<tr><td>× 1.41</td><td>−0.020</td><td>mirror</td><td>+0.158</td></tr>
+<tr><td>× 2.00</td><td>+0.070</td><td>shifted 37 px</td><td>+0.120</td></tr>
+<tr><td>× 2.83</td><td>−0.030</td><td>shuffled</td><td>−0.002</td></tr>
+<tr><td>× 4.00</td><td>−0.028</td><td></td><td></td></tr>
+</table>
+<p>Every zoom lands at or below a meaningless shift. The quarter turn the tile really does
+have scores +0.536 on the same scale. <b>Not a fractal</b>, and it could not have been one:
+p4 is a crystallographic group — whole-tile shifts and a quarter turn, nothing else. It
+contains no zoom. And f is a <i>finite</i> sum of cosines, so the line between blue and white
+is an ordinary smooth curve, for any number of terms.</p>
+
+<h3>Then build one, to check the ruler</h3>
+<p>A measurement that only ever says no is not yet trustworthy. The tile fails for one narrow
+reason — the series stops. Remove exactly that, by adding the motif back at every zoom with
+each copy weaker by a fixed ratio, and nothing else changes:</p>
+
+<div class="eq">
+f<sub>H</sub>(x) &nbsp;=&nbsp; Σ<sub>j</sub> &nbsp; b<sup>−jH</sup> &nbsp; f(b<sup>j</sup>x)
+<small>Weierstrass, in two dimensions. b is a whole number and the grid is odd, so f(b<sup>j</sup>x)
+is exact rather than interpolated: the period and the four-fold centre survive every level.
+Still a sum of cosines, still p4 — now with a dilation symmetry it did not have. H is the
+knob, and the contour pattern of such a field has D = 2 − H.</small></div>
+
+<img class="wide" src="fractal.gif" alt="the tile fraying into a fractal">
+<p class="cap">The knob is how far the boundary is allowed to wander. At 0 px it is the tile.
+Every step adds the same wobble at every scale at once — that is what scale-free means.</p>
+
+<p>The same box counting, run on the stacked motif, where the pattern is sparse enough that
+coverage does not drown the signal:</p>
+<table style="max-width:none">
+<tr><th>box size, px</th><th>1–2</th><th>2–4</th><th>4–8</th><th>8–16</th><th>16–32</th><th>32–64</th><th>64–128</th></tr>
+<tr><td>the motif alone</td><td>0.87</td><td>0.94</td><td>0.96</td><td>0.99</td><td>1.02</td><td>1.05</td><td>1.07</td></tr>
+<tr><td>stacked, H = 0.70</td><td>0.94</td><td>1.08</td><td>1.22</td><td>1.26</td><td>1.28</td><td>1.36</td><td>1.35</td></tr>
+<tr><td>Koch curve</td><td>1.25</td><td>1.26</td><td>1.28</td><td>1.28</td><td>1.36</td><td>1.33</td><td>1.50</td></tr>
+</table>
+<p>Flat, and sitting on Koch's line, at the 2 − H = 1.30 the construction was asked for. The
+ruler works: it refuses the tile and accepts this. That is the only reason this exists.</p>
+
+<p>Two things it cost. The first attempt added copies across the whole plane, including the
+middle of solid areas, where a perturbation moves the boundary by (perturbation ÷ steepness)
+and the interior is flat — so it punched holes and the drawing dissolved into mould. Weighting
+by |∇f| fixes it: the edge frays, the interior does not move.</p>
+<div class="pair">
+<div><img class="wide" src="frac_mould.png" alt="the failed attempt">
+<p class="cap">Fractal, D ≈ 1.3, and no longer a tile.</p></div>
+<div><img class="wide" src="frac_frilled.png" alt="the edge frayed instead">
+<p class="cap">The same construction weighted by |∇f|.</p></div>
+</div>
+<p>The second is not fixable and is the point. Scale-free means the wobble at scale L is
+(L/L₀)<sup>H</sup> times the wobble at the top, so frilling at 2 px cannot be ordered without
+2<sup>7H</sup> times as much of it at 256 px. Fine detail is not an accessory bolted on the
+bottom. Asking for it only at the bottom is asking for a cutoff — which is what made the tile
+not a fractal in the first place.</p>
+
+<p class="cap">Measured by <i>src/fractal.py</i>; built by <i>src/fractalise.py</i>.
+Sources: Mandelbrot, <i>How Long Is the Coast of Britain?</i>, Science <b>156</b> (1967)
+636–638. Falconer, <i>Fractal Geometry</i>, Wiley (1990), ch. 2, for the box-counting
+dimension. Berry &amp; Lewis, <i>On the Weierstrass–Mandelbrot fractal function</i>, Proc. R.
+Soc. Lond. A <b>370</b> (1980) 459–484. Matsushita, Ouchi &amp; Honda, <i>On the fractal
+structure and statistics of contour lines on a self-affine surface</i>, J. Phys. Soc. Jpn.
+<b>60</b> (1991) 2109–2112, for D = 2 − H. A third test — the high-frequency spectral slope,
+after Porod, Kolloid-Z. <b>124</b> (1951) 83–114 — could not tell the two cases apart
+(−1.85 for the tile, −1.80 for a real fractal, −2.01 for a smooth boundary) and decides
+nothing. It is reported rather than dropped.</p>
+</details>
 
 <details><summary>an onion pattern with no onion in it</summary>
 <p>Zwiebelmuster has five motifs: bamboo, aster, peony, peach, and the “onion”. Audited
@@ -146,6 +246,7 @@ against a marked Meissen (Teichert) plate, this tile has one of them.</p>
 <tr><td>peach</td><td>absent</td></tr>
 <tr><td>the “onion”</td><td>absent</td></tr>
 </table>
+<p class="cap">Motif list and audit: the five canonical Zwiebelmuster motifs as given by the Meissen Porcelain Museum, compared element by element against a marked Meissen (Teichert) plate and against this tile. Correlations by <i>src/symmetry.py</i>.</p>
 <p>It kept the flowers and dropped every fruit — the motifs the pattern is named for.
 Not Zwiebelmuster, then: a derivative, redrawn for printing and rearranged four-fold.</p>
 <p>The tile itself is Czechoslovak, 15 × 15 cm, 4 mm. An identical
@@ -180,6 +281,7 @@ edge width moves by a factor of 40, so no bleed length is quoted anywhere here.<
 <p>The cosine counts hold against this photograph's resolution; a sharper one would need
 more.</p>
 <p>The tile's maker and year. The back gives VH20 and an arc reading …CHOSLOVAK….</p>
+<p class="cap">The E<sub>a</sub> range is taken from Zhang, Ni &amp; Chen, <i>Diffusion data in silicate melts</i>, Reviews in Mineralogy &amp; Geochemistry <b>72</b> (2010), for divalent network-modifying cations. It is a range for a family of cations, not a measured value for Co²⁺ in this glaze, which is exactly why nothing is quoted from it.</p>
 </details>
 
 </div>
