@@ -1,0 +1,302 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Like talking to a brick wall</title>
+<style>
+:root{--paper:#f7f5f0;--ink:#213660;--dark:#282c34;--grey:#8b8880;--rule:#e0dcd3;
+ --warm:#b0554a;--grout:#cfc9bd}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--dark);overflow:hidden;
+ font:15px/1.45 Georgia,'DejaVu Serif',serif;-webkit-font-smoothing:antialiased}
+.wrap{height:100%;max-width:1220px;margin:0 auto;padding:14px 18px 16px;
+ display:flex;flex-direction:column;gap:10px}
+h1{font:400 17px/1.2 Georgia,serif;margin:0 6px 0 0;white-space:nowrap;letter-spacing:-.01em}
+h1 b{color:var(--ink);font-weight:400}
+.bar{flex:0 0 auto;display:flex;gap:6px;align-items:center}
+.bar input[type=text]{flex:1 1 auto;min-width:120px;font:14px Georgia,serif;color:var(--dark);
+ background:#fff;border:1px solid var(--rule);border-radius:5px;padding:7px 11px}
+.bar input[type=text]:focus{outline:none;border-color:var(--ink)}
+.go{font:600 12px 'DejaVu Sans',system-ui,sans-serif;color:var(--ink);background:#fff;
+ border:1px solid var(--rule);border-radius:5px;padding:7px 10px;cursor:pointer;line-height:1}
+.go:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.wall{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);
+ grid-template-rows:repeat(3,1fr);gap:9px;background:var(--grout);padding:9px;border-radius:5px}
+.tile{background:#fff;border-radius:2px;padding:7px 9px 8px;display:flex;flex-direction:column;
+ min-height:0;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.13);cursor:pointer}
+.pic{position:relative;flex:1 1 auto;min-height:0;display:flex}
+.tile img{width:100%;height:100%;object-fit:contain;display:block;background:var(--paper)}
+.q{position:absolute;top:2px;right:2px;z-index:2;width:17px;height:17px;padding:0;
+ font:600 11px/1 'DejaVu Sans',system-ui,sans-serif;color:var(--grey);background:rgba(255,255,255,.85);
+ border:1px solid var(--rule);border-radius:50%;cursor:pointer}
+.q:hover{color:#fff;background:var(--warm);border-color:var(--warm)}
+.tile.open .q{color:#fff;background:var(--warm);border-color:var(--warm)}
+.say{position:absolute;inset:0;cursor:pointer;background:rgba(255,255,255,.965);padding:9px 10px;
+ display:none;overflow:auto;font:10.5px/1.45 Georgia,serif;color:var(--dark)}
+.say b{display:block;font:600 9.5px/1.3 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.09em;
+ text-transform:uppercase;color:var(--warm);margin-bottom:5px}
+.tile.open .say{display:block}
+.tag{position:absolute;top:2px;left:2px;font:600 9px 'DejaVu Sans',system-ui,sans-serif;
+ letter-spacing:.1em;text-transform:uppercase;color:var(--grey);background:rgba(255,255,255,.8);
+ padding:1px 5px;border-radius:2px}
+.tile input[type=range]{flex:0 0 auto;width:100%;accent-color:var(--ink);height:15px;cursor:grab;margin:5px 0 0}
+.ke{display:flex;justify-content:space-between;font:9.5px 'DejaVu Sans',system-ui,sans-serif;
+ color:var(--grey);margin-top:-2px}
+.kv{flex:0 0 auto;font:12px/1.35 'DejaVu Sans',system-ui,sans-serif;color:var(--dark);
+ margin:4px 0 0;height:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv b{color:var(--ink);font-variant-numeric:tabular-nums}
+.kv em{color:var(--grey);font-style:normal;font-size:11px}
+.why{display:none}
+.tile.speaking{outline:2px solid var(--warm);outline-offset:1px}
+#bub{position:fixed;z-index:50;max-width:330px;background:#fff;border:1px solid var(--ink);
+ border-radius:9px;padding:11px 13px;box-shadow:0 8px 26px rgba(0,0,0,.18);display:none;
+ font:13px/1.5 Georgia,serif}
+#bub.on{display:block}
+#bub h4{margin:0 0 5px;font:600 10px 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.11em;
+ text-transform:uppercase;color:var(--warm)}
+#bub .now{margin:7px 0 0;padding-top:7px;border-top:1px solid var(--rule);
+ font:12px 'DejaVu Sans',system-ui,sans-serif;color:var(--dark)}
+#bub .x{position:absolute;top:5px;right:9px;color:var(--grey);cursor:pointer;font:14px sans-serif}
+#bub:after{content:"";position:absolute;width:11px;height:11px;background:#fff;
+ border-left:1px solid var(--ink);border-bottom:1px solid var(--ink);transform:rotate(45deg)}
+#bub.left:after{right:-6.5px;top:22px;transform:rotate(225deg)}
+#bub.right:after{left:-6.5px;top:22px;transform:rotate(45deg)}
+footer{flex:0 0 auto;font:11px 'DejaVu Sans',system-ui,sans-serif;color:var(--grey)}
+footer a{color:var(--grey)}
+@media(max-width:900px){
+ body{overflow:auto}
+ .wrap{height:auto;padding:10px 10px 220px}
+ h1{font-size:15px;margin-right:0}
+ .bar{flex-wrap:wrap}
+ .bar input[type=text]{order:3;flex:1 1 100%}
+ .wall{grid-template-rows:none;gap:7px;padding:7px}
+ .pic{height:min(31vw,190px);flex:0 0 auto}
+ #bub{left:0!important;right:0;top:auto!important;bottom:0;max-width:none;border-radius:12px 12px 0 0;
+  border-left:0;border-right:0;border-bottom:0;max-height:56vh;overflow:auto;
+  box-shadow:0 -8px 26px rgba(0,0,0,.2)}
+ #bub:after{display:none}}
+@media(max-width:600px){.wall{grid-template-columns:1fr 1fr}}
+</style></head><body>
+
+<div class="wrap">
+<div class="bar">
+<h1>talk to <b>a brick wall</b></h1>
+<input type="text" id="q" placeholder="ask it something…"
+ aria-label="ask the wall a question" autocomplete="off">
+<button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
+<button class="go" onclick="wall.about()" title="what is this">?</button>
+</div>
+
+<div class="wall">
+<div class="tile" data-tile="cut">
+<div class="pic"><img id="cutimg" src="" alt="how many cosines I take"><span class="tag">cosines</span>
+<button class="q" onclick="wall.open('cut')" aria-label="what how many cosines I take means">?</button>
+<div class="say" id="cutsay" onclick="wall.close('cut')"><b>how many cosines I take</b><span>62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</span></div></div>
+<input type="range" id="cutr" min="0" max="24" value="24" step="1" aria-label="how many cosines I take"
+ onclick="event.stopPropagation()">
+<p class="kv" id="cutout"></p>
+<div class="why" id="cutwhy" data-name="how many cosines I take">62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</div></div>
+<div class="tile" data-tile="kil">
+<div class="pic"><img id="kilimg" src="" alt="what the fire does to me"><span class="tag">kiln</span>
+<button class="q" onclick="wall.open('kil')" aria-label="what what the fire does to me means">?</button>
+<div class="say" id="kilsay" onclick="wall.close('kil')"><b>what the fire does to me</b><span>Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</span></div></div>
+<input type="range" id="kilr" min="0" max="24" value="0" step="1" aria-label="what the fire does to me"
+ onclick="event.stopPropagation()">
+<p class="kv" id="kilout"></p>
+<div class="why" id="kilwhy" data-name="what the fire does to me">Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</div></div>
+<div class="tile" data-tile="perc">
+<div class="pic"><img id="percimg" src="" alt="when my blue joins up"><span class="tag">percolation</span>
+<button class="q" onclick="wall.open('perc')" aria-label="what when my blue joins up means">?</button>
+<div class="say" id="percsay" onclick="wall.close('perc')"><b>when my blue joins up</b><span>Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</span></div></div>
+<input type="range" id="percr" min="0" max="25" value="8" step="1" aria-label="when my blue joins up"
+ onclick="event.stopPropagation()">
+<p class="kv" id="percout"></p>
+<div class="why" id="percwhy" data-name="when my blue joins up">Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</div></div>
+<div class="tile" data-tile="eye">
+<div class="pic"><img id="eyeimg" src="" alt="what you actually see of me"><span class="tag">acuity</span>
+<button class="q" onclick="wall.open('eye')" aria-label="what what you actually see of me means">?</button>
+<div class="say" id="eyesay" onclick="wall.close('eye')"><b>what you actually see of me</b><span>At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</span></div></div>
+<input type="range" id="eyer" min="0" max="25" value="0" step="1" aria-label="what you actually see of me"
+ onclick="event.stopPropagation()">
+<p class="kv" id="eyeout"></p>
+<div class="why" id="eyewhy" data-name="what you actually see of me">At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</div></div>
+<div class="tile" data-tile="chi">
+<div class="pic"><img id="chiimg" src="" alt="which way I curl"><span class="tag">chirality</span>
+<button class="q" onclick="wall.open('chi')" aria-label="what which way I curl means">?</button>
+<div class="say" id="chisay" onclick="wall.close('chi')"><b>which way I curl</b><span>Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</span></div></div>
+<input type="range" id="chir" min="0" max="30" value="20" step="1" aria-label="which way I curl"
+ onclick="event.stopPropagation()">
+<p class="kv" id="chiout"></p>
+<div class="why" id="chiwhy" data-name="which way I curl">Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</div></div>
+<div class="tile" data-tile="frac">
+<div class="pic"><img id="fracimg" src="" alt="the fractal I am not"><span class="tag">geometry</span>
+<button class="q" onclick="wall.open('frac')" aria-label="what the fractal I am not means">?</button>
+<div class="say" id="fracsay" onclick="wall.close('frac')"><b>the fractal I am not</b><span>My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</span></div></div>
+<input type="range" id="fracr" min="0" max="25" value="0" step="1" aria-label="the fractal I am not"
+ onclick="event.stopPropagation()">
+<p class="kv" id="fracout"></p>
+<div class="why" id="fracwhy" data-name="the fractal I am not">My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</div></div>
+<div class="tile" data-tile="copy">
+<div class="pic"><img id="copyimg" src="" alt="three centuries of being copied"><span class="tag">history</span>
+<button class="q" onclick="wall.open('copy')" aria-label="what three centuries of being copied means">?</button>
+<div class="say" id="copysay" onclick="wall.close('copy')"><b>three centuries of being copied</b><span>Every generation is a firing. With a copyist who remembers (λ = 0.15) I hold 0.795 after 25 of them. The honest version failed: a copyist who only learns k motifs scores 0.315 at best, while doing nothing at all scores 0.49.</span></div></div>
+<input type="range" id="copyr" min="0" max="25" value="0" step="1" aria-label="three centuries of being copied"
+ onclick="event.stopPropagation()">
+<p class="kv" id="copyout"></p>
+<div class="why" id="copywhy" data-name="three centuries of being copied">Every generation is a firing. With a copyist who remembers (λ = 0.15) I hold 0.795 after 25 of them. The honest version failed: a copyist who only learns k motifs scores 0.315 at best, while doing nothing at all scores 0.49.</div></div>
+<div class="tile" data-tile="ship">
+<div class="pic"><img id="shipimg" src="" alt="how much of me can be replaced"><span class="tag">identity</span>
+<button class="q" onclick="wall.open('ship')" aria-label="what how much of me can be replaced means">?</button>
+<div class="say" id="shipsay" onclick="wall.close('ship')"><b>how much of me can be replaced</b><span>Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</span></div></div>
+<input type="range" id="shipr" min="0" max="25" value="0" step="1" aria-label="how much of me can be replaced"
+ onclick="event.stopPropagation()">
+<p class="kv" id="shipout"></p>
+<div class="why" id="shipwhy" data-name="how much of me can be replaced">Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</div></div>
+<div class="tile" data-tile="attn">
+<div class="pic"><img id="attnimg" src="" alt="what attention finds in me"><span class="tag">machine learning</span>
+<button class="q" onclick="wall.open('attn')" aria-label="what what attention finds in me means">?</button>
+<div class="say" id="attnsay" onclick="wall.close('attn')"><b>what attention finds in me</b><span>Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</span></div></div>
+<input type="range" id="attnr" min="0" max="25" value="13" step="1" aria-label="what attention finds in me"
+ onclick="event.stopPropagation()">
+<p class="kv" id="attnout"></p>
+<div class="why" id="attnwhy" data-name="what attention finds in me">Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</div></div>
+</div>
+
+</div>
+
+<div id="bub"><span class="x" onclick="wall.close()">&#215;</span><h4 id="bubh"></h4>
+<div id="bubt"></div><p class="now" id="bubn"></p></div>
+
+<script type="application/json" id="wall-api">{"cut": {"name": "how many cosines I take", "field": "cosines", "steps": 25}, "kil": {"name": "what the fire does to me", "field": "kiln", "steps": 25}, "perc": {"name": "when my blue joins up", "field": "percolation", "steps": 26}, "eye": {"name": "what you actually see of me", "field": "acuity", "steps": 26}, "chi": {"name": "which way I curl", "field": "chirality", "steps": 31}, "frac": {"name": "the fractal I am not", "field": "geometry", "steps": 26}, "copy": {"name": "three centuries of being copied", "field": "history", "steps": 26}, "ship": {"name": "how much of me can be replaced", "field": "identity", "steps": 26}, "attn": {"name": "what attention finds in me", "field": "machine learning", "steps": 26}}</script>
+<script>
+const D = {"CUT": [{"K": 1, "cos": 3, "iou": 0.0}, {"K": 2, "cos": 7, "iou": 0.0}, {"K": 4, "cos": 25, "iou": 0.2698}, {"K": 7, "cos": 75, "iou": 0.3941}, {"K": 10, "cos": 159, "iou": 0.4495}, {"K": 14, "cos": 307, "iou": 0.4896}, {"K": 18, "cos": 505, "iou": 0.5362}, {"K": 23, "cos": 827, "iou": 0.5791}, {"K": 29, "cos": 1315, "iou": 0.6359}, {"K": 35, "cos": 1927, "iou": 0.6901}, {"K": 42, "cos": 2763, "iou": 0.7222}, {"K": 49, "cos": 3763, "iou": 0.7608}, {"K": 57, "cos": 5095, "iou": 0.7963}, {"K": 66, "cos": 6837, "iou": 0.8284}, {"K": 75, "cos": 8833, "iou": 0.8566}, {"K": 85, "cos": 11351, "iou": 0.8739}, {"K": 95, "cos": 14173, "iou": 0.8915}, {"K": 106, "cos": 17633, "iou": 0.9081}, {"K": 118, "cos": 21855, "iou": 0.925}, {"K": 130, "cos": 26539, "iou": 0.9382}, {"K": 143, "cos": 32105, "iou": 0.9502}, {"K": 156, "cos": 38213, "iou": 0.96}, {"K": 170, "cos": 45393, "iou": 0.9727}, {"K": 185, "cos": 53751, "iou": 0.9829}, {"K": 200, "cos": 62815, "iou": 0.9917}], "CHI": [0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989], "KIL": [{"l": 0.0, "mm": 0.0, "ink": 0.2089}, {"l": 0.33, "mm": 0.099, "ink": 0.2089}, {"l": 0.67, "mm": 0.201, "ink": 0.2086}, {"l": 1.0, "mm": 0.299, "ink": 0.2081}, {"l": 1.33, "mm": 0.398, "ink": 0.2065}, {"l": 1.67, "mm": 0.5, "ink": 0.2025}, {"l": 2.0, "mm": 0.599, "ink": 0.198}, {"l": 2.33, "mm": 0.698, "ink": 0.1926}, {"l": 2.67, "mm": 0.799, "ink": 0.1865}, {"l": 3.0, "mm": 0.898, "ink": 0.1816}, {"l": 3.33, "mm": 0.997, "ink": 0.1766}, {"l": 3.67, "mm": 1.099, "ink": 0.1724}, {"l": 4.0, "mm": 1.198, "ink": 0.1689}, {"l": 4.33, "mm": 1.296, "ink": 0.1652}, {"l": 4.67, "mm": 1.398, "ink": 0.1614}, {"l": 5.0, "mm": 1.497, "ink": 0.1583}, {"l": 5.33, "mm": 1.596, "ink": 0.156}, {"l": 5.67, "mm": 1.698, "ink": 0.1531}, {"l": 6.0, "mm": 1.796, "ink": 0.1501}, {"l": 6.33, "mm": 1.895, "ink": 0.1471}, {"l": 6.67, "mm": 1.997, "ink": 0.1443}, {"l": 7.0, "mm": 2.096, "ink": 0.1411}, {"l": 7.33, "mm": 2.195, "ink": 0.1382}, {"l": 7.67, "mm": 2.296, "ink": 0.1359}, {"l": 8.0, "mm": 2.395, "ink": 0.1328}], "PERC": [{"theta": 0.78, "ink": 0.0971, "n": 541, "big": 0.0927, "spans": false}, {"theta": 0.758, "ink": 0.103, "n": 565, "big": 0.1056, "spans": false}, {"theta": 0.737, "ink": 0.1121, "n": 837, "big": 0.1022, "spans": false}, {"theta": 0.715, "ink": 0.1267, "n": 1409, "big": 0.0956, "spans": false}, {"theta": 0.694, "ink": 0.1467, "n": 1489, "big": 0.0906, "spans": false}, {"theta": 0.672, "ink": 0.1665, "n": 633, "big": 0.0864, "spans": false}, {"theta": 0.65, "ink": 0.184, "n": 453, "big": 0.0899, "spans": false}, {"theta": 0.629, "ink": 0.197, "n": 401, "big": 0.0927, "spans": false}, {"theta": 0.607, "ink": 0.2049, "n": 437, "big": 0.0916, "spans": false}, {"theta": 0.586, "ink": 0.2121, "n": 469, "big": 0.0905, "spans": false}, {"theta": 0.564, "ink": 0.2205, "n": 457, "big": 0.0891, "spans": false}, {"theta": 0.542, "ink": 0.2335, "n": 801, "big": 0.4729, "spans": false}, {"theta": 0.521, "ink": 0.2523, "n": 1321, "big": 0.4546, "spans": false}, {"theta": 0.499, "ink": 0.275, "n": 665, "big": 0.499, "spans": false}, {"theta": 0.478, "ink": 0.2963, "n": 337, "big": 0.5165, "spans": false}, {"theta": 0.456, "ink": 0.3125, "n": 269, "big": 0.5186, "spans": false}, {"theta": 0.434, "ink": 0.3229, "n": 221, "big": 0.5248, "spans": false}, {"theta": 0.413, "ink": 0.3306, "n": 237, "big": 0.5226, "spans": false}, {"theta": 0.391, "ink": 0.3385, "n": 245, "big": 0.5203, "spans": false}, {"theta": 0.37, "ink": 0.3494, "n": 369, "big": 0.5267, "spans": false}, {"theta": 0.348, "ink": 0.3687, "n": 1081, "big": 0.5191, "spans": false}, {"theta": 0.326, "ink": 0.398, "n": 1430, "big": 0.5046, "spans": false}, {"theta": 0.305, "ink": 0.4312, "n": 266, "big": 0.9727, "spans": true}, {"theta": 0.283, "ink": 0.457, "n": 189, "big": 0.9793, "spans": true}, {"theta": 0.262, "ink": 0.4734, "n": 165, "big": 0.9756, "spans": true}, {"theta": 0.24, "ink": 0.4809, "n": 157, "big": 0.9741, "spans": true}], "EYE": [{"d": 0.3, "K": 200, "mm": 0.087, "cos": 62815}, {"d": 0.35, "K": 200, "mm": 0.101, "cos": 62815}, {"d": 0.4, "K": 200, "mm": 0.117, "cos": 62815}, {"d": 0.47, "K": 200, "mm": 0.136, "cos": 62815}, {"d": 0.54, "K": 200, "mm": 0.157, "cos": 62815}, {"d": 0.63, "K": 200, "mm": 0.182, "cos": 62815}, {"d": 0.73, "K": 200, "mm": 0.212, "cos": 62815}, {"d": 0.84, "K": 200, "mm": 0.245, "cos": 62815}, {"d": 0.98, "K": 200, "mm": 0.284, "cos": 62815}, {"d": 1.13, "K": 200, "mm": 0.329, "cos": 62815}, {"d": 1.31, "K": 197, "mm": 0.382, "cos": 60953}, {"d": 1.52, "K": 170, "mm": 0.442, "cos": 45393}, {"d": 1.76, "K": 146, "mm": 0.513, "cos": 33479}, {"d": 2.04, "K": 126, "mm": 0.594, "cos": 24931}, {"d": 2.37, "K": 109, "mm": 0.689, "cos": 18649}, {"d": 2.74, "K": 94, "mm": 0.798, "cos": 13865}, {"d": 3.18, "K": 81, "mm": 0.925, "cos": 10297}, {"d": 3.69, "K": 70, "mm": 1.072, "cos": 7687}, {"d": 4.27, "K": 60, "mm": 1.243, "cos": 5645}, {"d": 4.95, "K": 52, "mm": 1.44, "cos": 4249}, {"d": 5.74, "K": 45, "mm": 1.669, "cos": 3181}, {"d": 6.65, "K": 39, "mm": 1.935, "cos": 2389}, {"d": 7.71, "K": 33, "mm": 2.242, "cos": 1705}, {"d": 8.93, "K": 29, "mm": 2.599, "cos": 1315}, {"d": 10.35, "K": 25, "mm": 3.012, "cos": 981}, {"d": 12.0, "K": 21, "mm": 3.491, "cos": 687}], "SHIP": [{"p": 0.0, "iou": 1.0}, {"p": 0.04, "iou": 0.9329}, {"p": 0.08, "iou": 0.8594}, {"p": 0.12, "iou": 0.8142}, {"p": 0.16, "iou": 0.7954}, {"p": 0.2, "iou": 0.7538}, {"p": 0.24, "iou": 0.7179}, {"p": 0.28, "iou": 0.7029}, {"p": 0.32, "iou": 0.6762}, {"p": 0.36, "iou": 0.653}, {"p": 0.4, "iou": 0.6338}, {"p": 0.44, "iou": 0.3326}, {"p": 0.48, "iou": 0.3079}, {"p": 0.52, "iou": 0.2839}, {"p": 0.56, "iou": 0.2716}, {"p": 0.6, "iou": 0.2619}, {"p": 0.64, "iou": 0.2363}, {"p": 0.68, "iou": 0.2259}, {"p": 0.72, "iou": 0.2115}, {"p": 0.76, "iou": 0.2051}, {"p": 0.8, "iou": 0.1866}, {"p": 0.84, "iou": 0.1614}, {"p": 0.88, "iou": 0.1569}, {"p": 0.92, "iou": 0.1509}, {"p": 0.96, "iou": 0.1265}, {"p": 1.0, "iou": 0.1256}], "COPY": [{"gen": 0, "ink": 0.28, "iou": 1.0}, {"gen": 1, "ink": 0.2827, "iou": 0.9139}, {"gen": 2, "ink": 0.2845, "iou": 0.8815}, {"gen": 3, "ink": 0.2854, "iou": 0.8609}, {"gen": 4, "ink": 0.2861, "iou": 0.8462}, {"gen": 5, "ink": 0.2865, "iou": 0.8354}, {"gen": 6, "ink": 0.2868, "iou": 0.8281}, {"gen": 7, "ink": 0.2871, "iou": 0.822}, {"gen": 8, "ink": 0.2874, "iou": 0.8167}, {"gen": 9, "ink": 0.2877, "iou": 0.8127}, {"gen": 10, "ink": 0.288, "iou": 0.8099}, {"gen": 11, "ink": 0.2881, "iou": 0.8077}, {"gen": 12, "ink": 0.2883, "iou": 0.8058}, {"gen": 13, "ink": 0.2885, "iou": 0.8041}, {"gen": 14, "ink": 0.2886, "iou": 0.8026}, {"gen": 15, "ink": 0.2888, "iou": 0.8014}, {"gen": 16, "ink": 0.2889, "iou": 0.8004}, {"gen": 17, "ink": 0.2889, "iou": 0.7996}, {"gen": 18, "ink": 0.2889, "iou": 0.7989}, {"gen": 19, "ink": 0.2889, "iou": 0.7982}, {"gen": 20, "ink": 0.2889, "iou": 0.7976}, {"gen": 21, "ink": 0.2888, "iou": 0.7971}, {"gen": 22, "ink": 0.2888, "iou": 0.7966}, {"gen": 23, "ink": 0.2887, "iou": 0.7961}, {"gen": 24, "ink": 0.2887, "iou": 0.7956}, {"gen": 25, "ink": 0.2887, "iou": 0.7954}], "ATTN": [{"beta": 1.0, "entropy": 0.9961, "lift": 0.91}, {"beta": 1.3, "entropy": 0.9937, "lift": 0.89}, {"beta": 1.6, "entropy": 0.9899, "lift": 0.86}, {"beta": 2.1, "entropy": 0.9837, "lift": 0.82}, {"beta": 2.6, "entropy": 0.974, "lift": 0.77}, {"beta": 3.3, "entropy": 0.9588, "lift": 0.7}, {"beta": 4.2, "entropy": 0.9358, "lift": 0.63}, {"beta": 5.4, "entropy": 0.9019, "lift": 0.55}, {"beta": 6.8, "entropy": 0.8539, "lift": 0.48}, {"beta": 8.6, "entropy": 0.7892, "lift": 0.42}, {"beta": 11.0, "entropy": 0.7071, "lift": 0.38}, {"beta": 14.0, "entropy": 0.6103, "lift": 0.38}, {"beta": 17.7, "entropy": 0.506, "lift": 0.38}, {"beta": 22.5, "entropy": 0.4029, "lift": 0.38}, {"beta": 28.7, "entropy": 0.3085, "lift": 0.36}, {"beta": 36.4, "entropy": 0.2292, "lift": 0.34}, {"beta": 46.3, "entropy": 0.1679, "lift": 0.29}, {"beta": 58.8, "entropy": 0.1232, "lift": 0.24}, {"beta": 74.7, "entropy": 0.0916, "lift": 0.18}, {"beta": 95.0, "entropy": 0.0693, "lift": 0.12}, {"beta": 120.7, "entropy": 0.0534, "lift": 0.06}, {"beta": 153.4, "entropy": 0.0417, "lift": 0.03}, {"beta": 194.9, "entropy": 0.0326, "lift": 0.01}, {"beta": 247.7, "entropy": 0.0254, "lift": 0.0}, {"beta": 314.8, "entropy": 0.0196, "lift": 0.0}, {"beta": 400.0, "entropy": 0.0151, "lift": 0.0}]}, FRW = [0.0, 1.0, 2.1, 3.1, 4.2, 5.2, 6.2, 7.3, 8.3, 9.4, 10.4, 11.4, 12.5, 13.5, 14.6, 15.6, 16.6, 17.7, 18.7, 19.8, 20.8, 21.8, 22.9, 23.9, 25.0, 26.0];
+const sp = n => n.toLocaleString('en-US').replace(/,/g,'\u2009');
+const TILE = {};
+let stopped=false, running=false, bubFor=null;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function wire(id,dir,pre,n,read){
+  const img=document.getElementById(id+'img'), r=document.getElementById(id+'r'),
+        out=document.getElementById(id+'out');
+  const f=[...Array(n)].map((_,i)=>{const im=new Image();
+    im.src=dir+'/'+pre+String(i).padStart(2,'0')+'.png'; return im;});
+  const show=()=>{const i=+r.value; img.src=f[i].src; out.innerHTML=read(i);
+  };
+  r.addEventListener('input',show); show();
+  TILE[id]={r,out,n,show};
+}
+wire('cut','cut','k',25,i=>'<b>'+sp(D.CUT[i].cos)+'</b> cosines<em> · '+(D.CUT[i].K<8?'a smudge':D.CUT[i].K<30?'the layout arrives':D.CUT[i].K<90?'the flowers arrive':D.CUT[i].K<160?'now the stipple':'the last percent is dots')+'</em>');
+wire('kil','kiln','s',25,i=>'&#8467; = <b>'+D.KIL[i].mm.toFixed(2)+'</b> mm<em> · '+(i===0?'unfired':i<4?'one real firing':i<12?'the fine work is going':'hotter than any kiln')+'</em>');
+wire('perc','perc','p',26,i=>'&#952; = <b>'+D.PERC[i].theta.toFixed(2)+'</b><em> · '+(D.PERC[i].spans?'one piece, edge to edge':D.PERC[i].big>0.4?'just joined up':D.PERC[i].n+' separate flowers')+'</em>');
+wire('eye','eye','e',26,i=>'<b>'+sp(D.EYE[i].cos)+'</b> reach you<em> · at '+D.EYE[i].d.toFixed(1)+' m'+(D.EYE[i].d<0.35?', as good as the camera':D.EYE[i].cos>20000?', losing the dots':D.EYE[i].cos>3000?', only the flowers':', a blue haze')+'</em>');
+wire('chi','chi','t',31,i=>'&#967; = <b>'+D.CHI[i].toFixed(3)+'</b><em> · '+(i===20?'this is me':i===0?'mirrors forced on':i<20?'straightening out':'never painted')+'</em>');
+wire('frac','frac','w',26,i=>'<b>'+FRW[i].toFixed(0)+'</b> px displaced<em> · '+(i===0?'me, unchanged':i<8?'the edge starts to fray':'detail at every scale')+'</em>');
+wire('copy','copy','c',26,i=>'<b>'+D.COPY[i].gen+'</b> firings<em> · '+(100*D.COPY[i].iou).toFixed(0)+' % still me'+(i===0?'':D.COPY[i].iou>0.9?', holding':', she repaints me')+'</em>');
+wire('ship','ship','s',26,i=>'<b>'+(100*D.SHIP[i].p).toFixed(0)+' %</b> replaced<em> · '+(100*D.SHIP[i].iou).toFixed(0)+' % still me'+(D.SHIP[i].iou<0.186?', someone else now':'')+'</em>');
+wire('attn','attn','a',26,i=>'&#946; = <b>'+D.ATTN[i].beta.toFixed(0)+'</b><em> · lift '+D.ATTN[i].lift.toFixed(1)+'&#215;'+(D.ATTN[i].entropy>0.9?', looking everywhere':D.ATTN[i].entropy>0.3?', finding neighbours':', one patch only')+'</em>');
+
+function place(id){
+  document.querySelector('[data-tile="'+id+'"]').classList.add('open');
+}
+window.wall = {
+  help(){ return "wall.ask('plain question') | wall.converse([qs]) | wall.run(id) | "
+    + "wall.runAll() | wall.all() | wall.runMany([ids]) | wall.set(id,step) | "
+    + "wall.read(id) | wall.why(id) | wall.list() | "
+    + "wall.open(id) | wall.close() | wall.stop(). ids: " + Object.keys(TILE).join(', '); },
+  list(){ return Object.entries(TILE).map(([id,t])=>({id,
+    name:document.getElementById(id+'why').dataset.name, steps:t.n, step:+t.r.value,
+    reading:t.out.textContent})); },
+  set(id,s){ const t=TILE[id]; if(!t) return 'no such tile';
+    t.r.value=Math.max(0,Math.min(t.n-1,s|0)); t.show(); return t.out.textContent; },
+  read(id){ return TILE[id]?TILE[id].out.textContent:'no such tile'; },
+  why(id){ const w=document.getElementById(id+'why');
+    return w?w.textContent.trim():'no such tile'; },
+  open(id){ if(id===undefined||id==='all'){ document.querySelectorAll('.tile')
+      .forEach(c=>c.classList.add('open')); return 'all open'; }
+    if(!TILE[id]) return 'no such tile';
+    document.querySelector('[data-tile="'+id+'"]').classList.toggle('open'); return this.read(id); },
+  close(id){ if(id&&TILE[id]) document.querySelector('[data-tile="'+id+'"]').classList.remove('open');
+    else { document.querySelectorAll('.tile').forEach(c=>c.classList.remove('open'));
+           document.getElementById('bub').classList.remove('on'); }
+    return 'closed'; },
+  about(){
+    const b=document.getElementById('bub');
+    document.getElementById('bubh').textContent='what this is';
+    document.getElementById('bubt').innerHTML='One kitchen wall in a valley under the '
+      + 'Krkonoše, photographed once. Nine tiles, nine different questions, nine numbers '
+      + 'back. Every coefficient is measured off that photograph, none chosen, and the results '
+      + 'that spoiled the story were kept.<br><br>Drag a tile, or type a question. '
+      + 'A language model in this browser can drive it: '
+      + '<code>wall.ask(&#39;are you a fractal?&#39;)</code>, <code>wall.list()</code>, '
+      + '<code>wall.runAll()</code>.<br><br>'
+      + '<a href="https://github.com/moudrkat/underglaze">code and measurements</a>';
+    document.getElementById('bubn').textContent='';
+    b.className='on'; bubFor=null;
+    b.style.left=Math.max(8,(innerWidth-Math.min(330,innerWidth-16))/2)+'px';
+    b.style.top='60px';
+    return 'about';
+  },
+  stop(){ stopped=true; document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
+  toggle(){ return running ? this.stop() : this.all(); },
+  async run(id, ms=90){
+    if(Array.isArray(id)) return this.runMany(id, ms);
+    if(!TILE[id]) return 'no such tile';
+    stopped=false;
+    document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
+    const cell=document.querySelector('[data-tile="'+id+'"]');
+    cell.classList.add('speaking');
+    const t=TILE[id];
+    for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
+    return t.out.textContent;
+  },
+  async runMany(ids, ms=90){
+    ids = (ids===undefined||ids==='all') ? Object.keys(TILE)
+        : (Array.isArray(ids) ? ids : [ids]);
+    ids = ids.filter(i=>TILE[i]);
+    if(!ids.length) return 'no such tiles';
+    stopped=false; running=true;
+    const btn=document.getElementById('play'); if(btn) btn.innerHTML='&#9632;';
+    this.close();
+    ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.add('speaking'));
+    await Promise.all(ids.map(async id=>{
+      const t=TILE[id];
+      for(let k=0;k<t.n && !stopped;k++){ this.set(id,k); await sleep(ms); }
+    }));
+    ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.remove('speaking'));
+    running=false; if(btn) btn.innerHTML='&#9654;';
+    return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
+  },
+  all(ms=90){ return this.runMany(Object.keys(TILE), ms); },
+  ask(q){
+    const k=String(q||'').toLowerCase();
+    const hit=[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece/],
+               ['frac',/fractal|zoom|scale|dimension|self.?similar/],
+               ['chi',/mirror|curl|hand|chiral|left|right|twist|symmetr/],
+               ['attn',/attention|\bai\b|model|machine|learn|transformer|notice|neural/],
+               ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another/],
+               ['copy',/copy|copied|old|age|year|century|history|survive|remember|origin|come from|who made/],
+               ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven/],
+               ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information/],
+               ['eye',/see|eye|far|door|room|across|distance|look at you|from here/]]
+      .find(([,re])=>re.test(k));
+    if(!hit){ document.getElementById('foot').innerHTML =
+      'The wall has nine answers: cosines, fire, joining up, distance, mirrors, fractals, '
+      + 'copying, replacing, attention. Try one of those words.';
+      return 'no tile matched'; }
+    return this.run(hit[0]);
+  },
+  async converse(qs, ms=90){
+    stopped=false;
+    for(const q of qs){ if(stopped) break; await this.ask(q); await sleep(850); }
+    return 'done';
+  },
+  async runAll(ms=70){
+    stopped=false; running=true; document.getElementById('play').innerHTML='&#9632;';
+    for(const id of Object.keys(TILE)){ if(stopped) break; await this.run(id,ms); await sleep(500); }
+    running=false; document.getElementById('play').innerHTML='&#9654;';
+    document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
+    return 'done';
+  }
+};
+document.getElementById('q').addEventListener('keydown',e=>{
+  if(e.key==='Enter') wall.ask(e.target.value);});
+addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
+</script></body></html>
