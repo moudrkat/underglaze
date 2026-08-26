@@ -14,15 +14,15 @@ import re, sys, os, io
 TILES = ["cut", "kil", "perc", "eye", "chi", "frac", "copy", "ship", "attn"]
 
 ROUTES = [
- ("perc", r"join|connect|touch|apart|separate|threshold|percolat|one piece"),
- ("frac", r"fractal|zoom|scale|dimension|self.?similar"),
- ("chi", r"mirror|curl|hand|chiral|left|right|twist|symmetr"),
- ("attn", r"attention|\bai\b|model|machine|learn|transformer|notice|neural"),
- ("ship", r"replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another"),
- ("copy", r"copy|copied|old|age|year|century|history|survive|remember|origin|come from|who made"),
- ("kil", r"fire|fired|kiln|firing|hot|burn|melt|oven"),
- ("cut", r"cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information"),
- ("eye", r"see|eye|far|door|room|across|distance|look at you|from here"),
+ ("perc", r"join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous"),
+ ("frac", r"fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite"),
+ ("kil", r"fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze"),
+ ("copy", r"copy|copied|\bold\b|\bage\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit"),
+ ("chi", r"mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you"),
+ ("attn", r"attention|\bai\b|language model|\bmodel\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm"),
+ ("ship", r"replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you"),
+ ("cut", r"cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest"),
+ ("eye", r"\bsee|eye|\bfar\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses"),
 ]
 
 CASES = [
@@ -90,6 +90,43 @@ CASES = [
 ]
 
 
+# A second set, written without looking at the patterns -- the phrasings a
+# stranger reaches for. The first set was written alongside the router and only
+# shows it is self-consistent; this is the one that can actually fail.
+HARD = [
+ ("who painted you?", "copy"),
+ ("were you made by hand?", "copy"),
+ ("are you an original or a copy?", "copy"),
+ ("what was here before you?", "copy"),
+ ("how many times were you baked?", "kil"),
+ ("did the oven change you?", "kil"),
+ ("what would 900 degrees do to you?", "kil"),
+ ("what happens if I squint?", "eye"),
+ ("am I seeing all of you right now?", "eye"),
+ ("if I stand back, do you change?", "eye"),
+ ("what is the smallest thing on you?", "eye"),
+ ("do you look the same upside down?", "chi"),
+ ("are you symmetrical?", "chi"),
+ ("do you have a left and a right?", "chi"),
+ ("could I flip you and not notice?", "chi"),
+ ("is there a pattern inside your pattern?", "frac"),
+ ("do you go on forever?", "frac"),
+ ("what if I keep magnifying?", "frac"),
+ ("when do your flowers merge?", "perc"),
+ ("is your blue all one thing?", "perc"),
+ ("could I walk across you without leaving the blue?", "perc"),
+ ("how much can I change you before you are gone?", "ship"),
+ ("what if I break you and rebuild you?", "ship"),
+ ("what makes you you?", "ship"),
+ ("how would a computer store you?", "cut"),
+ ("are you complicated?", "cut"),
+ ("what is the cheapest way to write you down?", "cut"),
+ ("would a robot understand you?", "attn"),
+ ("what does a language model make of you?", "attn"),
+ ("could software recognise you?", "attn"),
+]
+
+
 def route(q):
     k = q.lower()
     for tile, pat in ROUTES:
@@ -106,23 +143,26 @@ def check_sync(path="web/wall.html"):
     return "in sync with the page" if not missing else "OUT OF SYNC: " + ",".join(missing)
 
 
+def score(cases, label):
+    bad = [(q, w, route(q)) for q, w in cases if route(q) != w]
+    n = len(cases)
+    print("%-32s %2d/%2d  (%3.0f %%)" % (label, n - len(bad), n, 100 * (n - len(bad)) / n))
+    return bad
+
+
 def main():
     print("router sync: %s\n" % check_sync())
-    bad = []
-    for q, want in CASES:
-        got = route(q)
-        if got != want:
-            bad.append((q, want, got))
-    n = len(CASES)
-    print("%d/%d correct  (%.0f %%)\n" % (n - len(bad), n, 100 * (n - len(bad)) / n))
+    b1 = score(CASES, "written with the router open")
+    b2 = score(HARD, "written blind")
+    bad = [("open",) + t for t in b1] + [("blind",) + t for t in b2]
+    print()
     if bad:
-        print("  %-46s %-6s %-6s" % ("question", "want", "got"))
-        for q, want, got in bad:
-            print("  %-46s %-6s %-6s" % (q[:46], want or "-", got or "-"))
+        print("  %-6s %-48s %-6s %-6s" % ("set", "question", "want", "got"))
+        for tag, q, want, got in bad:
+            print("  %-6s %-48s %-6s %-6s" % (tag, q[:48], want or "-", got or "-"))
     else:
         print("  every question routed as intended.")
     return 1 if bad else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -30,6 +30,15 @@ h1 b{color:var(--ink);font-weight:400}
  border:1px solid var(--rule);border-radius:50%;cursor:pointer}
 .q:hover{color:#fff;background:var(--warm);border-color:var(--warm)}
 .tile.open .q{color:#fff;background:var(--warm);border-color:var(--warm)}
+.ex{display:block;margin-top:7px;padding-top:6px;border-top:1px solid var(--rule);
+ font:italic 10px/1.4 Georgia,serif;color:var(--warm);cursor:pointer}
+.ex:hover{text-decoration:underline}
+#sug{position:absolute;z-index:60;background:#fff;border:1px solid var(--ink);border-radius:6px;
+ box-shadow:0 8px 22px rgba(0,0,0,.16);padding:5px;display:none;max-width:340px}
+#sug.on{display:block}
+#sug button{display:block;width:100%;text-align:left;font:12.5px Georgia,serif;color:var(--dark);
+ background:none;border:0;border-radius:4px;padding:5px 8px;cursor:pointer}
+#sug button:hover{background:var(--paper);color:var(--ink)}
 .say{position:absolute;inset:0;cursor:pointer;background:rgba(255,255,255,.965);padding:9px 10px;
  display:none;overflow:auto;font:10.5px/1.45 Georgia,serif;color:var(--dark)}
 .say b{display:block;font:600 9.5px/1.3 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.09em;
@@ -90,7 +99,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="cut">
 <div class="pic"><img id="cutimg" src="" alt="how many cosines I take"><span class="tag">cosines</span>
 <button class="q" onclick="wall.open('cut')" aria-label="what how many cosines I take means">?</button>
-<div class="say" id="cutsay" onclick="wall.close('cut')"><b>how many cosines I take</b><span>62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</span></div></div>
+<div class="say" id="cutsay" onclick="wall.close('cut')"><b>how many cosines I take</b><span>62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how many cosines does it take to draw you?">try: &ldquo;how many cosines does it take to draw you?&rdquo;</i></div></div>
 <input type="range" id="cutr" min="0" max="24" value="24" step="1" aria-label="how many cosines I take"
  onclick="event.stopPropagation()">
 <p class="kv" id="cutout"></p>
@@ -98,7 +108,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="kil">
 <div class="pic"><img id="kilimg" src="" alt="what the fire does to me"><span class="tag">kiln</span>
 <button class="q" onclick="wall.open('kil')" aria-label="what what the fire does to me means">?</button>
-<div class="say" id="kilsay" onclick="wall.close('kil')"><b>what the fire does to me</b><span>Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</span></div></div>
+<div class="say" id="kilsay" onclick="wall.close('kil')"><b>what the fire does to me</b><span>Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what did the fire do to you?">try: &ldquo;what did the fire do to you?&rdquo;</i></div></div>
 <input type="range" id="kilr" min="0" max="24" value="0" step="1" aria-label="what the fire does to me"
  onclick="event.stopPropagation()">
 <p class="kv" id="kilout"></p>
@@ -106,7 +117,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="perc">
 <div class="pic"><img id="percimg" src="" alt="when my blue joins up"><span class="tag">percolation</span>
 <button class="q" onclick="wall.open('perc')" aria-label="what when my blue joins up means">?</button>
-<div class="say" id="percsay" onclick="wall.close('perc')"><b>when my blue joins up</b><span>Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</span></div></div>
+<div class="say" id="percsay" onclick="wall.close('perc')"><b>when my blue joins up</b><span>Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="when does your blue join up?">try: &ldquo;when does your blue join up?&rdquo;</i></div></div>
 <input type="range" id="percr" min="0" max="25" value="8" step="1" aria-label="when my blue joins up"
  onclick="event.stopPropagation()">
 <p class="kv" id="percout"></p>
@@ -114,7 +126,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="eye">
 <div class="pic"><img id="eyeimg" src="" alt="what you actually see of me"><span class="tag">acuity</span>
 <button class="q" onclick="wall.open('eye')" aria-label="what what you actually see of me means">?</button>
-<div class="say" id="eyesay" onclick="wall.close('eye')"><b>what you actually see of me</b><span>At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</span></div></div>
+<div class="say" id="eyesay" onclick="wall.close('eye')"><b>what you actually see of me</b><span>At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what do I see of you from the door?">try: &ldquo;what do I see of you from the door?&rdquo;</i></div></div>
 <input type="range" id="eyer" min="0" max="25" value="0" step="1" aria-label="what you actually see of me"
  onclick="event.stopPropagation()">
 <p class="kv" id="eyeout"></p>
@@ -122,7 +135,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="chi">
 <div class="pic"><img id="chiimg" src="" alt="which way I curl"><span class="tag">chirality</span>
 <button class="q" onclick="wall.open('chi')" aria-label="what which way I curl means">?</button>
-<div class="say" id="chisay" onclick="wall.close('chi')"><b>which way I curl</b><span>Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</span></div></div>
+<div class="say" id="chisay" onclick="wall.close('chi')"><b>which way I curl</b><span>Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="which way do you curl?">try: &ldquo;which way do you curl?&rdquo;</i></div></div>
 <input type="range" id="chir" min="0" max="30" value="20" step="1" aria-label="which way I curl"
  onclick="event.stopPropagation()">
 <p class="kv" id="chiout"></p>
@@ -130,7 +144,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="frac">
 <div class="pic"><img id="fracimg" src="" alt="the fractal I am not"><span class="tag">geometry</span>
 <button class="q" onclick="wall.open('frac')" aria-label="what the fractal I am not means">?</button>
-<div class="say" id="fracsay" onclick="wall.close('frac')"><b>the fractal I am not</b><span>My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</span></div></div>
+<div class="say" id="fracsay" onclick="wall.close('frac')"><b>the fractal I am not</b><span>My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="are you a fractal?">try: &ldquo;are you a fractal?&rdquo;</i></div></div>
 <input type="range" id="fracr" min="0" max="25" value="0" step="1" aria-label="the fractal I am not"
  onclick="event.stopPropagation()">
 <p class="kv" id="fracout"></p>
@@ -138,7 +153,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="copy">
 <div class="pic"><img id="copyimg" src="" alt="three centuries of being copied"><span class="tag">history</span>
 <button class="q" onclick="wall.open('copy')" aria-label="what three centuries of being copied means">?</button>
-<div class="say" id="copysay" onclick="wall.close('copy')"><b>three centuries of being copied</b><span>Every generation is a firing. With a copyist who remembers (λ = 0.15) I hold 0.795 after 25 of them. The honest version failed: a copyist who only learns k motifs scores 0.315 at best, while doing nothing at all scores 0.49.</span></div></div>
+<div class="say" id="copysay" onclick="wall.close('copy')"><b>three centuries of being copied</b><span>Every generation is a firing. With a copyist who remembers (λ = 0.15) I hold 0.795 after 25 of them. The honest version failed: a copyist who only learns k motifs scores 0.315 at best, while doing nothing at all scores 0.49.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="who painted you?">try: &ldquo;who painted you?&rdquo;</i></div></div>
 <input type="range" id="copyr" min="0" max="25" value="0" step="1" aria-label="three centuries of being copied"
  onclick="event.stopPropagation()">
 <p class="kv" id="copyout"></p>
@@ -146,7 +162,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="ship">
 <div class="pic"><img id="shipimg" src="" alt="how much of me can be replaced"><span class="tag">identity</span>
 <button class="q" onclick="wall.open('ship')" aria-label="what how much of me can be replaced means">?</button>
-<div class="say" id="shipsay" onclick="wall.close('ship')"><b>how much of me can be replaced</b><span>Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</span></div></div>
+<div class="say" id="shipsay" onclick="wall.close('ship')"><b>how much of me can be replaced</b><span>Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how much of you can I replace?">try: &ldquo;how much of you can I replace?&rdquo;</i></div></div>
 <input type="range" id="shipr" min="0" max="25" value="0" step="1" aria-label="how much of me can be replaced"
  onclick="event.stopPropagation()">
 <p class="kv" id="shipout"></p>
@@ -154,7 +171,8 @@ footer a{color:var(--grey)}
 <div class="tile" data-tile="attn">
 <div class="pic"><img id="attnimg" src="" alt="what attention finds in me"><span class="tag">machine learning</span>
 <button class="q" onclick="wall.open('attn')" aria-label="what what attention finds in me means">?</button>
-<div class="say" id="attnsay" onclick="wall.close('attn')"><b>what attention finds in me</b><span>Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</span></div></div>
+<div class="say" id="attnsay" onclick="wall.close('attn')"><b>what attention finds in me</b><span>Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what does attention find in you?">try: &ldquo;what does attention find in you?&rdquo;</i></div></div>
 <input type="range" id="attnr" min="0" max="25" value="13" step="1" aria-label="what attention finds in me"
  onclick="event.stopPropagation()">
 <p class="kv" id="attnout"></p>
@@ -163,6 +181,7 @@ footer a{color:var(--grey)}
 
 </div>
 
+<div id="sug"></div>
 <div id="bub"><span class="x" onclick="wall.close()">&#215;</span><h4 id="bubh"></h4>
 <div id="bubt"></div><p class="now" id="bubn"></p></div>
 
@@ -224,9 +243,9 @@ window.wall = {
       + 'Krkonoše, photographed once. Nine tiles, nine different questions, nine numbers '
       + 'back. Every coefficient is measured off that photograph, none chosen, and the results '
       + 'that spoiled the story were kept.<br><br>Drag a tile, or type a question. '
-      + 'A language model in this browser can drive it: '
-      + '<code>wall.ask(&#39;are you a fractal?&#39;)</code>, <code>wall.list()</code>, '
-      + '<code>wall.runAll()</code>.<br><br>'
+      + 'Nine things it will answer:<br>' + Object.values(EX).map(q=>'&middot; '+q).join('<br>')
+      + '<br><br>A browser agent can drive it: <code>wall.ask()</code>, <code>wall.list()</code>, '
+      + '<code>wall.runMany([ids])</code>.<br><br>'
       + '<a href="https://github.com/moudrkat/underglaze">code and measurements</a>';
     document.getElementById('bubn').textContent='';
     b.className='on'; bubFor=null;
@@ -267,20 +286,20 @@ window.wall = {
   all(ms=90){ return this.runMany(Object.keys(TILE), ms); },
   ask(q){
     const k=String(q||'').toLowerCase();
-    const hit=[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece/],
-               ['frac',/fractal|zoom|scale|dimension|self.?similar/],
-               ['chi',/mirror|curl|hand|chiral|left|right|twist|symmetr/],
-               ['attn',/attention|\bai\b|model|machine|learn|transformer|notice|neural/],
-               ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another/],
-               ['copy',/copy|copied|old|age|year|century|history|survive|remember|origin|come from|who made/],
-               ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven/],
-               ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information/],
-               ['eye',/see|eye|far|door|room|across|distance|look at you|from here/]]
+    const hit=[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous/],
+               ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
+               ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze/],
+               ['copy',/copy|copied|\bold\b|\bage\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit/],
+               ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
+               ['attn',/attention|\bai\b|language model|\bmodel\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
+               ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
+               ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest/],
+               ['eye',/\bsee|eye|\bfar\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses/]]
       .find(([,re])=>re.test(k));
-    if(!hit){ document.getElementById('foot').innerHTML =
-      'The wall has nine answers: cosines, fire, joining up, distance, mirrors, fractals, '
-      + 'copying, replacing, attention. Try one of those words.';
+    if(!hit){ suggest(true); const q=document.getElementById('q');
+      q.value=''; q.placeholder='the wall did not follow — try one of these';
       return 'no tile matched'; }
+    suggest(false);
     return this.run(hit[0]);
   },
   async converse(qs, ms=90){
@@ -296,7 +315,20 @@ window.wall = {
     return 'done';
   }
 };
-document.getElementById('q').addEventListener('keydown',e=>{
-  if(e.key==='Enter') wall.ask(e.target.value);});
+const EX = {"cut": "how many cosines does it take to draw you?", "kil": "what did the fire do to you?", "perc": "when does your blue join up?", "eye": "what do I see of you from the door?", "chi": "which way do you curl?", "frac": "are you a fractal?", "copy": "who painted you?", "ship": "how much of you can I replace?", "attn": "what does attention find in you?"};
+const sug=document.getElementById('sug'), qi=document.getElementById('q');
+Object.entries(EX).forEach(([id,q])=>{const b=document.createElement('button');
+  b.textContent=q; b.onclick=()=>{qi.value=q; wall.ask(q); suggest(false);}; sug.appendChild(b);});
+function suggest(on){
+  if(!on){ sug.classList.remove('on'); return; }
+  const r=qi.getBoundingClientRect();
+  sug.style.left=r.left+'px'; sug.style.top=(r.bottom+5)+'px';
+  sug.style.width=Math.min(340,r.width)+'px'; sug.classList.add('on');
+}
+qi.addEventListener('focus',()=>suggest(true));
+qi.addEventListener('keydown',e=>{ if(e.key==='Enter'){ wall.ask(e.target.value); e.target.blur(); }});
+document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi) suggest(false); });
+let exi=0; setInterval(()=>{ if(document.activeElement!==qi && !qi.value){
+  const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; } }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 </script></body></html>
