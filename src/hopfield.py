@@ -100,3 +100,27 @@ if __name__ == "__main__":
             np.stack([finals[k] for k in sorted(finals)]))
     print()
     print("  control (no copyist, kiln only) is IoU@60 = 0.49")
+
+
+# MEASURED, and it is not the metric's fault.
+#
+# The first run scored on intersection-over-union and the copyist lost to doing
+# nothing: 0.315 at k=64 against 0.49 for the kiln alone. The obvious suspicion
+# was that IoU rewards keeping large blobs, which is exactly what the fire
+# preserves, so the same runs were scored again on what the fire actually takes
+# -- the length of the outline, and the number of separate inked regions.
+#
+#   after 30 firings        perimeter    regions      IoU
+#   the tile itself             28612        164      1.000
+#   nobody, kiln alone           5972         13      0.532
+#   copyist, 8 motifs               0          0      0.000
+#   copyist, 16 motifs            566          3      0.063
+#   copyist, 32 motifs           2368          8      0.293
+#   copyist, 64 motifs           2112          8      0.258
+#
+# On every measure tried, a copyist who has learned k motifs and never sees the
+# original again destroys more than the fire does. Eight motifs erase the tile
+# completely. So the failure is real, not an artefact: patch-wise recall of a
+# fixed vocabulary is a worse transmission channel than no transmission at all,
+# and the version in src/memory.py that survives is the one that cheats by
+# keeping the original on the desk.

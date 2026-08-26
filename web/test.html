@@ -1,0 +1,310 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>which of us is talking to a wall — smoke test</title>
+<style>
+:root{--paper:#f7f5f0;--ink:#213660;--dark:#282c34;--grey:#8b8880;--rule:#e0dcd3;
+ --ok:#3f7d4e;--bad:#b0554a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--dark);font:15px/1.5 Georgia,serif}
+.wrap{max-width:900px;margin:0 auto;padding:30px 20px 70px}
+h1{font:400 22px/1.2 Georgia,serif;margin:0 0 4px}
+p.sub{color:var(--grey);font-size:13.5px;margin:0 0 18px;max-width:72ch}
+#score{font:600 26px 'DejaVu Sans',system-ui,sans-serif;margin:14px 0 2px}
+#score.pass{color:var(--ok)} #score.fail{color:var(--bad)}
+table{border-collapse:collapse;width:100%;margin-top:12px;font:13px 'DejaVu Sans',system-ui,sans-serif}
+td{padding:5px 10px 5px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+td.v{width:24px;font-weight:700}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+h2{font:600 11px 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.11em;text-transform:uppercase;
+ color:var(--grey);margin:22px 0 0}
+iframe{width:1150px;height:780px;border:1px solid var(--rule);border-radius:4px;
+ transform:scale(.34);transform-origin:0 0}
+.frame{height:275px;width:395px;overflow:hidden;margin-top:20px;border-radius:4px}
+code{font:12px 'DejaVu Sans Mono',monospace;color:var(--grey)}
+</style></head><body><div class="wrap">
+
+<h1>Smoke test</h1>
+<p class="sub">Loads the real page in a frame and pokes at it. It exists because a function was
+once called and never written, which quietly broke every answer that lit more than one tile, and
+then a newline got inside a string and took the whole page down. Run it after every change.</p>
+
+<div id="score">running…</div>
+<div id="out"></div>
+<div class="frame"><iframe id="f" src="index.html"></iframe></div>
+
+<script>
+const R = [];
+let SECTION = '';
+async function t(name, fn){
+  try { const m = await fn(); R.push([m === true, SECTION, name, m === true ? '' : String(m)]); }
+  catch(e){ R.push([false, SECTION, name, String(e).slice(0,95)]); }
+}
+const eq = (a, b, what) => a === b ? true : what + ': ' + a + ' vs ' + b;
+
+addEventListener('load', async () => {
+  const f = document.getElementById('f');
+  const W = f.contentWindow, D = f.contentDocument;
+  for (let i = 0; i < 60 && !W.WALLLM; i++) await new Promise(r => setTimeout(r, 250));
+  await new Promise(r => setTimeout(r, 800));
+  const L = W.WALLLM, wall = W.wall;
+  const ids = L ? Object.keys(L.DESC).filter(k => !k.startsWith('_')) : [];
+
+  SECTION = 'it loaded at all';
+  await t('the contract is there', () => !!L || 'WALLLM missing');
+  await t('the api is there', () => !!wall || 'window.wall missing');
+  await t('no script died on the way in', () =>
+    D.querySelectorAll('.tile').length === 9 ? true : 'only ' + D.querySelectorAll('.tile').length + ' tiles');
+  await t('nine tiles in the contract', () => eq(ids.length, 9, 'tiles'));
+  if (!L || !wall) return finish();
+
+  SECTION = 'the api';
+  for (const k of ['ask','matchWords','run','runMany','_recite','all','set','read','why','lines',
+                   'line','say','miss','open','close','stop','list','help','choose','about'])
+    await t('wall.' + k + ' is callable', () => typeof wall[k] === 'function' || typeof wall[k]);
+  await t('it lists all nine', () => eq(wall.list().length, 9, 'rows'));
+  await t('help says how to ask', () => /ask/.test(wall.help()) ? true : 'no mention of ask');
+
+  SECTION = 'the written words';
+  await t('ninety lines, ten a tile', () => eq(L.LINES.length, 90, 'lines'));
+  await t('every line belongs to a real tile', () => {
+    const bad = [...new Set(L.LINES.map(l => l[0]))].filter(k => !ids.includes(k));
+    return bad.length ? bad.join(',') : true; });
+  await t('no two lines are identical', () => {
+    const seen = new Set(), dup = [];
+    L.LINES.forEach(([, l]) => seen.has(l) ? dup.push(l) : seen.add(l));
+    return dup.length ? dup.length + ' repeated' : true; });
+  await t('no line carries angle brackets', () =>
+    L.LINES.filter(l => /[<>]/.test(l[1])).length || true);
+  await t('every line is finished with a stop', () => {
+    const bad = L.LINES.filter(l => !/[.?!]$/.test(l[1].trim()));
+    return bad.length ? bad.length + ' are not' : true; });
+  await t('no line runs past 110 characters', () => {
+    const bad = L.LINES.filter(l => l[1].length > 110);
+    return bad.length ? bad.length + ' too long' : true; });
+  for (const k of ['MISS','CHAT','ASIDE','TAG']) {
+    await t(k.toLowerCase() + ' has at least six', () =>
+      (L[k] && L[k].length >= 6) ? true : 'only ' + ((L[k] || []).length));
+    await t('no repeats in ' + k.toLowerCase(), () =>
+      new Set(L[k]).size === L[k].length ? true : 'repeats');
+  }
+
+  SECTION = 'routing';
+  await t('threshold is a sane number', () =>
+    (L.THRESHOLD > 0 && L.THRESHOLD < 1) ? true : L.THRESHOLD);
+  await t('every phrase rule points at a real tile', () => {
+    const bad = L.RULES.map(r => r[0]).filter(k => !ids.includes(k));
+    return bad.length ? bad.join(',') : true; });
+  await t('every intent id is underscored', () => {
+    const bad = L.INTENTS.map(i => i[0]).filter(k => !k.startsWith('_'));
+    return bad.length ? bad.join(',') : true; });
+  await t('every description key is a tile or an intent', () => {
+    const bad = Object.keys(L.DESC).filter(k => !k.startsWith('_') && !ids.includes(k));
+    return bad.length ? bad.join(',') : true; });
+  await t('each tile suggests a question that comes back to it', () => {
+    const bad = [];
+    D.querySelectorAll('.ex').forEach(e => {
+      const want = e.closest('[data-tile]').dataset.tile;
+      if (wall.matchWords(e.dataset.q) !== want) bad.push(want);
+    });
+    return bad.length ? bad.join(',') : true; });
+  await t('every intent is reachable', () => {
+    const want = { _all: 'tell me everything you know', _help: 'what can i ask you?',
+                   _surprise: 'show me something interesting', _chat: 'how are you?' };
+    const bad = Object.entries(want).filter(([k, q]) => wall.matchWords(q) !== k).map(([k]) => k);
+    return bad.length ? bad.join(',') : true; });
+  await t('nine plain questions all land somewhere', () => {
+    const qs = ['what did the fire do to you?', 'are you a fractal?', 'who painted you?',
+      'how much of you can i replace?', 'when does your blue join up?', 'which way do you curl?',
+      'what do i see of you from the door?', 'what does attention find in you?',
+      'how many cosines does it take to draw you?'];
+    const bad = qs.filter(q => !ids.includes(wall.matchWords(q)));
+    return bad.length ? bad.join(' / ') : true; });
+  await t('junk is refused rather than answered', () => {
+    const junk = ['what is the weather like?', 'buy me a sandwich', 'asdfgh', 'what time is it?'];
+    const bad = junk.filter(q => wall.matchWords(q) !== null);
+    return bad.length ? bad.join(' / ') : true; });
+
+  SECTION = 'each tile';
+  wall.knobs(true);                       // the numbers hide until somebody asks for them
+  for (const id of ids) {
+    await t(id + ': slider, picture and reading all exist', () =>
+      (D.getElementById(id + 'r') && D.getElementById(id + 'img') && D.getElementById(id + 'out'))
+        ? true : 'one is missing');
+    await t(id + ': its panel says something', () => {
+      const w = D.getElementById(id + 'why');
+      return w && w.textContent.trim().length > 40 ? true : 'panel empty'; });
+    await t(id + ': ten lines of its own', () => {
+      const n = wall.lines(id).length; return n >= 10 ? true : 'only ' + n; });
+    await t(id + ': the reading fits inside the tile', () => {
+      const e = D.getElementById(id + 'out');
+      return e.scrollWidth <= e.clientWidth + 1 ? true
+             : 'overflows by ' + (e.scrollWidth - e.clientWidth) + 'px'; });
+    await t(id + ': the reading is a measurement', () =>
+      /[0-9]/.test(wall.read(id)) ? true : 'no number in it');
+    await t(id + ': the slider is labelled for a screen reader', () =>
+      (D.getElementById(id + 'r').getAttribute('aria-label') || '').length > 3
+        ? true : 'no aria-label');
+    await t(id + ': moving it changes the picture', () => {
+      const im = D.getElementById(id + 'img'), r = D.getElementById(id + 'r');
+      wall.set(id, 0); const a = im.getAttribute('src');
+      wall.set(id, +r.max); const b = im.getAttribute('src');
+      return a !== b ? true : 'the frame did not change'; });
+    await t(id + ': out of range is clamped', () => {
+      const r = D.getElementById(id + 'r');
+      wall.set(id, 9999); const hi = +r.value;
+      wall.set(id, -50); const lo = +r.value;
+      return (hi === +r.max && lo === 0) ? true : hi + '/' + lo; });
+    await t(id + ': first and last frame both load', async () => {
+      const r = D.getElementById(id + 'r'), im = D.getElementById(id + 'img'), urls = [];
+      wall.set(id, 0); urls.push(im.src);
+      wall.set(id, +r.max); urls.push(im.src);
+      for (const u of urls) {
+        const ok = await new Promise(res => { const i = new Image();
+          i.onload = () => res(true); i.onerror = () => res(false); i.src = u; });
+        if (!ok) return 'missing ' + u.split('/').slice(-2).join('/');
+      }
+      return true; });
+  }
+
+  await t('the sliders and numbers hide again', () => {
+    wall.knobs(false);
+    const vis = D.querySelector('.kv').offsetParent !== null;
+    wall.knobs(true);
+    const back = D.querySelector('.kv').offsetParent !== null;
+    wall.knobs(false);
+    return (!vis && back) ? true : 'hidden=' + !vis + ' shown=' + back; });
+  await t('show me what you can do runs the wall', () =>
+    wall.matchWords('show me what you can do') === '_demo' ? true : 'not routed');
+  await t('asking about the third tile is understood', () =>
+    wall.matchWords('what does the third tile mean?') === '_which' ? true : 'not routed');
+
+  SECTION = 'the wall speaking';
+  await t('saying shows, saying nothing hides', () => {
+    wall.say('hello there');
+    const on = D.getElementById('said').classList.contains('on');
+    wall.say('');
+    const off = !D.getElementById('said').classList.contains('on');
+    return (on && off) ? true : 'on=' + on + ' off=' + off; });
+  await t('a tile only says its own lines, or an aside', async () => {
+    const bad = [];
+    for (const id of ids) {
+      const tag = D.querySelector('[data-tile="' + id + '"] .tag').textContent;
+      for (let k = 0; k < 14; k++) {
+        await wall.line(id);
+        const said = D.getElementById('said').textContent.replace(tag, '').trim();
+        const known = wall.lines(id).some(l => said.startsWith(l))
+                   || L.ASIDE.some(l => said.startsWith(l));
+        if (!known) { bad.push(id + ': ' + said.slice(0, 32)); break; }
+      }
+    }
+    return bad.length ? bad.join(' / ') : true; });
+  await t('the miss line comes out of the miss pool', () => {
+    const m = wall.miss();
+    return L.MISS.includes(m) ? true : 'not from the pool'; });
+  await t('reciting several tiles does not throw', () => {
+    wall._recite(ids.slice(0, 3), 220); return true; });
+  await t('reciting actually writes something', async () => {
+    await new Promise(r => setTimeout(r, 300));
+    return D.getElementById('said').textContent.trim().length > 5 ? true : 'the line stayed empty'; });
+  await t('reciting moves on to the next tile', async () => {
+    const a = D.getElementById('said').textContent;
+    await new Promise(r => setTimeout(r, 500));
+    const b = D.getElementById('said').textContent;
+    wall.stop();
+    return a !== b ? true : 'it said the same thing twice'; });
+
+  SECTION = 'running tiles';
+  wall.stop();
+  D.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking', 'open'));
+  await t('two tiles light exactly two', async () => {
+    wall.runMany(['kil', 'copy'], 25);
+    await new Promise(r => setTimeout(r, 140));
+    const on = [...D.querySelectorAll('.tile.speaking')].map(c => c.dataset.tile).sort().join(',');
+    return on === 'copy,kil' ? true : (on || 'none'); });
+  await new Promise(r => setTimeout(r, 900));
+  wall.stop();
+  await t('everything lights all nine', async () => {
+    D.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
+    wall.all(18);
+    await new Promise(r => setTimeout(r, 160));
+    return eq(D.querySelectorAll('.tile.speaking').length, 9, 'lit'); });
+  await new Promise(r => setTimeout(r, 700));
+  await t('stopping clears the highlight', async () => {
+    wall.stop();
+    await new Promise(r => setTimeout(r, 120));
+    D.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
+    return D.querySelectorAll('.tile.speaking').length === 0 ? true : 'still lit'; });
+  await t('opening a panel shows it, closing hides it', () => {
+    wall.open('frac');
+    const on = D.querySelector('[data-tile="frac"]').classList.contains('open');
+    wall.close();
+    const off = !D.querySelector('[data-tile="frac"]').classList.contains('open');
+    return (on && off) ? true : 'on=' + on + ' off=' + off; });
+
+  SECTION = 'how it looks';
+  await t('nothing is broken on the page', () => {
+    const b = [...D.images].filter(i => !i.complete || i.naturalWidth === 0);
+    return b.length ? b.length + ' broken images' : true; });
+  await t('the page fits its own window', () =>
+    D.body.scrollHeight <= W.innerHeight + 2 ? true
+      : D.body.scrollHeight + ' > ' + W.innerHeight);
+  await t('a long answer never moves the wall', () => {
+    wall.say('');
+    const before = D.querySelector('.wall').getBoundingClientRect().top;
+    const longest = L.LINES.map(l => l[1]).sort((a,b) => b.length - a.length)[0];
+    wall.say(longest + ' ' + L.TAG.sort((a,b) => b.length - a.length)[0], 'attn');
+    const after = D.querySelector('.wall').getBoundingClientRect().top;
+    wall.say('');
+    return Math.abs(before - after) < 1 ? true : 'the wall moved ' + Math.round(after - before) + 'px'; });
+  await t('the longest answer still fits its two lines', () => {
+    const e = D.getElementById('said');
+    const longest = L.LINES.map(l => l[1]).sort((a,b) => b.length - a.length)[0];
+    wall.say(longest, 'attn');
+    const over = e.scrollHeight - e.clientHeight;
+    wall.say('');
+    return over <= 1 ? true : 'clipped by ' + over + 'px'; });
+  await t('the spoken line lines up with the wall', () => {
+    const a = D.querySelector('.said').getBoundingClientRect();
+    const b = D.querySelector('.wall').getBoundingClientRect();
+    return Math.abs(a.width - b.width) < 3 ? true
+      : Math.round(a.width) + ' vs ' + Math.round(b.width); });
+  await t('the top strip lines up with the wall', () => {
+    const a = D.querySelector('.bar').getBoundingClientRect();
+    const b = D.querySelector('.wall').getBoundingClientRect();
+    return Math.abs(a.width - b.width) < 3 ? true
+      : Math.round(a.width) + ' vs ' + Math.round(b.width); });
+  await t('the tiles are square, give or take', () => {
+    const p = D.querySelector('.pic').getBoundingClientRect();
+    return Math.abs(p.width - p.height) / p.width < 0.18 ? true
+      : Math.round(p.width) + '×' + Math.round(p.height); });
+  await t('every tile carries a plain-English label', () => {
+    const bad = [...D.querySelectorAll('.tag')].filter(e => e.textContent.trim().length < 4);
+    return bad.length ? bad.length + ' too short' : true; });
+  await t('every tile has a question mark', () =>
+    eq(D.querySelectorAll('.tile .q').length, 9, 'buttons'));
+  await t('the page is titled in the browser tab', () =>
+    D.title.length > 5 ? true : 'no title');
+  await t('there is no heading competing with the wall', () =>
+    D.querySelector('h1') ? 'an h1 crept back in' : true);
+  await t('nothing is stored in the browser', () => {
+    try { return W.localStorage.length === 0 ? true : W.localStorage.length + ' keys'; }
+    catch (e) { return true; } });
+
+  finish();
+
+  function finish(){
+    const bad = R.filter(r => !r[0]).length;
+    const s = document.getElementById('score');
+    s.textContent = (R.length - bad) + ' / ' + R.length
+                  + (bad ? '  —  ' + bad + ' failing' : '  —  all good');
+    s.className = bad ? 'fail' : 'pass';
+    let html = '', sec = null;
+    for (const [ok, section, name, why] of R) {
+      if (section !== sec) { html += '</table><h2>' + section + '</h2><table>'; sec = section; }
+      html += '<tr><td class="v ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '✓' : '✕')
+            + '</td><td>' + name + '</td><td><code>' + (why || '') + '</code></td></tr>';
+    }
+    document.getElementById('out').innerHTML = (html + '</table>').replace(/^<\/table>/, '');
+  }
+});
+</script></div></body></html>

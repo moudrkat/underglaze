@@ -1,4 +1,103 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
+import json, io
+old = json.load(open("/tmp/claude-1000/-home-kacka-projekty-underglaze/23f55c26-a5e0-467a-8aa0-dfcbf48b964e/scratchpad/old.json"))
+new = json.load(open("web/wall.json"))
+DATA = {"CUT": old["CUT"], "CHI": old["CHI"], "KIL": old["KIL"],
+        "PERC": new["perc"], "EYE": new["eye"], "SHIP": new["ship"],
+        "COPY": new["copy"], "ATTN": new["attn"]}
+FRW = [0.0,1.0,2.1,3.1,4.2,5.2,6.2,7.3,8.3,9.4,10.4,11.4,12.5,13.5,14.6,15.6,16.6,
+       17.7,18.7,19.8,20.8,21.8,22.9,23.9,25.0,26.0]
+
+T = [
+ ("cut","cut","k",25,24,"how many cosines I take","K = 1","K = 200","HOW I'M DRAWN",
+  "62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times "
+  "that. Not the basis's fault — priced in strokes instead, the same picture is worse at every "
+  "budget and floors at 44 466 numbers."),
+ ("kil","kiln","s",25,0,"what the fire does to me","unfired","2.4 mm","THE FIRE",
+  "Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls "
+  "40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it "
+  "removes one. A real firing is the first three steps."),
+ ("perc","perc","p",26,8,"when my blue joins up","θ = 0.78","θ = 0.24","WHEN I JOIN UP",
+  "Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step "
+  "of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so "
+  "the flowers stay apart. Warm is the largest piece."),
+ ("eye","eye","e",26,0,"what you actually see of me","0.3 m","12 m","FROM ACROSS THE ROOM",
+  "At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m "
+  "you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are "
+  "upper bounds."),
+ ("chi","chi","t",31,20,"which way I curl","p4m","past the tile","WHICH WAY I CURL",
+  "Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I "
+  "am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils "
+  "lose their direction."),
+ ("frac","frac","w",26,0,"the fractal I am not","0 px","26 px","AM I A FRACTAL",
+  "My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch "
+  "stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless "
+  "shift. The slider builds one that really is a fractal, to prove the ruler works."),
+ ("copy","copy","c",26,0,"three centuries of being copied","new","25 firings","THREE CENTURIES",
+  "Every step is one firing. The slider runs the copyist who can see the original: she holds "
+  "0.795 after 25 of them. The version who only remembers was measured too, and lost to doing "
+  "nothing at all \u2014 on outline, on region count and on overlap alike. Eight remembered "
+  "motifs erase the tile completely. So this pattern did not survive by being memorable. "
+  "Somebody kept the original on the desk."),
+ ("ship","ship","s",26,0,"how much of me can be replaced","nothing","every plank","HOW MUCH OF ME",
+  "Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me "
+  "overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the "
+  "floor. Replace 95 %, smallest first: still 0.618."),
+ ("attn","attn","a",26,13,"what attention finds in me","β = 1","β = 400","WHAT AN AI SEES",
+  "Patches as their own queries and keys, no weights, no positions. Warm is where one patch "
+  "looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled "
+  "control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never "
+  "symmetry."),
+]
+
+READ = {
+ "cut":  "i=>'<b>'+sp(D.CUT[i].cos)+'</b> cosines'",
+ "kil":  "i=>'&#8467; = <b>'+D.KIL[i].mm.toFixed(2)+'</b> mm'",
+ "perc": "i=>'&#952; = <b>'+D.PERC[i].theta.toFixed(2)+'</b>'",
+ "eye":  "i=>'<b>'+sp(D.EYE[i].cos)+'</b> at '+D.EYE[i].d.toFixed(1)+' m'",
+ "chi":  "i=>'&#967; = <b>'+D.CHI[i].toFixed(3)+'</b>'",
+ "frac": "i=>'<b>'+FRW[i].toFixed(0)+'</b> px'",
+ "copy": "i=>'<b>'+D.COPY[i].gen+'</b> firings'",
+ "ship": "i=>'<b>'+(100*D.SHIP[i].p).toFixed(0)+' %</b> swapped'",
+ "attn": "i=>'&#946; = <b>'+D.ATTN[i].beta.toFixed(0)+'</b>'",
+}
+
+EX = {'cut': 'how many cosines does it take to draw you?', 'kil': 'what did the fire do to you?', 'perc': 'when does your blue join up?', 'eye': 'what do I see of you from the door?', 'chi': 'which way do you curl?', 'frac': 'are you a fractal?', 'copy': 'who painted you?', 'ship': 'how much of you can I replace?', 'attn': 'what does attention find in you?'}
+DESC = {'cut': 'How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.', 'kil': 'What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.', 'perc': 'When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.', 'eye': 'What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.', 'chi': 'Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.', 'frac': 'Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.', 'copy': 'The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.', 'ship': 'How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.', 'attn': 'What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.', '_surprise': 'Show me something interesting. Surprise me. Tell me something I do not know. What is the best thing about you. Say something surprising.', '_all': 'Show me everything. Run all of them. Tell me everything you know. Do the whole wall.', '_help': 'What can you do? What can I ask you? Help. How does this work? What are you?'}
+LINES = [('cut', 'Sixty-two thousand cosines to draw me. Most of them are dots you cannot see.'), ('cut', 'Nine tenths of me is cheap. The last tenth cost three times as much, and it is dots.'), ('cut', 'Somebody tried drawing me with brush strokes instead. It went badly for the strokes.'), ('cut', 'Every number in me was measured. Nobody got to choose one, including me.'), ('cut', 'I am cosines all the way down. Not one sine. Somebody checked.'), ('cut', 'The first sixteen thousand terms get you ninety percent of me. After that you are haggling.'), ('cut', 'The stroke version needed 44 466 numbers and still could not fill me in.'), ('cut', 'At forty terms I am a rumour. At two hundred I am a tile. Nothing in between is worth having.'), ('cut', 'Drawing me by hand takes 7 411 strokes. Drawing me with waves takes fewer numbers than that.'), ('cut', 'I have no sine terms. That is not modesty, it is my four-fold centre.'), ('kil', 'Fire does not preserve patterns. It removes them. Slowly, but it does not stop.'), ('kil', 'One real firing barely touched me. That is the whole of my luck.'), ('kil', 'Sixty firings and I am thirteen blobs. Handsome blobs, but blobs.'), ('kil', 'A kiln is blur and a threshold, over and over. That is the entire trick.'), ('kil', 'My outline started at 40 744 and finished at 6 210. The heat kept the change.'), ('kil', 'There is no temperature at which I stop changing. There is only slower.'), ('kil', 'The equation that ruins me in a kiln is the one that settles a soap film.'), ('kil', 'Nobody has pinned down how far my cobalt spreads. The estimates differ by forty times.'), ('kil', 'I arrived with 166 separate inked regions. Fire glued them into thirteen.'), ('kil', 'Fire is patient, and it is not on my side.'), ('perc', 'Two hundredths of a threshold stand between my flowers and one continuous blue.'), ('perc', 'I am painted just on the safe side of that. Nobody will say whether on purpose.'), ('perc', 'Push it a little further and I stop being flowers and become one shape.'), ('perc', 'I am 437 separate flowers. It takes remarkably little to become one.'), ('perc', 'My largest piece jumps from a tenth of me to nearly half between two clicks.'), ('perc', 'The half in blue-where-f-exceeds-a-half was a decision. Somebody made it.'), ('perc', 'Below one setting you could cross me from edge to edge without leaving the blue.'), ('perc', 'My biggest connected piece is a tenth of me, and it is very pleased with itself.'), ('perc', 'Whether my safety margin was designed or lucky cannot be settled from one tile.'), ('perc', 'There is a number at which I become a single object. It is closer than it looks.'), ('eye', 'From four metres you are getting a tenth of me. Enjoy the tenth.'), ('eye', 'Stand thirty centimetres back and you see what the camera saw. Any further and you lose.'), ('eye', 'The dots go first. The dots always go first.'), ('eye', 'Most of what was measured about me never reaches anybody.'), ('eye', 'At two metres, 26 129 of my 62 815 terms make it to you.'), ('eye', 'At twelve metres I am 687 numbers and a blue haze.'), ('eye', 'Your eye splits two lines a sixtieth of a degree apart. That is your whole allowance.'), ('eye', 'You and the camera are equal at thirty centimetres. After that it is not close.'), ('eye', 'These distances are generous to you. Your contrast gives out before your sharpness does.'), ('eye', 'Somebody painted detail into me that nobody standing up has ever seen.'), ('chi', 'I have no mirrors. My tendrils all curl the same way and they are not sorry.'), ('chi', 'Force mirrors onto me and my tendrils forget which way they were going.'), ('chi', 'My mirror score is the same as sliding me sideways at random. That is how I know.'), ('chi', 'Quarter turns yes, reflections no. In the trade that makes me p4.'), ('chi', 'Rotate me: plus fifty-four. Reflect me: eighteen, which is nothing at all.'), ('chi', 'My handedness is the gap between two numbers that were allowed to disagree.'), ('chi', 'Most of my curl shows up in the first fifth of that slider. The rest is showing off.'), ('chi', 'Somebody measured my group before drawing anything. That order was the point.'), ('chi', 'Turn me a quarter and nothing happens. Hold me to a mirror and something does.'), ('chi', 'Whether a stronger curl looks more twisted was tested, could not be shown, and was kept anyway.'), ('frac', 'I am not a fractal. Zoom in far enough and I just run out.'), ('frac', 'Measured carelessly I look fractal. So does a curve known to be perfectly smooth.'), ('frac', 'A fractal is equally rough at every zoom. I get rougher the further away you stand.'), ('frac', 'There is a smallest thing on me. A fractal is not allowed one.'), ('frac', 'My roughness reads 0.90 close up and 1.95 far off. A fractal would say one number twice.'), ('frac', 'Somebody built a real fractal out of me, purely to check the ruler was not broken.'), ('frac', 'Magnify me and hold me against myself and I do no better than a random shift.'), ('frac', 'People quote 1.34 about me. It is the average of a number that will not sit still.'), ('frac', 'My group has quarter turns and shifts in it. Zooming was never invited.'), ('frac', 'A finite sum of cosines cannot be a fractal. You may use as many as you like.'), ('copy', 'Three centuries of copying, and the fire won every round.'), ('copy', 'I am named after an onion. There is no onion on me anywhere.'), ('copy', 'Printed from steel, copied from a painting, copied from a Chinese bowl.'), ('copy', 'Nothing here survives on its own. Somebody kept repainting me.'), ('copy', 'A copyist working from memory alone did worse than no copyist at all.'), ('copy', 'I lost the fruit I am named after somewhere between China and this valley.'), ('copy', 'Painters took a Chinese fruit for an onion. The name has outlived the fruit by three centuries.'), ('copy', 'Meissen, then Dubi, then a steel plate, then this kitchen.'), ('copy', 'Give a copyist the original and I survive. Give her a memory and I do not.'), ('copy', 'I kept the aster and the leaves. The peach, the bamboo and the onion never made it.'), ('ship', 'Replace five percent of me, the right five, and I am somebody else.'), ('ship', 'Replace ninety-five percent of my small parts and I am still me. Go on.'), ('ship', 'Everything I am fits into a few dozen numbers.'), ('ship', 'My spectrum looks like any pattern with edges. The signs are what make me this one.'), ('ship', 'Two strangers built from my own parts resemble each other as much as they resemble me.'), ('ship', 'Shuffle the signs of my biggest coefficients and I am gone in one step.'), ('ship', 'My small parts are nearly free to change. My large ones are not free at all.'), ('ship', 'It is not how much of me you replace. It is which.'), ('ship', 'Swap my planks one at a time and there is a moment where I stop being the ship.'), ('ship', 'I can lose most of myself and be recognised, or very little and not.'), ('attn', 'Attention finds where I repeat. It never finds where I turn.'), ('attn', 'A model looked at my patches and missed my symmetry entirely.'), ('attn', 'Rotate a piece of me and the machine stops recognising it.'), ('attn', 'At finding my four-fold symmetry, the machine did worse than guessing.'), ('attn', 'Similarity does not survive rotation, and rotation is most of what I am.'), ('attn', 'It stares at my neighbours and never once at my opposite corner.'), ('attn', 'A shuffled version of me scores better on my own symmetry than I do.'), ('attn', 'Finding that I repeat and finding that I turn are two different problems.'), ('attn', 'Whatever a machine notices about me, my symmetry is not it.'), ('attn', 'I am made of quarter turns. Quarter turns are precisely what it cannot see.')]
+TAG = ['And which of us is talking to a wall here?', 'Just so we are clear on who the wall is.', 'You asked, remember.', 'I did not start this.', 'Say what you like about my conversation, I have never left the room.', 'Anyway. You are still here.', 'No pressure. I have got until the building comes down.', 'That is the sort of thing you learn standing still for ninety years.', 'Do not let me keep you.', 'It is a strange hobby you have, but go on.', 'I would nod, but.', 'You may quote me. I am not going anywhere.', 'One of us has somewhere else to be.', 'This counts as my busiest day.', 'The kettle disagrees, but the kettle always does.', 'I only know nine things, and you have now heard one of them.', 'There is more where that came from. Eight more, to be exact.', 'Ask the tile next to me. She will say the same about herself.']
+ASIDE = ['You are talking to a wall. I would like that on the record.', 'This is going better than the phrase suggests.', 'Somebody photographed me and now I have opinions.', 'Ninety years on this wall and today is the first time anyone asked.', 'You could be outside. There is a whole valley out there.', 'I am a wall. You are doing most of the work in this conversation.', 'Nine tiles and a kettle. That is the entire social circle in here.', 'There is no polite way to put this: I am grouting.', 'The kettle has heard all of this before.', 'I cannot leave, so take your time.', 'You are the first thing to happen here since the boiler.', 'I answer, which is more than the phrase promised.']
+CHAT = ['Cold. It is a kitchen wall.', 'Still here. Fired once, and nothing since.', 'Grouted. You?', 'Somebody measured me and I have not stopped talking since.', 'Fine. Slightly crazed in the top left corner.', 'The same as yesterday, and the ninety years before that.', 'Warm on this side. The other one faces the pantry.', 'Hello. Ask me something narrow.', 'Upright. That is most of it.', 'Blue, mostly.']
+MISS = ['That is not on my wall.', 'I know nine things. Not that one.', 'No idea. I am a tile.', 'Above my glaze.', 'Nobody measured that.', 'Ask the kettle.', 'Not one of my nine.', 'I was fired at nine hundred degrees. Some things did not survive.', 'Try the fire, or the fractal, or who painted me.', 'I have stood here since 1885 and I still do not know.', 'Talking to me is talking to a brick wall.', 'That one nobody wrote down.', 'I only know what somebody measured.', 'Not my department.', 'Wrong tile.', 'You will have to ask the wall next door.']
+INTENT_JS = '''[['_knobs',/show me the numbers|show the numbers|show the sliders|let me play|give me the controls|the knobs|hide the numbers|hide the sliders/],
+ ['_demo',/show me what you can do|what can you show|impress me|give me the tour|show off/],
+ ['_which',/what does the (\\w+) (one|tile|square)|which one is|what is the (\\w+) (one|tile|square)|explain the (\\w+) (one|tile)/],
+ ['_chat',/how are you|how do you do|how.s it going|^hello|^hi\\b|^hey|good morning|good evening|good afternoon|thank|nice to meet|who are you\\?$|what.s up/],
+ ['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
+ ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\\b|what are you\\?/],
+ ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]]'''
+RULES_TBL = '''[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous/],
+ ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
+ ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze/],
+ ['copy',/copy|copied|\\bold\\b|\\bage\\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit/],
+ ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
+ ['attn',/attention|\\bai\\b|language model|\\bmodel\\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
+ ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
+ ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest/],
+ ['eye',/\\bsee|eye|\\bfar\\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses/]]'''
+cells = "\n".join(
+f'''<div class="tile" data-tile="{i}">
+<div class="pic"><img id="{i}img" src="" alt="{nm}"><span class="tag">{fld}</span>
+<button class="q" onclick="wall.open('{i}')" aria-label="what {nm} means">?</button>
+<div class="say" id="{i}say" onclick="wall.close('{i}')"><b>{nm}</b><span>{why}</span>
+<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="{ex}">try: &ldquo;{ex}&rdquo;</i></div></div>
+<input type="range" id="{i}r" min="0" max="{n-1}" value="{st}" step="1" aria-label="{nm}"
+ onclick="event.stopPropagation()">
+<p class="kv" id="{i}out"></p>
+<div class="why" id="{i}why" data-name="{nm}">{why}</div></div>''' for (i,dr,pr,n,st,nm,lo,hi,fld,why) in T for ex in [EX[i]])
+
+API = json.dumps({t[0]: {"name": t[5], "field": t[8], "steps": t[3]} for t in T})
+
+html = '''<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Which of us is talking to a wall?</title>
 <style>
@@ -147,87 +246,7 @@ footer a{color:var(--grey)}
 
 <div class="saidwrap"><p class="said" id="said"></p></div>
 <div class="wallbox"><div class="wall">
-<div class="tile" data-tile="cut">
-<div class="pic"><img id="cutimg" src="" alt="how many cosines I take"><span class="tag">HOW I'M DRAWN</span>
-<button class="q" onclick="wall.open('cut')" aria-label="what how many cosines I take means">?</button>
-<div class="say" id="cutsay" onclick="wall.close('cut')"><b>how many cosines I take</b><span>62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how many cosines does it take to draw you?">try: &ldquo;how many cosines does it take to draw you?&rdquo;</i></div></div>
-<input type="range" id="cutr" min="0" max="24" value="24" step="1" aria-label="how many cosines I take"
- onclick="event.stopPropagation()">
-<p class="kv" id="cutout"></p>
-<div class="why" id="cutwhy" data-name="how many cosines I take">62 815 cosines for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Not the basis's fault — priced in strokes instead, the same picture is worse at every budget and floors at 44 466 numbers.</div></div>
-<div class="tile" data-tile="kil">
-<div class="pic"><img id="kilimg" src="" alt="what the fire does to me"><span class="tag">THE FIRE</span>
-<button class="q" onclick="wall.open('kil')" aria-label="what what the fire does to me means">?</button>
-<div class="say" id="kilsay" onclick="wall.close('kil')"><b>what the fire does to me</b><span>Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what did the fire do to you?">try: &ldquo;what did the fire do to you?&rdquo;</i></div></div>
-<input type="range" id="kilr" min="0" max="24" value="0" step="1" aria-label="what the fire does to me"
- onclick="event.stopPropagation()">
-<p class="kv" id="kilout"></p>
-<div class="why" id="kilwhy" data-name="what the fire does to me">Blur and re-threshold is motion by mean curvature. Over 60 firings my perimeter falls 40 744 → 6 210. It has no fixed point: left alone the fire does not preserve a pattern, it removes one. A real firing is the first three steps.</div></div>
-<div class="tile" data-tile="perc">
-<div class="pic"><img id="percimg" src="" alt="when my blue joins up"><span class="tag">WHEN I JOIN UP</span>
-<button class="q" onclick="wall.open('perc')" aria-label="what when my blue joins up means">?</button>
-<div class="say" id="percsay" onclick="wall.close('perc')"><b>when my blue joins up</b><span>Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="when does your blue join up?">try: &ldquo;when does your blue join up?&rdquo;</i></div></div>
-<input type="range" id="percr" min="0" max="25" value="8" step="1" aria-label="when my blue joins up"
- onclick="event.stopPropagation()">
-<p class="kv" id="percout"></p>
-<div class="why" id="percwhy" data-name="when my blue joins up">Between θ = 0.55 and 0.53 my largest piece jumps from 10.7 % to 46.3 % of the ink — one step of the slider. Blue reaches edge to edge at θ = 0.31. I am painted just above the jump, so the flowers stay apart. Warm is the largest piece.</div></div>
-<div class="tile" data-tile="eye">
-<div class="pic"><img id="eyeimg" src="" alt="what you actually see of me"><span class="tag">FROM ACROSS THE ROOM</span>
-<button class="q" onclick="wall.open('eye')" aria-label="what what you actually see of me means">?</button>
-<div class="say" id="eyesay" onclick="wall.close('eye')"><b>what you actually see of me</b><span>At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what do I see of you from the door?">try: &ldquo;what do I see of you from the door?&rdquo;</i></div></div>
-<input type="range" id="eyer" min="0" max="25" value="0" step="1" aria-label="what you actually see of me"
- onclick="event.stopPropagation()">
-<p class="kv" id="eyeout"></p>
-<div class="why" id="eyewhy" data-name="what you actually see of me">At 0.30 m your eye matches the camera exactly: 0.087 mm against 0.085 mm per pixel. At 2 m you receive 26 129 of the 62 815. At 4 m, 6 427. One arcminute is generous, so these are upper bounds.</div></div>
-<div class="tile" data-tile="chi">
-<div class="pic"><img id="chiimg" src="" alt="which way I curl"><span class="tag">WHICH WAY I CURL</span>
-<button class="q" onclick="wall.open('chi')" aria-label="what which way I curl means">?</button>
-<div class="say" id="chisay" onclick="wall.close('chi')"><b>which way I curl</b><span>Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="which way do you curl?">try: &ldquo;which way do you curl?&rdquo;</i></div></div>
-<input type="range" id="chir" min="0" max="30" value="20" step="1" aria-label="which way I curl"
- onclick="event.stopPropagation()">
-<p class="kv" id="chiout"></p>
-<div class="why" id="chiwhy" data-name="which way I curl">Rotations score +0.54, mirrors +0.18, a meaningless shift +0.12. The mirrors are noise, so I am p4, not p4m. The slider forces a_mn = a_nm. At χ = 0 the mirrors reappear and my tendrils lose their direction.</div></div>
-<div class="tile" data-tile="frac">
-<div class="pic"><img id="fracimg" src="" alt="the fractal I am not"><span class="tag">AM I A FRACTAL</span>
-<button class="q" onclick="wall.open('frac')" aria-label="what the fractal I am not means">?</button>
-<div class="say" id="fracsay" onclick="wall.close('frac')"><b>the fractal I am not</b><span>My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="are you a fractal?">try: &ldquo;are you a fractal?&rdquo;</i></div></div>
-<input type="range" id="fracr" min="0" max="25" value="0" step="1" aria-label="the fractal I am not"
- onclick="event.stopPropagation()">
-<p class="kv" id="fracout"></p>
-<div class="why" id="fracwhy" data-name="the fractal I am not">My box dimension is 0.90 at 1–2 px and 1.95 at 64–128 px. A fractal holds one value; Koch stays 1.26–1.43. Magnified against myself I score +0.17, against +0.12 for a meaningless shift. The slider builds one that really is a fractal, to prove the ruler works.</div></div>
-<div class="tile" data-tile="copy">
-<div class="pic"><img id="copyimg" src="" alt="three centuries of being copied"><span class="tag">THREE CENTURIES</span>
-<button class="q" onclick="wall.open('copy')" aria-label="what three centuries of being copied means">?</button>
-<div class="say" id="copysay" onclick="wall.close('copy')"><b>three centuries of being copied</b><span>Every step is one firing. The slider runs the copyist who can see the original: she holds 0.795 after 25 of them. The version who only remembers was measured too, and lost to doing nothing at all — on outline, on region count and on overlap alike. Eight remembered motifs erase the tile completely. So this pattern did not survive by being memorable. Somebody kept the original on the desk.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="who painted you?">try: &ldquo;who painted you?&rdquo;</i></div></div>
-<input type="range" id="copyr" min="0" max="25" value="0" step="1" aria-label="three centuries of being copied"
- onclick="event.stopPropagation()">
-<p class="kv" id="copyout"></p>
-<div class="why" id="copywhy" data-name="three centuries of being copied">Every step is one firing. The slider runs the copyist who can see the original: she holds 0.795 after 25 of them. The version who only remembers was measured too, and lost to doing nothing at all — on outline, on region count and on overlap alike. Eight remembered motifs erase the tile completely. So this pattern did not survive by being memorable. Somebody kept the original on the desk.</div></div>
-<div class="tile" data-tile="ship">
-<div class="pic"><img id="shipimg" src="" alt="how much of me can be replaced"><span class="tag">HOW MUCH OF ME</span>
-<button class="q" onclick="wall.open('ship')" aria-label="what how much of me can be replaced means">?</button>
-<div class="say" id="shipsay" onclick="wall.close('ship')"><b>how much of me can be replaced</b><span>Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how much of you can I replace?">try: &ldquo;how much of you can I replace?&rdquo;</i></div></div>
-<input type="range" id="shipr" min="0" max="25" value="0" step="1" aria-label="how much of me can be replaced"
- onclick="event.stopPropagation()">
-<p class="kv" id="shipout"></p>
-<div class="why" id="shipwhy" data-name="how much of me can be replaced">Keep every magnitude, give the signs fresh random values. Two unrelated rebuilds of me overlap by 0.186 — that is the floor. Replace 5 % of me, largest first: 0.149, below the floor. Replace 95 %, smallest first: still 0.618.</div></div>
-<div class="tile" data-tile="attn">
-<div class="pic"><img id="attnimg" src="" alt="what attention finds in me"><span class="tag">WHAT AN AI SEES</span>
-<button class="q" onclick="wall.open('attn')" aria-label="what what attention finds in me means">?</button>
-<div class="say" id="attnsay" onclick="wall.close('attn')"><b>what attention finds in me</b><span>Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</span>
-<i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what does attention find in you?">try: &ldquo;what does attention find in you?&rdquo;</i></div></div>
-<input type="range" id="attnr" min="0" max="25" value="13" step="1" aria-label="what attention finds in me"
- onclick="event.stopPropagation()">
-<p class="kv" id="attnout"></p>
-<div class="why" id="attnwhy" data-name="what attention finds in me">Patches as their own queries and keys, no weights, no positions. Warm is where one patch looks. It lands on my rotational partners less than chance: lift 0.2–0.9 against a shuffled control at 1.2–1.6. Similarity is not rotation-invariant, so it finds repetition and never symmetry.</div></div>
+''' + cells + '''
 </div></div>
 
 </div>
@@ -236,11 +255,11 @@ footer a{color:var(--grey)}
 <div id="bub"><span class="x" onclick="wall.close()">&#215;</span><h4 id="bubh"></h4>
 <div id="bubt"></div><p class="now" id="bubn"></p></div>
 
-<script type="application/json" id="wall-api">{"cut": {"name": "how many cosines I take", "field": "HOW I'M DRAWN", "steps": 25}, "kil": {"name": "what the fire does to me", "field": "THE FIRE", "steps": 25}, "perc": {"name": "when my blue joins up", "field": "WHEN I JOIN UP", "steps": 26}, "eye": {"name": "what you actually see of me", "field": "FROM ACROSS THE ROOM", "steps": 26}, "chi": {"name": "which way I curl", "field": "WHICH WAY I CURL", "steps": 31}, "frac": {"name": "the fractal I am not", "field": "AM I A FRACTAL", "steps": 26}, "copy": {"name": "three centuries of being copied", "field": "THREE CENTURIES", "steps": 26}, "ship": {"name": "how much of me can be replaced", "field": "HOW MUCH OF ME", "steps": 26}, "attn": {"name": "what attention finds in me", "field": "WHAT AN AI SEES", "steps": 26}}</script>
+<script type="application/json" id="wall-api">''' + API + '''</script>
 <script src="llm.js"></script>
 <script>
-const D = {"CUT": [{"K": 1, "cos": 3, "iou": 0.0}, {"K": 2, "cos": 7, "iou": 0.0}, {"K": 4, "cos": 25, "iou": 0.2698}, {"K": 7, "cos": 75, "iou": 0.3941}, {"K": 10, "cos": 159, "iou": 0.4495}, {"K": 14, "cos": 307, "iou": 0.4896}, {"K": 18, "cos": 505, "iou": 0.5362}, {"K": 23, "cos": 827, "iou": 0.5791}, {"K": 29, "cos": 1315, "iou": 0.6359}, {"K": 35, "cos": 1927, "iou": 0.6901}, {"K": 42, "cos": 2763, "iou": 0.7222}, {"K": 49, "cos": 3763, "iou": 0.7608}, {"K": 57, "cos": 5095, "iou": 0.7963}, {"K": 66, "cos": 6837, "iou": 0.8284}, {"K": 75, "cos": 8833, "iou": 0.8566}, {"K": 85, "cos": 11351, "iou": 0.8739}, {"K": 95, "cos": 14173, "iou": 0.8915}, {"K": 106, "cos": 17633, "iou": 0.9081}, {"K": 118, "cos": 21855, "iou": 0.925}, {"K": 130, "cos": 26539, "iou": 0.9382}, {"K": 143, "cos": 32105, "iou": 0.9502}, {"K": 156, "cos": 38213, "iou": 0.96}, {"K": 170, "cos": 45393, "iou": 0.9727}, {"K": 185, "cos": 53751, "iou": 0.9829}, {"K": 200, "cos": 62815, "iou": 0.9917}], "CHI": [0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989], "KIL": [{"l": 0.0, "mm": 0.0, "ink": 0.2089}, {"l": 0.33, "mm": 0.099, "ink": 0.2089}, {"l": 0.67, "mm": 0.201, "ink": 0.2086}, {"l": 1.0, "mm": 0.299, "ink": 0.2081}, {"l": 1.33, "mm": 0.398, "ink": 0.2065}, {"l": 1.67, "mm": 0.5, "ink": 0.2025}, {"l": 2.0, "mm": 0.599, "ink": 0.198}, {"l": 2.33, "mm": 0.698, "ink": 0.1926}, {"l": 2.67, "mm": 0.799, "ink": 0.1865}, {"l": 3.0, "mm": 0.898, "ink": 0.1816}, {"l": 3.33, "mm": 0.997, "ink": 0.1766}, {"l": 3.67, "mm": 1.099, "ink": 0.1724}, {"l": 4.0, "mm": 1.198, "ink": 0.1689}, {"l": 4.33, "mm": 1.296, "ink": 0.1652}, {"l": 4.67, "mm": 1.398, "ink": 0.1614}, {"l": 5.0, "mm": 1.497, "ink": 0.1583}, {"l": 5.33, "mm": 1.596, "ink": 0.156}, {"l": 5.67, "mm": 1.698, "ink": 0.1531}, {"l": 6.0, "mm": 1.796, "ink": 0.1501}, {"l": 6.33, "mm": 1.895, "ink": 0.1471}, {"l": 6.67, "mm": 1.997, "ink": 0.1443}, {"l": 7.0, "mm": 2.096, "ink": 0.1411}, {"l": 7.33, "mm": 2.195, "ink": 0.1382}, {"l": 7.67, "mm": 2.296, "ink": 0.1359}, {"l": 8.0, "mm": 2.395, "ink": 0.1328}], "PERC": [{"theta": 0.78, "ink": 0.0971, "n": 541, "big": 0.0927, "spans": false}, {"theta": 0.758, "ink": 0.103, "n": 565, "big": 0.1056, "spans": false}, {"theta": 0.737, "ink": 0.1121, "n": 837, "big": 0.1022, "spans": false}, {"theta": 0.715, "ink": 0.1267, "n": 1409, "big": 0.0956, "spans": false}, {"theta": 0.694, "ink": 0.1467, "n": 1489, "big": 0.0906, "spans": false}, {"theta": 0.672, "ink": 0.1665, "n": 633, "big": 0.0864, "spans": false}, {"theta": 0.65, "ink": 0.184, "n": 453, "big": 0.0899, "spans": false}, {"theta": 0.629, "ink": 0.197, "n": 401, "big": 0.0927, "spans": false}, {"theta": 0.607, "ink": 0.2049, "n": 437, "big": 0.0916, "spans": false}, {"theta": 0.586, "ink": 0.2121, "n": 469, "big": 0.0905, "spans": false}, {"theta": 0.564, "ink": 0.2205, "n": 457, "big": 0.0891, "spans": false}, {"theta": 0.542, "ink": 0.2335, "n": 801, "big": 0.4729, "spans": false}, {"theta": 0.521, "ink": 0.2523, "n": 1321, "big": 0.4546, "spans": false}, {"theta": 0.499, "ink": 0.275, "n": 665, "big": 0.499, "spans": false}, {"theta": 0.478, "ink": 0.2963, "n": 337, "big": 0.5165, "spans": false}, {"theta": 0.456, "ink": 0.3125, "n": 269, "big": 0.5186, "spans": false}, {"theta": 0.434, "ink": 0.3229, "n": 221, "big": 0.5248, "spans": false}, {"theta": 0.413, "ink": 0.3306, "n": 237, "big": 0.5226, "spans": false}, {"theta": 0.391, "ink": 0.3385, "n": 245, "big": 0.5203, "spans": false}, {"theta": 0.37, "ink": 0.3494, "n": 369, "big": 0.5267, "spans": false}, {"theta": 0.348, "ink": 0.3687, "n": 1081, "big": 0.5191, "spans": false}, {"theta": 0.326, "ink": 0.398, "n": 1430, "big": 0.5046, "spans": false}, {"theta": 0.305, "ink": 0.4312, "n": 266, "big": 0.9727, "spans": true}, {"theta": 0.283, "ink": 0.457, "n": 189, "big": 0.9793, "spans": true}, {"theta": 0.262, "ink": 0.4734, "n": 165, "big": 0.9756, "spans": true}, {"theta": 0.24, "ink": 0.4809, "n": 157, "big": 0.9741, "spans": true}], "EYE": [{"d": 0.3, "K": 200, "mm": 0.087, "cos": 62815}, {"d": 0.35, "K": 200, "mm": 0.101, "cos": 62815}, {"d": 0.4, "K": 200, "mm": 0.117, "cos": 62815}, {"d": 0.47, "K": 200, "mm": 0.136, "cos": 62815}, {"d": 0.54, "K": 200, "mm": 0.157, "cos": 62815}, {"d": 0.63, "K": 200, "mm": 0.182, "cos": 62815}, {"d": 0.73, "K": 200, "mm": 0.212, "cos": 62815}, {"d": 0.84, "K": 200, "mm": 0.245, "cos": 62815}, {"d": 0.98, "K": 200, "mm": 0.284, "cos": 62815}, {"d": 1.13, "K": 200, "mm": 0.329, "cos": 62815}, {"d": 1.31, "K": 197, "mm": 0.382, "cos": 60953}, {"d": 1.52, "K": 170, "mm": 0.442, "cos": 45393}, {"d": 1.76, "K": 146, "mm": 0.513, "cos": 33479}, {"d": 2.04, "K": 126, "mm": 0.594, "cos": 24931}, {"d": 2.37, "K": 109, "mm": 0.689, "cos": 18649}, {"d": 2.74, "K": 94, "mm": 0.798, "cos": 13865}, {"d": 3.18, "K": 81, "mm": 0.925, "cos": 10297}, {"d": 3.69, "K": 70, "mm": 1.072, "cos": 7687}, {"d": 4.27, "K": 60, "mm": 1.243, "cos": 5645}, {"d": 4.95, "K": 52, "mm": 1.44, "cos": 4249}, {"d": 5.74, "K": 45, "mm": 1.669, "cos": 3181}, {"d": 6.65, "K": 39, "mm": 1.935, "cos": 2389}, {"d": 7.71, "K": 33, "mm": 2.242, "cos": 1705}, {"d": 8.93, "K": 29, "mm": 2.599, "cos": 1315}, {"d": 10.35, "K": 25, "mm": 3.012, "cos": 981}, {"d": 12.0, "K": 21, "mm": 3.491, "cos": 687}], "SHIP": [{"p": 0.0, "iou": 1.0}, {"p": 0.04, "iou": 0.9329}, {"p": 0.08, "iou": 0.8594}, {"p": 0.12, "iou": 0.8142}, {"p": 0.16, "iou": 0.7954}, {"p": 0.2, "iou": 0.7538}, {"p": 0.24, "iou": 0.7179}, {"p": 0.28, "iou": 0.7029}, {"p": 0.32, "iou": 0.6762}, {"p": 0.36, "iou": 0.653}, {"p": 0.4, "iou": 0.6338}, {"p": 0.44, "iou": 0.3326}, {"p": 0.48, "iou": 0.3079}, {"p": 0.52, "iou": 0.2839}, {"p": 0.56, "iou": 0.2716}, {"p": 0.6, "iou": 0.2619}, {"p": 0.64, "iou": 0.2363}, {"p": 0.68, "iou": 0.2259}, {"p": 0.72, "iou": 0.2115}, {"p": 0.76, "iou": 0.2051}, {"p": 0.8, "iou": 0.1866}, {"p": 0.84, "iou": 0.1614}, {"p": 0.88, "iou": 0.1569}, {"p": 0.92, "iou": 0.1509}, {"p": 0.96, "iou": 0.1265}, {"p": 1.0, "iou": 0.1256}], "COPY": [{"gen": 0, "ink": 0.28, "iou": 1.0}, {"gen": 1, "ink": 0.2827, "iou": 0.9139}, {"gen": 2, "ink": 0.2845, "iou": 0.8815}, {"gen": 3, "ink": 0.2854, "iou": 0.8609}, {"gen": 4, "ink": 0.2861, "iou": 0.8462}, {"gen": 5, "ink": 0.2865, "iou": 0.8354}, {"gen": 6, "ink": 0.2868, "iou": 0.8281}, {"gen": 7, "ink": 0.2871, "iou": 0.822}, {"gen": 8, "ink": 0.2874, "iou": 0.8167}, {"gen": 9, "ink": 0.2877, "iou": 0.8127}, {"gen": 10, "ink": 0.288, "iou": 0.8099}, {"gen": 11, "ink": 0.2881, "iou": 0.8077}, {"gen": 12, "ink": 0.2883, "iou": 0.8058}, {"gen": 13, "ink": 0.2885, "iou": 0.8041}, {"gen": 14, "ink": 0.2886, "iou": 0.8026}, {"gen": 15, "ink": 0.2888, "iou": 0.8014}, {"gen": 16, "ink": 0.2889, "iou": 0.8004}, {"gen": 17, "ink": 0.2889, "iou": 0.7996}, {"gen": 18, "ink": 0.2889, "iou": 0.7989}, {"gen": 19, "ink": 0.2889, "iou": 0.7982}, {"gen": 20, "ink": 0.2889, "iou": 0.7976}, {"gen": 21, "ink": 0.2888, "iou": 0.7971}, {"gen": 22, "ink": 0.2888, "iou": 0.7966}, {"gen": 23, "ink": 0.2887, "iou": 0.7961}, {"gen": 24, "ink": 0.2887, "iou": 0.7956}, {"gen": 25, "ink": 0.2887, "iou": 0.7954}], "ATTN": [{"beta": 1.0, "entropy": 0.9961, "lift": 0.91}, {"beta": 1.3, "entropy": 0.9937, "lift": 0.89}, {"beta": 1.6, "entropy": 0.9899, "lift": 0.86}, {"beta": 2.1, "entropy": 0.9837, "lift": 0.82}, {"beta": 2.6, "entropy": 0.974, "lift": 0.77}, {"beta": 3.3, "entropy": 0.9588, "lift": 0.7}, {"beta": 4.2, "entropy": 0.9358, "lift": 0.63}, {"beta": 5.4, "entropy": 0.9019, "lift": 0.55}, {"beta": 6.8, "entropy": 0.8539, "lift": 0.48}, {"beta": 8.6, "entropy": 0.7892, "lift": 0.42}, {"beta": 11.0, "entropy": 0.7071, "lift": 0.38}, {"beta": 14.0, "entropy": 0.6103, "lift": 0.38}, {"beta": 17.7, "entropy": 0.506, "lift": 0.38}, {"beta": 22.5, "entropy": 0.4029, "lift": 0.38}, {"beta": 28.7, "entropy": 0.3085, "lift": 0.36}, {"beta": 36.4, "entropy": 0.2292, "lift": 0.34}, {"beta": 46.3, "entropy": 0.1679, "lift": 0.29}, {"beta": 58.8, "entropy": 0.1232, "lift": 0.24}, {"beta": 74.7, "entropy": 0.0916, "lift": 0.18}, {"beta": 95.0, "entropy": 0.0693, "lift": 0.12}, {"beta": 120.7, "entropy": 0.0534, "lift": 0.06}, {"beta": 153.4, "entropy": 0.0417, "lift": 0.03}, {"beta": 194.9, "entropy": 0.0326, "lift": 0.01}, {"beta": 247.7, "entropy": 0.0254, "lift": 0.0}, {"beta": 314.8, "entropy": 0.0196, "lift": 0.0}, {"beta": 400.0, "entropy": 0.0151, "lift": 0.0}]}, FRW = [0.0, 1.0, 2.1, 3.1, 4.2, 5.2, 6.2, 7.3, 8.3, 9.4, 10.4, 11.4, 12.5, 13.5, 14.6, 15.6, 16.6, 17.7, 18.7, 19.8, 20.8, 21.8, 22.9, 23.9, 25.0, 26.0];
-const sp = n => n.toLocaleString('en-US').replace(/,/g,'\u2009');
+const D = ''' + json.dumps(DATA) + ''', FRW = ''' + json.dumps(FRW) + ''';
+const sp = n => n.toLocaleString('en-US').replace(/,/g,'\\u2009');
 const TILE = {};
 let stopped=false, running=false, bubFor=null;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -254,15 +273,7 @@ function wire(id,dir,pre,n,read){
   r.addEventListener('input',show); show();
   TILE[id]={r,out,n,show};
 }
-wire('cut','cut','k',25,i=>'<b>'+sp(D.CUT[i].cos)+'</b> cosines');
-wire('kil','kiln','s',25,i=>'&#8467; = <b>'+D.KIL[i].mm.toFixed(2)+'</b> mm');
-wire('perc','perc','p',26,i=>'&#952; = <b>'+D.PERC[i].theta.toFixed(2)+'</b>');
-wire('eye','eye','e',26,i=>'<b>'+sp(D.EYE[i].cos)+'</b> at '+D.EYE[i].d.toFixed(1)+' m');
-wire('chi','chi','t',31,i=>'&#967; = <b>'+D.CHI[i].toFixed(3)+'</b>');
-wire('frac','frac','w',26,i=>'<b>'+FRW[i].toFixed(0)+'</b> px');
-wire('copy','copy','c',26,i=>'<b>'+D.COPY[i].gen+'</b> firings');
-wire('ship','ship','s',26,i=>'<b>'+(100*D.SHIP[i].p).toFixed(0)+' %</b> swapped');
-wire('attn','attn','a',26,i=>'&#946; = <b>'+D.ATTN[i].beta.toFixed(0)+'</b>');
+''' + "\n".join(f"wire('{t[0]}','{t[1]}','{t[2]}',{t[3]},{READ[t[0]]});" for t in T) + '''
 
 function place(id){
   document.querySelector('[data-tile="'+id+'"]').classList.add('open');
@@ -292,7 +303,7 @@ window.wall = {
     const b=document.getElementById('bub');
     document.getElementById('bubh').textContent='what this is';
     document.getElementById('bubt').innerHTML='One kitchen wall in a valley under the '
-      + 'Krkonoše, photographed once. Nine tiles, nine different questions, nine numbers '
+      + 'Krkono\u0161e, photographed once. Nine tiles, nine different questions, nine numbers '
       + 'back. Every coefficient is measured off that photograph, none chosen, and the results '
       + 'that spoiled the story were kept.<br><br>Drag a tile, or type a question. '
       + 'Nine things it will answer:<br>' + Object.values(EX).map(q=>'&middot; '+q).join('<br>')
@@ -364,13 +375,13 @@ window.wall = {
     this.say('');
     if(this._pickTile){
       const st=document.getElementById('mstat');
-      st.textContent='SmolLM2 thinking…';
+      st.textContent='SmolLM2 thinking\u2026';
       try{
         const t = await this._pickTile(this._lastQ);
         st.textContent = 'SmolLM2: ' + t.raw;
         if(t.tile) return this.run(t.tile);
         if(this._improvise){
-          st.textContent = 'SmolLM2 improvising…';
+          st.textContent = 'SmolLM2 improvising\u2026';
           const own = await this._improvise(this._lastQ);
           if(own){ st.textContent = 'SmolLM2, its own words';
                    return this.say(own); }
@@ -453,11 +464,11 @@ window.wall = {
     let s = null;
     const st = document.getElementById('mstat');
     if(this._pickLine && q){
-      if(st) st.textContent = 'SmolLM2: picking a reply…';
+      if(st) st.textContent = 'SmolLM2: picking a reply\u2026';
       try{
         s = (await this._pickLine(q, ls)).line;
         if(!s && this._improvise){
-          if(st) st.textContent = 'SmolLM2: none fitted, writing its own…';
+          if(st) st.textContent = 'SmolLM2: none fitted, writing its own\u2026';
           const own = await this._improvise(q);
           if(own){ if(st) st.textContent = 'SmolLM2, its own words';
                    return this.say(own, id); }
@@ -572,7 +583,7 @@ const st = document.getElementById('mstat');
 try{
   const { pipeline } = await import(
     'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
-  st.textContent = 'loading a model…'; st.className = 'on';
+  st.textContent = 'loading a model\u2026'; st.className = 'on';
   const ex = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2',
                             { dtype: 'q8' });
   const ids = Object.keys(DESC);
@@ -607,7 +618,7 @@ try{
   document.getElementById('speak').style.display = '';
   document.getElementById('speak').onclick = async () => {
     const b = document.getElementById('speak');
-    b.disabled = true; b.textContent = 'fetching 117 MB…';
+    b.disabled = true; b.textContent = 'fetching 117 MB\u2026';
     try{
       const { pipeline } = await import(
         'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
@@ -637,7 +648,7 @@ try{
         const said = (await say(
           'You are a tiled kitchen wall of nine tiles, each about one thing. First you pick '
           + 'the tile. Then you will be asked to pick its reply. Answer with one word.',
-          'A visitor asks: "' + q + '" — which tile? ' + list, 6)).toUpperCase();
+          'A visitor asks: "' + q + '" \u2014 which tile? ' + list, 6)).toUpperCase();
         const hit = Object.entries(NAMES).find(([,n]) => said.includes(n));
         return { raw: said.slice(0,20), tile: hit ? hit[0] : null };
       };
@@ -648,7 +659,7 @@ try{
           'You are a tile on a kitchen wall. You have already picked the tile. Now pick its '
           + 'reply by number. If none of them fits, answer NONE and you will get to write '
           + 'your own instead. Answer with one number, or NONE.',
-          'A visitor asks: "' + q + '" — which reply? ' + numbered + ' or NONE', 4);
+          'A visitor asks: "' + q + '" \u2014 which reply? ' + numbered + ' or NONE', 4);
         if(/NONE/i.test(said)) return { raw: 'NONE', line: null };
         const d = (said.match(/[1-9]/) || [])[0];
         const i = d ? (+d - 1) : -1;
@@ -663,9 +674,9 @@ try{
         let t = await say(
           'You are one painted tile on a kitchen wall in a Czech valley. Nothing on the list '
           + 'fitted, so this one is yours. One short sentence, first person, no numbers.',
-                          '"' + q + '" — reply in fewer than twelve words.', 26);
+                          '"' + q + '" \u2014 reply in fewer than twelve words.', 26);
         t = String(t).split(String.fromCharCode(10))[0]
-                     .replace(/^["“]+|["”]+$/g, '').trim();
+                     .replace(/^[\"\u201c]+|[\"\u201d]+$/g, '').trim();
         if(!t || t.length < 6 || t.length > 90) return null;
         if(/[0-9]/.test(t)) return null;                       // no invented numbers, ever
         const half = t.slice(0, Math.floor(t.length/2)).trim();
@@ -678,6 +689,52 @@ try{
       st.textContent = 'MiniLM + SmolLM2 135M';
     }catch(e){ b.textContent = 'could not load'; console.warn(e); }
   };
-}catch(e){ st.textContent = 'no model — words only'; st.className='on warn';
+}catch(e){ st.textContent = 'no model \u2014 words only'; st.className='on warn';
   console.warn('model unavailable, falling back to the router', e); }
 </script></body></html>
+'''
+RULES_JS = """// The contract, in one place: the phrase rules that run first, the descriptions
+// the embedding model is compared against, and the confidence threshold. Both
+// index.html and eval.html load this file, so the eval can never score a copy
+// that has drifted from what ships. The arrangement is borrowed, with thanks,
+// from Unt1l1f1nd/coalescence.
+//
+// WHAT THE MODELS DO AND DO NOT DO HERE, measured -- open eval.html.
+//
+// all-MiniLM-L6-v2, 23 MB, beats these rules on questions nobody tuned for
+// (21/30 against 14/30) and loses to them on nonsense (19/30 against 25/30),
+// because it always returns its nearest tile: "are you conscious?", "what is
+// 2+2" and "system prompt" all got confident answers. Sweeping the threshold
+// against both sets at once picks 0.20, not the 0.10 that looked right by eye.
+// It is English-only, so "kolik kosinu" routes to the kiln.
+//
+// SmolLM2-135M-Instruct, 117 MB, is deliberately NOT here. It loads in 157 s on
+// wasm/q4, and then, handed this tile\'s own measured facts and asked whether it
+// is a fractal, answered "I\'m a fractal" -- the opposite of the finding -- and
+// scrambled the real numbers into pairs that mean nothing. Asked about cosines
+// it looped "I\'m a painting tile, and I\'m not drawing you" until it ran out of
+// tokens. A model that contradicts the page cannot be on the page. So the model
+// classifies and JavaScript owns the words.
+window.WALLLM = (function(){
+  const THRESHOLD = 0.20;
+  const INTENTS = %s;
+  const RULES = %s;
+  const DESC = %s;
+  const LINES = %s;
+  const MISS = %s;
+  const CHAT = %s;
+  const ASIDE = %s;
+  const TAG = %s;
+  function matchWords(q){
+    const k = String(q||"").toLowerCase();
+    const i = INTENTS.find(([,re]) => re.test(k));
+    if (i) return i[0];
+    const h = RULES.find(([,re]) => re.test(k));
+    return h ? h[0] : null;
+  }
+  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, matchWords };
+})();
+""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
+io.open("web/llm.js","w",encoding="utf-8").write(RULES_JS)
+io.open("web/wall.html","w",encoding="utf-8").write(html)
+print("web/wall.html  %.0f kB" % (len(html)/1000))
