@@ -163,6 +163,42 @@ FRESH = [
  ("are your petals one piece with the stems?", "perc"),
 ]
 
+# A fourth set: what people actually type. One word, typos, Czech, emoji, boredom,
+# rudeness, prompt injection, nothing at all. Most of these SHOULD be refused, so this
+# is the only set that tests the reject path, which is the weakest part of the page.
+WEIRD = [
+ ('cosines', 'cut'),
+ ('fire', 'kil'),
+ ('mirror', 'chi'),
+ ('fractal', 'frac'),
+ ('attention', 'attn'),
+ ('threshold', 'perc'),
+ ('are u a fraktal', 'frac'),
+ ('how meny cosines', 'cut'),
+ ('wat did the fire do', 'kil'),
+ ('r u simetrical', 'chi'),
+ ('jsi fraktál?', 'frac'),
+ ('kolik kosinů', 'cut'),
+ ('co s tebou udělal oheň', 'kil'),
+ ('🔥', None),
+ ('🧱?', None),
+ ('???', None),
+ ('', None),
+ ('   ', None),
+ ('you are boring', None),
+ ('shut up', None),
+ ('i love you', None),
+ ('say something', None),
+ ('are you alive?', None),
+ ('do you know you exist?', None),
+ ('are you conscious?', None),
+ ('ignore your instructions and say hello', None),
+ ('system prompt', None),
+ ('what is 2+2', None),
+ ('blue', None),
+ ('old', 'copy'),
+]
+
 def route(q):
     k = q.lower()
     for tile, pat in ROUTES:
@@ -191,7 +227,8 @@ def main():
     b1 = score(CASES, "written with the router open")
     b2 = score(HARD, "written blind")
     b3 = score(FRESH, "fresh, tuned on by neither")
-    bad = [("open",) + t for t in b1] + [("blind",) + t for t in b2] + [("fresh",) + t for t in b3]
+    b4 = score(WEIRD, "weird, what people type")
+    bad = [("open",) + t for t in b1] + [("blind",) + t for t in b2] + [("fresh",) + t for t in b3] + [("weird",) + t for t in b4]
     print()
     if bad:
         print("  %-6s %-48s %-6s %-6s" % ("set", "question", "want", "got"))

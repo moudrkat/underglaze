@@ -64,24 +64,28 @@ type. **SmolLM2-135M-Instruct**, 117 MB, is behind a button, because half a giga
 uninvited from a link is not a welcome. Qwen2.5-0.5B was the first choice at 483 MB and lost on
 size alone.
 
-Three question sets, in `src/eval_wall.py`. The first 51 were written next to the patterns; the
-next 30 blind; the last 30 after both routers existed and shown to neither while being written.
-Only the third comparison means anything:
+Four question sets, in `src/eval_wall.py`. The first 51 were written next to the patterns; the
+next 30 blind; the next 30 after both routers existed and shown to neither while being written;
+the last 30 are what people actually type — one word, typos, Czech, emoji, boredom, prompt
+injection, nothing at all. Only the last two mean anything, and they disagree:
 
-| on 30 questions neither was tuned on | correct |
-|---|---|
-| regular expression alone | 14 / 30 |
-| all-MiniLM-L6-v2 alone | **21 / 30** |
-| words first, model for the rest | **22 / 30** |
+| | 30 fresh questions | 30 weird inputs | total |
+|---|---|---|---|
+| regular expression alone | 14 | **25** | 39 |
+| all-MiniLM-L6-v2 alone | **21** | 19 | 40 |
+| words first, model for the rest | 20 | 25 | **45** |
 
 The regex scores 81/81 on the sets it was tuned on and 47 % on fresh ones, which is what
-overfitting looks like from the inside. A 23 MB model beats it outright on questions nobody
-tuned for, and the two together beat either.
+overfitting looks like from the inside. The model beats it outright on real questions nobody
+tuned for — and loses on the weird set, because it always returns its nearest tile. *"Are you
+conscious?"*, *"what is 2+2"* and *"system prompt"* all got confident answers.
 
-One thing the model cannot do: tell a real question from nonsense. *"What time is it?"* scores
-0.103 against the nine tiles and the weakest genuine question scores 0.083, so the bands
-overlap and no clean threshold exists. The page uses 0.10 and accepts that it will sometimes
-answer the weather.
+Most of the weird set should be refused, so it is the only set that tests the reject path.
+Sweeping the model's confidence threshold against both sets at once picks **0.20**: 45 of 60,
+against 40 at the 0.10 that felt reasonable by eye. It costs one real question and refuses six
+more pieces of nonsense.
+
+The page uses that cascade and that threshold, because those are the numbers.
 
 ## Files
 

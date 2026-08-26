@@ -309,7 +309,7 @@ window.wall = {
         if(id==='_help'){ suggest(false); return this.about(); }
         if(id==='_surprise'){ suggest(false); const k=Object.keys(TILE);
           return this.run(k[Math.floor(Math.random()*k.length)]); }
-        if(sim >= 0.10){
+        if(sim >= 0.20){   // swept against both sets: 45/60, against 40/60 at 0.10
           suggest(false);
           if(this._say){
             const el=document.getElementById(id+'say');
