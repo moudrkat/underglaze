@@ -107,13 +107,14 @@ and nothing imaginary survives. Largest imaginary part found: 2.6 × 10<sup>−1
 <p>Mirrors sit at the level of a meaningless shift. The group is <b>p4</b>.</p>
 <p class="cap">Measured by <i>src/symmetry.py</i>. Group names follow Schattschneider, <i>The plane symmetry groups: their recognition and notation</i>, Amer. Math. Monthly <b>85</b> (1978) 439–450; and <i>International Tables for Crystallography</i>, Vol. A.</p></details>
 
-<details><summary>the plant and the snowflake</summary>
+<details><summary>what forcing the mirrors does</summary>
 <div class="pair">
-<div><img class="wide" src="chi_real.png" alt="the tile"><p class="cap">χ = 0.199 — a plant.</p></div>
-<div><img class="wide" src="chi_zero.png" alt="p4m"><p class="cap">χ = 0 — a snowflake.</p></div>
+<div><img class="wide" src="chi_real.png" alt="the tile"><p class="cap">χ = 0.199 — the tile as measured.</p></div>
+<div><img class="wide" src="chi_zero.png" alt="p4m"><p class="cap">χ = 0 — the same coefficients with a<sub>mn</sub> = a<sub>nm</sub> forced.</p></div>
 </div>
-<p>p4 has no mirrors, so a<sub>mn</sub> and a<sub>nm</sub> are free to differ. Force them equal
-and the pattern crystallises. Things that grow are chiral; things that crystallise have mirrors.</p>
+<p>p4 has no mirrors, so a<sub>mn</sub> and a<sub>nm</sub> are free to differ. Forcing them equal
+adds the four mirrors, which turns the group into p4m. The tendrils lose their direction of
+curl and the motif becomes mirror-symmetric.</p>
 <table>
 <tr><th>t</th><th>χ</th><th>mirror corr.</th><th>rot 90°</th></tr>
 <tr><td>0.00</td><td>0.000</td><td>1.000</td><td>1.000</td></tr>
@@ -140,88 +141,125 @@ pattern, it removes one.</p>
 
 <details><summary>the cost of detail</summary>
 <svg viewBox="0 0 820 300" class="chart" role="img" aria-label="agreement against number of cosines"><g class="grid"><line x1="58" y1="199.5" x2="700" y2="199.5"/><line x1="58" y1="139.0" x2="700" y2="139.0"/><line x1="58" y1="78.5" x2="700" y2="78.5"/><line x1="58" y1="18.0" x2="700" y2="18.0"/></g><text x="48" y="203.5" class="ax" text-anchor="end">25%</text><text x="48" y="143.0" class="ax" text-anchor="end">50%</text><text x="48" y="82.5" class="ax" text-anchor="end">75%</text><text x="48" y="22.0" class="ax" text-anchor="end">100%</text><text x="58.0" y="286" class="ax" text-anchor="middle">0</text><text x="236.3" y="286" class="ax" text-anchor="middle">25 000</text><text x="414.7" y="286" class="ax" text-anchor="middle">50 000</text><text x="593.0" y="286" class="ax" text-anchor="middle">75 000</text><path d="M 58.2 194.7 L 58.7 162.1 L 59.6 150.2 L 60.8 136.1 L 62.5 124.4 L 64.4 116.8 L 66.8 108.5 L 69.4 99.6 L 72.5 92.5 L 75.9 87.0 L 79.7 81.5 L 83.7 77.0 L 88.3 72.6 L 93.1 68.1 L 98.3 64.0 L 109.7 57.8 L 122.6 52.6 L 136.9 48.6 L 152.8 45.2 L 170.1 42.4 L 188.6 39.2 L 208.7 36.8 L 230.3 34.8 L 253.1 32.4 L 277.5 30.8 L 303.3 29.0 L 330.6 27.7 L 359.2 26.2 L 389.4 24.2 L 421.0 22.8 L 453.9 21.6 L 488.3 20.5 L 524.2 19.6 L 561.5 19.1 L 600.2 18.6 L 640.3 18.3 L 681.9 18.0" class="line"/><circle cx="179.1" cy="41.2" r="4.5" class="dot"/><text x="190.1" y="75.2" class="mk">90 %</text><text x="190.1" y="91.2" class="mks">16 975 cosines</text><circle cx="290.2" cy="29.9" r="4.5" class="dot"/><text x="301.2" y="25.9" class="mk">95 %</text><text x="301.2" y="41.9" class="mks">32 551 cosines</text><circle cx="506.1" cy="19.9" r="4.5" class="dot"/><text x="517.1" y="15.9" class="mk">99 %</text><text x="517.1" y="31.9" class="mks">62 815 cosines</text></svg>
-<p class="cap">The last 9 % costs three times what the first 90 % did. Agreement is intersection-over-union against the thresholded photograph; counted by <i>src/build_assets.py</i>.</p></details>
+<p class="cap">The last 9 % costs three times what the first 90 % did. Agreement is intersection-over-union against the thresholded photograph; counted by <i>src/build_assets.py</i>.</p>
+<p>A large count could just mean cosines are a bad basis for line art. They are global: every coefficient is nonzero because the tile has edges, and an edge costs a power-law tail whatever is drawn. So the same picture was priced a second way. <i>src/trace.py</i> already reduces the ink to a skeleton; give each point a width measured off the ink, draw it back, and score it with the same intersection-over-union. Both sides counted in free real numbers.</p>
+<table style="max-width:none">
+<tr><th>free numbers</th><th>291</th><th>690</th><th>1 710</th><th>3 900</th><th>9 399</th><th>21 411</th><th>44 877</th></tr>
+<tr><td>cosines</td><td>0.54</td><td>0.64</td><td>0.72</td><td>0.86</td><td>0.93</td><td>0.97</td><td>0.99</td></tr>
+<tr><td>strokes</td><td>0.16</td><td>0.29</td><td>0.45</td><td>0.59</td><td>0.68</td><td>0.74</td><td>0.77</td></tr>
+</table>
+<img class="wide" src="strokes_vs_cosines.png" alt="cosines and strokes at the same budget">
+<p class="cap">1 710 numbers each. Cosines on the left at 0.72, strokes on the right at 0.45.</p>
+<p>Cosines win at every budget, and by the widest margin at the smallest ones. Two reasons, both measured. Strokes have a floor: the skeleton breaks into 7 411 fragments, each needing two endpoints, so 44 466 numbers is the least that draws all of them, and going below it means discarding whole strokes rather than describing them more coarsely. And strokes have a ceiling of 0.77, because thinning discards the interior of every solid area and every junction, and no number of control points puts those back.</p>
+<p>So 62 815 is not an artefact of the basis. It is the cheapest of the two representations tried, at every fidelity.</p>
+<p class="cap">Measured by <i>src/strokes.py</i>. Skeleton by Zhang–Suen, simplification by Douglas–Peucker, widths from an exact Euclidean distance transform (Felzenszwalb &amp; Huttenlocher). Two earlier versions of the stroke side scored worse and were wrong, not informative: one width per stroke underfilled to 0.141 ink against the reference's 0.209, and a Chebyshev distance transform overfilled to 0.235. Both are recorded in the module.</p></details>
 
 <details><summary>is it a fractal?</summary>
-<p>Someone asked. A fractal is a shape that does not care how far you zoom in — a snowflake
-edge has the same notches at every magnification. That is measurable. Lay a grid of boxes of
-side ε over the outline, count how many boxes it touches, shrink the boxes, count again:</p>
+<p>Someone asked whether the tile is a fractal. The question has a measurable answer.</p>
+
+<p>A fractal is a shape whose outline is equally complicated at every magnification. To test
+that, cover the outline with a grid of boxes of side ε and count how many boxes contain a
+piece of it. Call that count N(ε). Then repeat with smaller boxes.</p>
 
 <div class="eq">
 D &nbsp;=&nbsp; lim<sub>ε→0</sub> &nbsp; log N(ε) &nbsp;/&nbsp; log(1/ε)
-<small>Halve the box and a straight line needs twice as many boxes, so D = 1. A filled area
-needs four times, so D = 2. A fractal falls in between — and gives back the <i>same</i> D at
-every ε. That last part is the whole test.</small></div>
+<small>Halve ε and a straight line meets twice as many boxes, giving D = 1. A filled region
+meets four times as many, giving D = 2. A shape with 1 &lt; D &lt; 2 is called a fractal. The
+number is only meaningful if it comes out the same at every ε.</small></div>
 
-<p>So measure D separately at each zoom rather than fitting one number across all of them:</p>
+<p>That last condition is the one usually skipped. Fitting a single D through all box sizes at
+once gives 1.34 for this tile, which sits between 1 and 2 and looks like a fractal result.
+Measuring D separately in each range of box sizes gives something else:</p>
 <svg viewBox="0 0 820 300" class="chart" role="img" aria-label="roughness measured separately at each zoom"><g class="grid"><line x1="58" y1="209.5" x2="660" y2="209.5"/><line x1="58" y1="162.1" x2="660" y2="162.1"/><line x1="58" y1="118.3" x2="660" y2="118.3"/><line x1="58" y1="27.1" x2="660" y2="27.1"/></g><text x="48" y="213.5" class="ax" text-anchor="end">1.0</text><text x="48" y="166.1" class="ax" text-anchor="end">1.26</text><text x="48" y="122.3" class="ax" text-anchor="end">1.5</text><text x="48" y="31.1" class="ax" text-anchor="end">2.0</text><text x="58.0" y="272" class="ax" text-anchor="middle">2</text><text x="158.3" y="272" class="ax" text-anchor="middle">4</text><text x="258.7" y="272" class="ax" text-anchor="middle">8</text><text x="359.0" y="272" class="ax" text-anchor="middle">16</text><text x="459.3" y="272" class="ax" text-anchor="middle">32</text><text x="559.7" y="272" class="ax" text-anchor="middle">64</text><text x="660.0" y="272" class="ax" text-anchor="middle">128</text><text x="359.0" y="298" class="ax" text-anchor="middle">how far you zoom out  (box size, pixels)</text><path d="M 58.0 228.0 L 158.3 213.4 L 258.7 195.2 L 359.0 147.3 L 459.3 99.0 L 559.7 80.8 L 660.0 36.2" class="line"/><text x="672.0" y="40.2" class="mk">this tile</text><path d="M 58.0 168.7 L 158.3 162.5 L 258.7 157.7 L 359.0 154.9 L 459.3 141.2 L 559.7 131.1 L 660.0 147.8" class="line2"/><text x="672.0" y="151.8" class="mk">a real fractal</text><path d="M 58.0 216.8 L 158.3 212.2 L 258.7 206.0 L 359.0 186.4 L 459.3 138.8 L 559.7 107.6 L 660.0 73.4" class="line3"/><text x="672.0" y="77.4" class="mk">smooth curves</text></svg>
-<p class="cap">Box-counting dimension, one zoom level at a time. A fractal holds one value.
-The tile does not — and neither does the dashed line, which is this same tile rebuilt from
-cosines, and therefore made of provably smooth curves.</p>
+<p class="cap">Box-counting dimension, measured separately in each range of box sizes.</p>
 
-<p>The tile climbs from 1.0 to 1.9, tracking the smooth control the whole way. That climb is
-not roughness, it is the boxes getting big enough to cover everything. Fit one number across
-all zooms at once and you get 1.34, which looks satisfyingly fractal and means nothing,
-because the guaranteed-smooth control gives it too.</p>
+<p>The tile's value is not constant. It is 0.90 for boxes of 1–2 px and 1.95 for boxes of
+64–128 px. The Koch curve, which is a fractal, stays between 1.26 and 1.43 over the same
+range. So 1.34 is an average of a rising quantity, not a property of the shape.</p>
 
-<p>Second test, the same one the mirrors got. Zooming is a symmetry like any other, so
-correlate the tile against a magnified view of itself around the four-fold centre:</p>
+<p>The rise has a cause that is not roughness. A box of 1–2 px sits on one edge of one painted
+stroke, and an edge is a line, so D ≈ 1. A box of 128 px is wider than the gaps between
+strokes, so nearly every box contains some paint and the count grows like an area, so D ≈ 2.
+Every dense pattern of ordinary smooth curves behaves this way.</p>
+
+<p>The dashed line confirms it. That is this same tile rebuilt from its cosine series and
+thresholded again. A finite sum of cosines is analytic, so its contours are smooth curves with
+D = 1 by construction. It produces the same rise, and the same 1.34 under a single fit.</p>
+
+<h3>Second test</h3>
+<p>Magnification is a symmetry, so it can be tested the way the mirrors were: correlate the
+tile with a magnified view of itself about the four-fold centre.</p>
 <table>
-<tr><th>zoom</th><th></th><th>for comparison</th><th></th></tr>
+<tr><th>magnified by</th><th></th><th>for comparison</th><th></th></tr>
 <tr><td>× 1.19</td><td>+0.172</td><td>rotation 90°</td><td>+0.536</td></tr>
 <tr><td>× 1.41</td><td>−0.020</td><td>mirror</td><td>+0.158</td></tr>
 <tr><td>× 2.00</td><td>+0.070</td><td>shifted 37 px</td><td>+0.120</td></tr>
 <tr><td>× 2.83</td><td>−0.030</td><td>shuffled</td><td>−0.002</td></tr>
 <tr><td>× 4.00</td><td>−0.028</td><td></td><td></td></tr>
 </table>
-<p>Every zoom lands at or below a meaningless shift. The quarter turn the tile really does
-have scores +0.536 on the same scale. <b>Not a fractal</b>, and it could not have been one:
-p4 is a crystallographic group — whole-tile shifts and a quarter turn, nothing else. It
-contains no zoom. And f is a <i>finite</i> sum of cosines, so the line between blue and white
-is an ordinary smooth curve, for any number of terms.</p>
+<p>+0.120 is what a 37 px shift scores, and a shift means nothing. No magnification beats it.
+The 90° rotation the tile does have scores +0.536.</p>
 
-<h3>Then build one, to check the ruler</h3>
-<p>A measurement that only ever says no is not yet trustworthy. The tile fails for one narrow
-reason — the series stops. Remove exactly that, by adding the motif back at every zoom with
-each copy weaker by a fixed ratio, and nothing else changes:</p>
+<p>The answer is no, and it was already fixed before any of this was measured. The group is
+p4, whose operations are translations by a whole tile and quarter turns; magnification is not
+one of them. And f is a sum of finitely many cosines, so the boundary f = ½ is a smooth curve
+for any number of terms.</p>
+
+<h3>A pattern that is one, to test the test</h3>
+<p>A procedure that returns no is only useful once it has been shown to return yes. The Koch
+curve above is one such check. A closer one is to take the tile, change the single property it
+lacks, and change nothing else.</p>
+
+<p>The tile's series stops at 62 815 terms, so the pattern has a smallest feature. Remove that
+by adding the motif back at every magnification, each copy smaller by a whole-number factor b
+and weaker by b<sup>−H</sup>:</p>
 
 <div class="eq">
 f<sub>H</sub>(x) &nbsp;=&nbsp; Σ<sub>j</sub> &nbsp; b<sup>−jH</sup> &nbsp; f(b<sup>j</sup>x)
-<small>Weierstrass, in two dimensions. b is a whole number and the grid is odd, so f(b<sup>j</sup>x)
-is exact rather than interpolated: the period and the four-fold centre survive every level.
-Still a sum of cosines, still p4 — now with a dilation symmetry it did not have. H is the
-knob, and the contour pattern of such a field has D = 2 − H.</small></div>
+<small>The Weierstrass function, in two dimensions. b is a whole number and the grid has an odd
+side, so f(b<sup>j</sup>x) is computed by exact index arithmetic rather than interpolation, and
+the period and the four-fold centre are unchanged at every level. The result is still a sum of
+cosines and still p4. H sets how fast the copies weaken; the contours of such a field have
+D = 2 − H.</small></div>
 
-<img class="wide" src="fractal.gif" alt="the tile fraying into a fractal">
-<p class="cap">The knob is how far the boundary is allowed to wander. At 0 px it is the tile.
-Every step adds the same wobble at every scale at once — that is what scale-free means.</p>
-
-<p>The same box counting, run on the stacked motif, where the pattern is sparse enough that
-coverage does not drown the signal:</p>
+<p>Measured with the same code, on the motif alone and on the stacked version:</p>
 <table style="max-width:none">
 <tr><th>box size, px</th><th>1–2</th><th>2–4</th><th>4–8</th><th>8–16</th><th>16–32</th><th>32–64</th><th>64–128</th></tr>
 <tr><td>the motif alone</td><td>0.87</td><td>0.94</td><td>0.96</td><td>0.99</td><td>1.02</td><td>1.05</td><td>1.07</td></tr>
 <tr><td>stacked, H = 0.70</td><td>0.94</td><td>1.08</td><td>1.22</td><td>1.26</td><td>1.28</td><td>1.36</td><td>1.35</td></tr>
 <tr><td>Koch curve</td><td>1.25</td><td>1.26</td><td>1.28</td><td>1.28</td><td>1.36</td><td>1.33</td><td>1.50</td></tr>
 </table>
-<p>Flat, and sitting on Koch's line, at the 2 − H = 1.30 the construction was asked for. The
-ruler works: it refuses the tile and accepts this. That is the only reason this exists.</p>
+<p>The motif alone gives 0.96–1.07: constant, and equal to 1. Stacked, it gives 1.22–1.36:
+constant, and equal to the 2 − H = 1.30 the construction was set up to produce. The same
+measurement that rejected the tile accepts this. That is the only reason it was built.</p>
 
-<p>Two things it cost. The first attempt added copies across the whole plane, including the
-middle of solid areas, where a perturbation moves the boundary by (perturbation ÷ steepness)
-and the interior is flat — so it punched holes and the drawing dissolved into mould. Weighting
-by |∇f| fixes it: the edge frays, the interior does not move.</p>
-<div class="pair">
-<div><img class="wide" src="frac_mould.png" alt="the failed attempt">
-<p class="cap">Fractal, D ≈ 1.3, and no longer a tile.</p></div>
-<div><img class="wide" src="frac_frilled.png" alt="the edge frayed instead">
-<p class="cap">The same construction weighted by |∇f|.</p></div>
+<div class="k" style="max-width:520px">
+<img id="fracimg" src="" alt="the tile with displacement added to its boundary at every scale">
+<input type="range" id="fracr" min="0" max="25" value="0" step="1" aria-label="how far the boundary is displaced">
+<div class="ke"><span>0 px</span><span>26 px</span></div>
+<p class="kn">how far the boundary is displaced</p><p class="kv" id="fracout"></p>
 </div>
-<p>The second is not fixable and is the point. Scale-free means the wobble at scale L is
-(L/L₀)<sup>H</sup> times the wobble at the top, so frilling at 2 px cannot be ordered without
-2<sup>7H</sup> times as much of it at 256 px. Fine detail is not an accessory bolted on the
-bottom. Asking for it only at the bottom is asking for a cutoff — which is what made the tile
-not a fractal in the first place.</p>
+<p class="cap">At 0 px this is the tile, unchanged. Each step adds displacement at every
+scale at once, in the proportion b<sup>−jH</sup> that the equation fixes. H = 0.50
+throughout, so only the amount changes, never how it is divided between scales.</p>
+
+<h3>Two results from building it</h3>
+<p>The first version applied the copies to the whole image, including the interiors of solid
+areas. A perturbation of size p moves a boundary by p / |∇f|, and |∇f| is near zero inside a
+solid area, so the interiors broke into holes. Multiplying the perturbation by |∇f| first makes
+the displacement the same everywhere: the boundary moves, the interior does not.</p>
+<div class="pair">
+<div><img class="wide" src="frac_mould.png" alt="copies applied to the whole image">
+<p class="cap">Applied everywhere. D ≈ 1.3, and the drawing is gone.</p></div>
+<div><img class="wide" src="frac_frilled.png" alt="copies weighted by the gradient">
+<p class="cap">Weighted by |∇f|. Same construction, same D.</p></div>
+</div>
+
+<p>The second result is a limit, not a mistake. The equation fixes the displacement at scale L
+at (L/L₀)<sup>H</sup> times the displacement at the largest scale. Detail at 2 px therefore
+requires 2<sup>7H</sup> times as much displacement at 256 px. Detail at small scales cannot be
+added by itself. Adding it only at small scales would give the pattern a smallest feature
+again, which is the property that made the tile not a fractal.</p>
 
 <p class="cap">Measured by <i>src/fractal.py</i>; built by <i>src/fractalise.py</i>.
 Sources: Mandelbrot, <i>How Long Is the Coast of Britain?</i>, Science <b>156</b> (1967)
@@ -229,10 +267,10 @@ Sources: Mandelbrot, <i>How Long Is the Coast of Britain?</i>, Science <b>156</b
 dimension. Berry &amp; Lewis, <i>On the Weierstrass–Mandelbrot fractal function</i>, Proc. R.
 Soc. Lond. A <b>370</b> (1980) 459–484. Matsushita, Ouchi &amp; Honda, <i>On the fractal
 structure and statistics of contour lines on a self-affine surface</i>, J. Phys. Soc. Jpn.
-<b>60</b> (1991) 2109–2112, for D = 2 − H. A third test — the high-frequency spectral slope,
-after Porod, Kolloid-Z. <b>124</b> (1951) 83–114 — could not tell the two cases apart
-(−1.85 for the tile, −1.80 for a real fractal, −2.01 for a smooth boundary) and decides
-nothing. It is reported rather than dropped.</p>
+<b>60</b> (1991) 2109–2112, for D = 2 − H. A third test, the high-frequency spectral slope
+after Porod, Kolloid-Z. <b>124</b> (1951) 83–114, gave −1.85 for the tile, −1.80 for a real
+fractal and −2.01 for a smooth boundary. It does not separate the cases and decides nothing,
+and is reported rather than dropped.</p>
 </details>
 
 <details><summary>an onion pattern with no onion in it</summary>
@@ -267,8 +305,8 @@ a Chinese melon per the Meissen museum, a pomegranate per Czech sources.</td></t
 <tr><td>before 1800</td><td>Other factories are already copying it.</td></tr>
 <tr><td>1885</td><td>Dubí. Czech production begins, and hand-painting is replaced by
 underglaze printing from steel plates.</td></tr>
-<tr><td>1895</td><td>Bernard Bloch buys the works and adds wall tiles. The pattern leaves
-the plate.</td></tr>
+<tr><td>1895</td><td>Bernard Bloch buys the works and adds wall tiles, so the pattern is
+printed on tiles as well as tableware.</td></tr>
 <tr><td>today</td><td>RAKO sells a <i>Cibulák</i> tile, decor fired at 820 °C.</td></tr>
 </table>
 <p class="cap">Sources: Meissen Porcelain Museum; cs.wikipedia <i>Cibulák</i>; kudyznudy.cz
@@ -295,11 +333,14 @@ function wire(id,dir,pre,n,read){
   r.addEventListener('input',show); show();
 }
 const CHI=[0.0, 0.0006, 0.0022, 0.005, 0.0088, 0.0137, 0.0197, 0.0268, 0.0348, 0.0439, 0.0539, 0.0648, 0.0767, 0.0894, 0.1029, 0.1173, 0.1324, 0.1482, 0.1646, 0.1817, 0.1994, 0.2176, 0.2363, 0.2555, 0.2751, 0.295, 0.3153, 0.3359, 0.3567, 0.3777, 0.3989], KIL=[{"l": 0.0, "mm": 0.0, "ink": 0.2089}, {"l": 0.33, "mm": 0.099, "ink": 0.2089}, {"l": 0.67, "mm": 0.201, "ink": 0.2086}, {"l": 1.0, "mm": 0.299, "ink": 0.2081}, {"l": 1.33, "mm": 0.398, "ink": 0.2065}, {"l": 1.67, "mm": 0.5, "ink": 0.2025}, {"l": 2.0, "mm": 0.599, "ink": 0.198}, {"l": 2.33, "mm": 0.698, "ink": 0.1926}, {"l": 2.67, "mm": 0.799, "ink": 0.1865}, {"l": 3.0, "mm": 0.898, "ink": 0.1816}, {"l": 3.33, "mm": 0.997, "ink": 0.1766}, {"l": 3.67, "mm": 1.099, "ink": 0.1724}, {"l": 4.0, "mm": 1.198, "ink": 0.1689}, {"l": 4.33, "mm": 1.296, "ink": 0.1652}, {"l": 4.67, "mm": 1.398, "ink": 0.1614}, {"l": 5.0, "mm": 1.497, "ink": 0.1583}, {"l": 5.33, "mm": 1.596, "ink": 0.156}, {"l": 5.67, "mm": 1.698, "ink": 0.1531}, {"l": 6.0, "mm": 1.796, "ink": 0.1501}, {"l": 6.33, "mm": 1.895, "ink": 0.1471}, {"l": 6.67, "mm": 1.997, "ink": 0.1443}, {"l": 7.0, "mm": 2.096, "ink": 0.1411}, {"l": 7.33, "mm": 2.195, "ink": 0.1382}, {"l": 7.67, "mm": 2.296, "ink": 0.1359}, {"l": 8.0, "mm": 2.395, "ink": 0.1328}], CUT=[{"K": 1, "cos": 3, "iou": 0.0}, {"K": 2, "cos": 7, "iou": 0.0}, {"K": 4, "cos": 25, "iou": 0.2698}, {"K": 7, "cos": 75, "iou": 0.3941}, {"K": 10, "cos": 159, "iou": 0.4495}, {"K": 14, "cos": 307, "iou": 0.4896}, {"K": 18, "cos": 505, "iou": 0.5362}, {"K": 23, "cos": 827, "iou": 0.5791}, {"K": 29, "cos": 1315, "iou": 0.6359}, {"K": 35, "cos": 1927, "iou": 0.6901}, {"K": 42, "cos": 2763, "iou": 0.7222}, {"K": 49, "cos": 3763, "iou": 0.7608}, {"K": 57, "cos": 5095, "iou": 0.7963}, {"K": 66, "cos": 6837, "iou": 0.8284}, {"K": 75, "cos": 8833, "iou": 0.8566}, {"K": 85, "cos": 11351, "iou": 0.8739}, {"K": 95, "cos": 14173, "iou": 0.8915}, {"K": 106, "cos": 17633, "iou": 0.9081}, {"K": 118, "cos": 21855, "iou": 0.925}, {"K": 130, "cos": 26539, "iou": 0.9382}, {"K": 143, "cos": 32105, "iou": 0.9502}, {"K": 156, "cos": 38213, "iou": 0.96}, {"K": 170, "cos": 45393, "iou": 0.9727}, {"K": 185, "cos": 53751, "iou": 0.9829}, {"K": 200, "cos": 62815, "iou": 0.9917}];
+const FRW=[0.0, 1.0, 2.1, 3.1, 4.2, 5.2, 6.2, 7.3, 8.3, 9.4, 10.4, 11.4, 12.5, 13.5, 14.6, 15.6, 16.6, 17.7, 18.7, 19.8, 20.8, 21.8, 22.9, 23.9, 25.0, 26.0];
 const sp=n=>n.toLocaleString('en-US').replace(/,/g,'\u2009');
 wire('cut','cut','k',CUT.length,i=>'<b>'+sp(CUT[i].cos)+'</b> cosines <em>· '
   +(100*CUT[i].iou).toFixed(0)+' % of the tile</em>');
 wire('k','chi','t',31,i=>'\u03c7 = <b>'+CHI[i].toFixed(3)+'</b><em>'
-  +(i===20?' · this is the tile':i===0?' · a snowflake':i>20?' · never painted':'')+'</em>');
+  +(i===20?' · this is the tile':i===0?' · mirrors forced on':i>20?' · never painted':'')+'</em>');
+wire('frac','frac','w',FRW.length,i=>'displacement = <b>'+FRW[i].toFixed(1)+'</b> px<em>'
+  +(i===0?' \u00b7 the tile, unchanged':' \u00b7 at every scale at once')+'</em>');
 wire('kil','kiln','s',KIL.length,i=>'\u2113 = <b>'+KIL[i].mm.toFixed(2)+'</b> mm'
   +(i===0?'<em> · unfired</em>':i<4?'<em> · a real firing</em>':'<em> · hotter than any kiln</em>'));
 </script></body></html>
