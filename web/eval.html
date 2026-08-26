@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>talk to a brick wall — does the router understand anything?</title>
+<style>
+:root{--paper:#f7f5f0;--ink:#213660;--dark:#282c34;--grey:#8b8880;--rule:#e0dcd3;--warm:#b0554a;--ok:#3f7d4e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--dark);font:15px/1.55 Georgia,'DejaVu Serif',serif}
+.wrap{max-width:960px;margin:0 auto;padding:34px 20px 80px}
+h1{font:400 24px/1.2 Georgia,serif;margin:0 0 4px}
+p.sub{color:var(--grey);margin:0 0 22px;max-width:70ch;font-size:14px}
+button{font:600 12px 'DejaVu Sans',system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;
+ color:#fff;background:var(--ink);border:0;border-radius:5px;padding:10px 16px;cursor:pointer}
+button[disabled]{opacity:.45;cursor:default}
+#stat{color:var(--grey);font:12.5px 'DejaVu Sans',system-ui,sans-serif;margin:14px 0 0}
+table{border-collapse:collapse;width:100%;margin-top:20px;font:13px 'DejaVu Sans',system-ui,sans-serif}
+th,td{text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{color:var(--grey);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.pass{color:var(--ok)} .fail{color:var(--warm)}
+.score{display:flex;gap:26px;flex-wrap:wrap;margin:22px 0 6px;padding:15px 18px;
+ border:1px solid var(--rule);border-radius:7px;background:#fff}
+.score div{min-width:130px}
+.score b{display:block;font:600 21px 'DejaVu Sans',system-ui,sans-serif;color:var(--ink)}
+.score span{font:11px 'DejaVu Sans',system-ui,sans-serif;color:var(--grey);text-transform:uppercase;letter-spacing:.08em}
+code{font:12px 'DejaVu Sans Mono',monospace;background:#fff;border:1px solid var(--rule);border-radius:3px;padding:1px 4px}
+</style></head><body><div class="wrap">
+
+<h1>Does the router understand anything?</h1>
+<p class="sub">141 questions in four sets, put to the two things that route them on
+<a href="index.html">the wall</a>: phrase rules, and all-MiniLM-L6-v2 embedding whatever you
+type. Both are loaded from <code>llm.js</code>, the same file the page ships, so this cannot
+score a copy that has drifted. Only the last two sets mean anything — the first two were
+written while the rules were open on the screen.</p>
+
+<button id="go">run the whole thing</button>
+<p id="stat">The model is 23 MB and arrives from the Hugging Face CDN on the first run.</p>
+<div id="score"></div>
+<div id="out"></div>
+
+<script src="llm.js"></script>
+<script type="module">
+const $ = s => document.querySelector(s);
+const NAMES = {tuned:'written with the rules open', blind:'written blind',
+               fresh:'fresh — neither was tuned on it', weird:'weird — what people type'};
+$('#go').onclick = async () => {
+  $('#go').disabled = true;
+  const sets = await (await fetch('evalsets.json')).json();
+  $('#stat').textContent = 'loading all-MiniLM-L6-v2…';
+  const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+  const ex = await pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2',{dtype:'q8'});
+  const ids = Object.keys(WALLLM.DESC);
+  const V = (await ex(Object.values(WALLLM.DESC),{pooling:'mean',normalize:true})).tolist();
+  const embed = async q => (await ex([q],{pooling:'mean',normalize:true})).tolist()[0];
+  const rank = async q => { const e = await embed(q);
+    return ids.map((id,i)=>[id, V[i].reduce((a,v,k)=>a+v*e[k],0)]).sort((a,b)=>b[1]-a[1]); };
+
+  const rows = [];
+  for (const [key, set] of Object.entries(sets)) {
+    for (const [q, want] of set) {
+      const rx = WALLLM.matchWords(q);
+      let model = null, sim = 0;
+      if (String(q).trim()) { const r = await rank(q); if(!String(r[0][0]).startsWith('_')){ model = r[0][0]; sim = r[0][1]; } }
+      const m = sim >= WALLLM.THRESHOLD ? model : null;
+      rows.push({key, q, want, rx, model: m, sim, casc: rx || m});
+      $('#stat').textContent = 'scoring… ' + rows.length + ' / 141';
+    }
+  }
+  const acc = (k, key) => rows.filter(r => (!key || r.key===key)).filter(r => r[k]===r.want).length;
+  const n = key => rows.filter(r => !key || r.key===key).length;
+  $('#score').innerHTML = ['rx','model','casc'].map(k =>
+    `<div><b>${acc(k)} / ${n()}</b><span>${{rx:'phrase rules',model:'MiniLM alone',casc:'rules, then model'}[k]}</span></div>`
+  ).join('') + `<div><b>${acc('casc','fresh')} / ${n('fresh')}</b><span>cascade, fresh set</span></div>`
+             + `<div><b>${acc('casc','weird')} / ${n('weird')}</b><span>cascade, weird set</span></div>`;
+
+  let html = '<table><tr><th>set</th><th>question</th><th>wanted</th><th>rules</th><th>model</th><th class="n">sim</th></tr>';
+  for (const s of Object.keys(sets)) {
+    html += `<tr><td colspan="6" style="padding-top:16px;color:var(--ink)"><b>${NAMES[s]}</b> — rules ${acc('rx',s)}/${n(s)}, model ${acc('model',s)}/${n(s)}, cascade ${acc('casc',s)}/${n(s)}</td></tr>`;
+    for (const r of rows.filter(r => r.key===s)) {
+      const cls = v => v===r.want ? 'pass' : 'fail';
+      html += `<tr><td></td><td>${r.q || '<i>(empty)</i>'}</td><td>${r.want||'—'}</td>`
+            + `<td class="${cls(r.rx)}">${r.rx||'—'}</td><td class="${cls(r.model)}">${r.model||'—'}</td>`
+            + `<td class="n">${r.sim ? r.sim.toFixed(2) : ''}</td></tr>`;
+    }
+  }
+  $('#out').innerHTML = html + '</table>';
+  $('#stat').textContent = 'done. Green is a hit, warm is a miss, an em dash is a refusal.';
+};
+</script></div></body></html>
