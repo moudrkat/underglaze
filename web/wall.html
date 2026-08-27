@@ -105,13 +105,30 @@ body.knobs .wall{aspect-ratio:.845}
 /* Two ways into the tile that just answered, because the answer is a sentence
    and the page is a set of knobs, and nothing said so. Its own row, always
    reserved, so the wall does not jump when it appears. */
-.more{margin:0;width:100%;max-width:var(--wallw,100%);height:1.5em;overflow:hidden;
+.more{margin:0;width:100%;max-width:var(--wallw,100%);height:2.1em;overflow:hidden;
+ display:flex;align-items:center;
  font:italic clamp(12px,1.8vh,16px)/1.5 Georgia,serif;color:var(--grey);
  opacity:0;transition:opacity .3s}
 .more.on{opacity:1}
 .more a{color:var(--warm);cursor:pointer;border-bottom:1px solid rgba(176,85,74,.45)}
 .more a:hover{border-bottom-color:var(--warm);background:rgba(176,85,74,.07)}
 .more b{font-weight:400;margin:0 .7em;color:var(--grey)}
+/* the arrows are the same circle as the ? on a tile, so they read as controls
+   the moment you have seen one */
+.pg{margin-right:1.15em;white-space:nowrap;display:inline-flex;align-items:center;gap:.3em}
+.pg a{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;
+ width:1.65em;height:1.65em;padding:0;font-size:1em;line-height:1;
+ display:inline-flex;align-items:center;justify-content:center;
+ color:var(--warm);background:#fff;border:1px solid rgba(176,85,74,.45);border-radius:50%;
+ box-shadow:0 1px 2px rgba(60,50,38,.14)}
+.pg a:hover{background:var(--warm);color:#fff;border-color:var(--warm)}
+.pg i{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;
+ font-size:.78em;letter-spacing:.06em;color:var(--grey);min-width:3.6em;text-align:center}
+/* the tile the row is talking about, lifted whether or not the wall is working */
+.tile.current{z-index:5;transform:scale(1.045);
+ outline:2px solid var(--warm);outline-offset:1px;
+ box-shadow:0 8px 20px rgba(60,50,38,.45), inset 0 0 0 .5px rgba(255,255,255,.7)}
+.wall.busy .tile.current{filter:none}
 /* and when "try it yourself" brings the sliders out, say which slider */
 @keyframes nudge{0%,100%{box-shadow:0 1px 2px rgba(60,50,38,.30),
                                    inset 0 0 0 .5px rgba(255,255,255,.7)}
@@ -390,7 +407,7 @@ window.wall = {
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
-  async run(id, ms=90){
+  async run(id, ms=135){
     if(Array.isArray(id)) return this.runMany(id, ms);
     if(!TILE[id]) return 'no such tile';
     stopped=false;
@@ -400,24 +417,32 @@ window.wall = {
     cell.classList.add('speaking');
     this.line(id, this._lastQ);
     const t=TILE[id];
+    this._said = [id]; this._at = 0;
     document.querySelector('.wall').classList.add('busy');
     for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
     document.querySelector('.wall').classList.remove('busy');
     return t.out.textContent;
   },
-  // With more than one tile moving there is no single speaker, so the wall
-  // recites: one tile's line at a time, held long enough to read. It outlasts
-  // the sweep on purpose -- the wall finishes its sentence after it stops.
-  _recite(ids, hold=1600){
+  // With more than one tile moving there is no single speaker. This used to
+  // recite -- a new line every 1.6 s until it ran out -- and with nine tiles
+  // answering that is nine sentences arriving faster than anyone reads one,
+  // none of which you can get back. So it says the first and stops, and the
+  // row underneath turns into a pager. Nothing moves unless you move it.
+  _recite(ids){
     clearInterval(this._rt);
-    let k = 0;
-    const step = () => { if(k >= ids.length){ clearInterval(this._rt); return; }
-                         this.line(ids[k++]); };
-    step();
-    if(ids.length > 1) this._rt = setInterval(step, hold);
-    return ids.length * hold;
+    this._said = ids.slice();
+    this._at = 0;
+    this.line(ids[0]);
+    return ids.length;
   },
-  async runMany(ids, ms=90){
+  page(d){
+    const ids = this._said || [];
+    if(ids.length < 2) return 'nothing to page through';
+    clearInterval(this._rt);
+    this._at = (this._at + d + ids.length) % ids.length;
+    return this.line(ids[this._at]);
+  },
+  async runMany(ids, ms=135){
     ids = (ids===undefined||ids==='all') ? Object.keys(TILE)
         : (Array.isArray(ids) ? ids : [ids]);
     ids = ids.filter(i=>TILE[i]);
@@ -442,7 +467,7 @@ window.wall = {
     running=false; if(btn) btn.innerHTML='&#9654;';
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
-  all(ms=90){ return this.runMany(Object.keys(TILE), ms); },
+  all(ms=135){ return this.runMany(Object.keys(TILE), ms); },
   async ask(q){
     // Measured on 30 questions neither router had seen: words alone 14/30, model
     // alone 21/30, words-then-model 22/30. So: words first, model for the rest.
@@ -546,12 +571,13 @@ window.wall = {
     // recital gives it before the next tile speaks
     const per = Math.max(7, Math.min(24, 1050 / Math.max(1, body.length)));
     let i = 0;
-    this.hint(null);
+    // the pager and the spotlight land with the label, not after the last
+    // character: turning a page should move the wall the moment you click it
+    this.hint(who);
     this._typing = setInterval(() => {
       i += body.length > 90 ? 2 : 1;
       out.textContent = body.slice(0, i);
-      if(i >= body.length){ clearInterval(this._typing); out.textContent = body;
-                            this.hint(who); }
+      if(i >= body.length){ clearInterval(this._typing); out.textContent = body; }
     }, per);
     return text;
   },
@@ -561,15 +587,31 @@ window.wall = {
   hint(id){
     const el = document.getElementById('more');
     if(!el) return id;
-    if(!id || !TILE[id]){ el.className = 'more'; el.innerHTML = ''; return id; }
+    if(!id || !TILE[id]){ el.className = 'more'; el.innerHTML = '';
+                          this.spot(null); return id; }
+    const ids = this._said || [];
     // the id rides on a data attribute, the way .ex carries its question: the
     // onclick is inside a python string inside a python string and a quote put
     // in here does not arrive as a quote out there
-    el.innerHTML = '<a data-t="'+id+'" onclick="wall.tryit(this.dataset.t)">'
-                 + 'try it yourself</a><b>&middot;</b>'
-                 + '<a data-t="'+id+'" onclick="wall.tell(this.dataset.t)">'
-                 + 'find out more</a>';
+    el.innerHTML = (ids.length > 1
+        ? '<span class="pg"><a onclick="wall.page(-1)" title="the tile before">&lsaquo;</a>'
+          + '<i>' + (ids.indexOf(id) + 1) + ' of ' + ids.length + '</i>'
+          + '<a onclick="wall.page(1)" title="the next tile">&rsaquo;</a></span>'
+        : '')
+      + '<a data-t="'+id+'" onclick="wall.tryit(this.dataset.t)">'
+      + 'try it yourself</a><b>&middot;</b>'
+      + '<a data-t="'+id+'" onclick="wall.tell(this.dataset.t)">'
+      + 'find out more</a>';
     el.className = 'more on';
+    this.spot(id);
+    return id;
+  },
+  // whose line you are reading, marked on the wall, so paging moves a spotlight
+  // around it rather than only swapping the sentence
+  spot(id){
+    document.querySelectorAll('.tile.current').forEach(c => c.classList.remove('current'));
+    const c = id && document.querySelector('[data-tile="'+id+'"]');
+    if(c) c.classList.add('current');
     return id;
   },
   tryit(id){ this.reset(); this.knobs(true);
@@ -586,7 +628,8 @@ window.wall = {
       if(r) this.set(k, +r.defaultValue);
     });
     document.querySelectorAll('.tile').forEach(c =>
-      c.classList.remove('speaking','open','nudge'));
+      c.classList.remove('speaking','open','nudge','current'));
+    this._said = []; this._at = 0;
     document.querySelector('.wall').classList.remove('busy');
     return 'reset';
   },
@@ -679,7 +722,7 @@ setInterval(() => {
   if (running || Date.now() - lastTouch < 12000) return;
   lastTouch = Date.now();
   const k = Object.keys(TILE);
-  wall.run(k[Math.floor(Math.random() * k.length)], 110);
+  wall.run(k[Math.floor(Math.random() * k.length)], 160);
 }, 3000);
 
 const HELLO = [

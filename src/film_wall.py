@@ -36,7 +36,7 @@ URL = os.environ.get("WALL_URL", "http://localhost:8777/web/wall.html")
 VW, VH = 920, 560               # smallest viewport that is still the desktop wall
 OW, OH = 1080, 1350             # 4:5, the shape a feed gives the most room to
 FPS = 30
-PAGE_W = 880                    # the page column, scaled, inside the frame
+PAGE_W = 820                    # the page column, scaled, inside the frame
 PAGE_X, PAGE_Y = (OW - PAGE_W) // 2, 24
 
 PAPER, INK, WARM, GREY = (247, 245, 240), (33, 54, 96), (176, 85, 74), (139, 136, 128)
@@ -51,15 +51,16 @@ TITLE = "talk to a brick wall"
 # (question, how many tiles it should reach). Short, and the sort of thing
 # somebody actually types at a wall.
 SCRIPT = [
-    ("who painted you?", 1),
-    ("why are you blue?", 3),
-    ("tell me everything", 9),
+    ("who painted you?", 1, 0),
+    ("why are you blue?", 3, 2),      # and page through the other two answers
+    ("tell me everything", 9, 0),
 ]
 
 TYPE_MS = 42
-HOLD_OPEN = 1500       # on the bare wall before anything is typed
-HOLD_READ = 1600       # on each finished answer
-HOLD_END = 2600        # on the last one
+HOLD_OPEN = 1200       # on the bare wall before anything is typed
+HOLD_READ = 1000       # on each finished answer
+HOLD_PAGE = 1500       # on each answer paged to
+HOLD_END = 2200        # on the last one
 
 READ = ("() => [...document.querySelectorAll('.tile input[type=range]')]"
         ".map(r => r.value).join(',')")
@@ -130,7 +131,7 @@ def film():
         print("rolling at +%.1f s, crop %s" % (start, crop))
         pg.wait_for_timeout(HOLD_OPEN)
 
-        for i, (q, want) in enumerate(SCRIPT):
+        for i, (q, want, pages) in enumerate(SCRIPT):
             touch(pg)
             pg.click("#q")
             pg.fill("#q", "")
@@ -138,7 +139,15 @@ def film():
             t_ask = time.monotonic() - clock
             pg.keyboard.press("Enter")
             lit, t_lit = wait_quiet(pg)
-            pg.wait_for_timeout(HOLD_END if i == len(SCRIPT) - 1 else HOLD_READ)
+            pg.wait_for_timeout(HOLD_READ)
+            # the wall no longer recites: with more than one tile answering it
+            # says the first and waits, so the film has to turn the pages
+            for _ in range(pages):
+                touch(pg)
+                pg.click(".pg a:last-child")
+                pg.wait_for_timeout(HOLD_PAGE)
+            if i == len(SCRIPT) - 1:
+                pg.wait_for_timeout(HOLD_END)
             beats.append({"q": q, "wanted": want, "lit": lit,
                           "names": [names.get(t, t) for t in lit],
                           "ask": round(t_ask - start, 2),
