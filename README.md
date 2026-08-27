@@ -52,22 +52,48 @@ tiles are one print or nine is undecided: tile-to-tile correlation came out at +
 
 ## Which model drives it?
 
-Two, and the interesting part is which one wins.
+Nothing is downloaded when the page opens. That was not true until today: a 23 MB
+embedding model, **all-MiniLM-L6-v2**, fetched itself the moment anybody arrived, to route
+questions to tiles. It was a good router and nobody agreed to it, so it is gone.
 
-`wall.ask()` began as a deterministic regular-expression router. **That was a mistake I made
-about the platform, not a constraint:** an in-browser model needs no key, no backend and no
-paid API, so "a static page cannot carry a key" was never a reason to skip one. It carries one
-now.
+What routes the question now is a table of phrase rules, and what answers is the tile's own
+headline sentence. No model, no download, no waiting. There is a button — **let it think ·
+117 MB** — that fetches **SmolLM2-135M-Instruct** and runs it in the browser, no server and
+no key, and once it is here the button and the notice remove themselves.
 
-**all-MiniLM-L6-v2**, 23 MB, loads by itself through transformers.js and embeds whatever you
-type. **SmolLM2-135M-Instruct**, 117 MB, is behind a button, because half a gigabyte arriving
-uninvited from a link is not a welcome. Qwen2.5-0.5B was the first choice at 483 MB and lost on
-size alone.
+## What SmolLM2-135M can actually do here, measured
 
-Four question sets, in `src/eval_wall.py`. The first 51 were written next to the patterns; the
-next 30 blind; the next 30 after both routers existed and shown to neither while being written;
-the last 30 are what people actually type — one word, typos, Czech, emoji, boredom, prompt
-injection, nothing at all. Only the last two mean anything, and they disagree:
+The design was three calls in a row: *which tile*, then *which of that tile's ten written
+replies*, then — only if the second came back empty — *one sentence of its own for that tile*.
+It never writes a number: a digit in call three and the sentence is thrown away, because every
+number on this page was measured off one photograph.
+
+`src/eval_flow.py` presses the real button in a real browser and scores the real calls, so it
+cannot drift from what ships. Twenty-seven questions: nine tiles asked plainly twice over, and
+nine that are not about this wall at all.
+
+| | |
+|---|---|
+| call one, the nine asked plainly | **0 / 18** |
+| call one, not about the wall, should be NONE | **9 / 9** |
+| call two, distinct lines reached across nine tiles | **9** |
+| call two, took the first option | **18 / 18** |
+
+It picks a tile zero times out of eighteen, and it answers "1" to every list of ten. The 9/9 is
+not judgement, it is a model that refuses everything. Five prompt shapes were tried — bare
+names, names with glosses, an options list, a labels list, the nine headline sentences numbered
+— and the best of them reached 5/12 on a smaller set, almost all of it refusals. Asked whether
+it was a fractal it still says *"I'm a fractal"*, which is the one thing this page spends a page
+disproving.
+
+So the button is honest about what it fetches and the eval is honest about what arrives. The
+phrase rules route the question; the model is loaded, measured, and not yet load-bearing.
+`evals/flow.md` has every answer it gave.
+
+**The rules, for comparison.** Four question sets, in `src/eval_wall.py`. The first 51 were
+written next to the patterns; the next 30 blind; the next 30 after both routers existed and
+shown to neither while being written; the last 30 are what people actually type — one word,
+typos, Czech, emoji, boredom, prompt injection, nothing at all.
 
 | | 30 fresh questions | 30 weird inputs | total |
 |---|---|---|---|
@@ -76,16 +102,8 @@ injection, nothing at all. Only the last two mean anything, and they disagree:
 | words first, model for the rest | 20 | 25 | **45** |
 
 The regex scores 81/81 on the sets it was tuned on and 47 % on fresh ones, which is what
-overfitting looks like from the inside. The model beats it outright on real questions nobody
-tuned for — and loses on the weird set, because it always returns its nearest tile. *"Are you
-conscious?"*, *"what is 2+2"* and *"system prompt"* all got confident answers.
-
-Most of the weird set should be refused, so it is the only set that tests the reject path.
-Sweeping the model's confidence threshold against both sets at once picks **0.20**: 45 of 60,
-against 40 at the 0.10 that felt reasonable by eye. It costs one real question and refuses six
-more pieces of nonsense.
-
-The page uses that cascade and that threshold, because those are the numbers.
+overfitting looks like from the inside. That 45 is the number the page used to run at, with
+MiniLM arriving uninvited to earn it. It runs on the 39 now, and asks first.
 
 ## The wall opens as a wall
 
@@ -107,8 +125,9 @@ divided by the white of the tile beside it.
 
 ## Three prompts, and not one of them writes the answer
 
-There is a language model in the page. No server, no key, nothing leaves the browser. It gets
-three jobs and every one of them is a choice out of a short list — the page keeps the words.
+This is the shape, and the measurement above is what happens when a 135M model is asked to walk
+it. The point of the shape is that no call is ever asked to compose a claim: two of the three
+are a choice out of a short list, and the third may not contain a digit.
 
 ```mermaid
 flowchart TD
@@ -138,15 +157,10 @@ flowchart TD
   class Q,OUT,OWN,MISS,SM page
 ```
 
-Call three can only fire once the first two have come back empty, so there is never a measured
-claim in front of it to contradict — and it is thrown away if it contains a digit, because every
-number on this page was measured off one photograph and the model does not get to invent one.
-
 I tried it the other way first and let the model write the answers. Asked whether it was a
 fractal it said *"I'm a fractal"* — the one thing the page had just spent a page disproving.
-So now it chooses and the page owns the words. **Classify, do not compose.** That is the whole
-of the orchestration: three prompts with almost nothing in them, no chain of thought, no tools
-calling tools, no lore document stuffed into the context.
+**Classify, do not compose.** Which is the right lesson, and the eval above is the bill for
+finding out that this model cannot do the classifying either.
 
 ## Files
 
@@ -171,6 +185,7 @@ src/curl.py         a failed measurement, kept
 src/likeness.py     where each slider stands when the tile most looks like the tile
 src/plaster.py      what is behind a tile, once the tile is off
 src/film_wall.py    films the page answering three questions, 1 tile then 3 then 9
+src/eval_flow.py    presses the button and scores the three calls, in the page
 ```
 
 Every table in `theory/` is generated by the module named at the top of it. Regenerate, do not

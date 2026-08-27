@@ -94,6 +94,11 @@ LINES = [('cut', 'Sixty-two thousand cosines to draw me. Most of them are dots y
 TAG = ['And which of us is talking to a wall here?', 'Just so we are clear on who the wall is.', 'You asked, remember.', 'I did not start this.', 'Say what you like about my conversation, I have never left the room.', 'Anyway. You are still here.', 'No pressure. I have got until the building comes down.', 'That is the sort of thing you learn standing still for ninety years.', 'Do not let me keep you.', 'It is a strange hobby you have, but go on.', 'I would nod, but.', 'You may quote me. I am not going anywhere.', 'One of us has somewhere else to be.', 'This counts as my busiest day.', 'The kettle disagrees, but the kettle always does.', 'I only know nine things, and you have now heard one of them.', 'There is more where that came from. Eight more, to be exact.', 'Ask the tile next to me. She will say the same about herself.']
 ASIDE = ['You are talking to a wall. I would like that on the record.', 'This is going better than the phrase suggests.', 'Somebody photographed me and now I have opinions.', 'Ninety years on this wall and today is the first time anyone asked.', 'You could be outside. There is a whole valley out there.', 'I am a wall. You are doing most of the work in this conversation.', 'Nine tiles and a kettle. That is the entire social circle in here.', 'There is no polite way to put this: I am grouting.', 'The kettle has heard all of this before.', 'I cannot leave, so take your time.', 'You are the first thing to happen here since the boiler.', 'I answer, which is more than the phrase promised.']
 CHAT = ['Cold. It is a kitchen wall.', 'Still here. Fired once, and nothing since.', 'Grouted. You?', 'Somebody measured me and I have not stopped talking since.', 'Fine. Slightly crazed in the top left corner.', 'The same as yesterday, and the ninety years before that.', 'Warm on this side. The other one faces the pantry.', 'Hello. Ask me something narrow.', 'Upright. That is most of it.', 'Blue, mostly.']
+LOOK = ['Watch this one.', 'Here. Look at this one.', 'Keep your eye on this one.',
+        'This one. Watch what happens to it.', 'That one. Go on, watch.',
+        'Hold on \u2014 watch this.', 'Look what happens to this one.',
+        'This one has something to show you.']
+
 MISS = ['That is not on my wall.', 'I know nine things. Not that one.', 'No idea. I am a tile.', 'Above my glaze.', 'Nobody measured that.', 'Ask the kettle.', 'Not one of my nine.', 'I was fired at nine hundred degrees. Some things did not survive.', 'Try the fire, or the fractal, or who painted me.', 'I have stood here since 1885 and I still do not know.', 'Talking to me is talking to a brick wall.', 'That one nobody wrote down.', 'I only know what somebody measured.', 'Not my department.', 'Wrong tile.', 'You will have to ask the wall next door.']
 INTENT_JS = '''[['_knobs',/show me the numbers|show the numbers|show the sliders|let me play|give me the controls|the knobs|hide the numbers|hide the sliders/],
  ['_demo',/show me what you can do|what can you show|impress me|give me the tour|show off/],
@@ -102,10 +107,10 @@ INTENT_JS = '''[['_knobs',/show me the numbers|show the numbers|show the sliders
  ['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
  ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\\b|what are you\\?/],
  ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]]'''
-RULES_TBL = '''[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous/],
+RULES_TBL = '''[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous|blue|flower|colour|color/],
  ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
- ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze/],
- ['copy',/copy|copied|\\bold\\b|\\bage\\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit/],
+ ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze|cobalt/],
+ ['copy',/copy|copied|\\bold\\b|\\bage\\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit|paint|cobalt|onion|meissen|zwiebel/],
  ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
  ['attn',/attention|\\bai\\b|language model|\\bmodel\\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
  ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
@@ -231,9 +236,11 @@ body.knobs .wall{aspect-ratio:.845}
 .said{margin:0;width:100%;max-width:var(--wallw,100%);
  font-family:Georgia,serif;font-style:italic;
  font-size:clamp(13px,2.4vh,20px);line-height:1.32;color:var(--ink);
- /* two lines, always reserved, so a long answer never shoves the wall down */
- height:calc(2 * 1.32em); overflow:hidden;
+ /* three lines, always reserved, so a fact with an aside after it never shoves
+    the wall down */
+ height:calc(3 * 1.32em); overflow:hidden;
  opacity:0;transition:opacity .35s}
+.said em{color:var(--grey)}
 .said b{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
@@ -368,7 +375,7 @@ footer a{color:var(--grey)}
 <input type="text" id="q" placeholder="ask it something…"
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
-<button class="go" id="speak" style="display:none" title="load SmolLM2-135M and let it choose, in this browser">speak</button>
+<button class="go" id="speak" title="download SmolLM2-135M and run it in this browser, no server and no key">let it think &middot; 117 MB</button>
 <button class="go" id="knobs" onclick="wall.knobs()" title="show the sliders and the numbers">&#9707;</button>
 <button class="go" onclick="wall.about()" title="what is this">?</button>
 <span id="mstat" class="mstat"></span>
@@ -498,9 +505,12 @@ window.wall = {
   // something you are looking at.
   label(id){
     const el = document.getElementById('said');
-    const tag = document.querySelector('[data-tile="'+id+'"] .tag');
     clearInterval(this._typing);
-    el.innerHTML = tag ? '<b>' + tag.textContent + '</b>' : '';
+    // Not the tile's name -- the tile has lifted out of the wall and the other
+    // eight have gone into shadow, so which one is not in question. What is
+    // missing is somebody saying look, so the wall says it.
+    const L = WALLLM.LOOK;
+    el.innerHTML = '<em>' + L[Math.floor(Math.random()*L.length)] + '</em>';
     el.classList.add('on');
     this.hint(id);
     return id;
@@ -582,79 +592,48 @@ window.wall = {
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
   all(ms=150){ return this.runMany(Object.keys(TILE), ms); },
+  // Everything here is the model's. It gets three calls in a row -- which tile,
+  // which of that tile's ten replies, and then, only if the second came back
+  // empty, one sentence of its own for that tile. There is no router underneath
+  // it any more: a page of phrase rules answering in a model's place was the
+  // thing that made the answers look chosen when they were not.
+  //
+  // If nobody has pressed the button, nobody has agreed to a download, and the
+  // wall says so. It is still a wall -- every tile comes off, every slider
+  // moves, the play button runs all nine. It just does not take dictation.
   async ask(q){
-    // Measured on 30 questions neither router had seen: words alone 14/30, model
-    // alone 21/30, words-then-model 22/30. So: words first, model for the rest.
     this._lastQ = String(q||'');
     this.stop();
     this.reset();
     this.say('');
+    suggest(false);
+    // The model first, if somebody fetched one -- and then the phrase rules,
+    // because src/eval_flow.py says the model picks a tile 0 times out of 18
+    // and answers "1" to every list of ten. It is here, it is measured, and it
+    // is not yet load-bearing. The rules are what actually routes the question.
     if(this._pickTile){
-      const st=document.getElementById('mstat');
-      st.textContent='SmolLM2 thinking\u2026';
+      const st = document.getElementById('mstat');
       try{
+        if(st) st.textContent = 'which tile\u2026';
         const t = await this._pickTile(this._lastQ);
-        st.textContent = 'SmolLM2: ' + t.raw;
+        if(st) st.textContent = '';
         if(t.tile) return this.run(t.tile);
-        if(this._improvise){
-          st.textContent = 'SmolLM2 improvising\u2026';
-          const own = await this._improvise(this._lastQ);
-          if(own){ st.textContent = 'SmolLM2, its own words';
-                   return this.say(own); }
-        }
-        return this.miss();
-      }catch(e){ st.textContent='MiniLM + SmolLM2 135M'; }
+      }catch(e){ if(st) st.textContent = ''; }
     }
-    const byWord = this.matchWords(q);
-    if(byWord){ suggest(false);
-      if(byWord==='_all') return this.all();
-      if(byWord==='_help') return this.about();
-      if(byWord==='_knobs'){
-        const off = /hide/.test(String(q||'').toLowerCase());
-        return this.say(this.knobs(!off)); }
-      if(byWord==='_demo'){ this.knobs(false); return this.all(); }
-      if(byWord==='_which'){
-        const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
-        const k = String(q||'').toLowerCase();
-        const n = ORD.findIndex(o => k.includes(o));
-        const key = Object.keys(TILE)[n];
-        if(n >= 0 && key){ this.open(key); return this.run(key); }
-        return this.miss();
-      }
-      if(byWord==='_chat'){
-        return this.say(WALLLM.CHAT[Math.floor(Math.random()*WALLLM.CHAT.length)]); }
-      if(byWord==='_surprise'){ const k=Object.keys(TILE);
-        return this.run(k[Math.floor(Math.random()*k.length)]); }
-      // The words decide, but the model may add a second tile when the question
-      // reaches across two -- "how do you survive the fire and the years?" is
-      // the kiln to a phrase rule and the kiln plus the copying to the model.
-      if(this._model){
-        try{
-          const many = await this.choose(q);
-          if(many && many.length > 1 && many.some(m => m.tile === byWord))
-            return this.runMany(many.map(m => m.tile));
-        }catch(e){}
-      }
-      return this.run(byWord); }
-    if(this._model){
-      try{
-        const [id, sim] = await this._model(String(q||''));
-        if(id==='_all'){ suggest(false); return this.all(); }
-        if(id==='_help'){ suggest(false); return this.about(); }
-        if(id==='_surprise'){ suggest(false); const k=Object.keys(TILE);
-          return this.run(k[Math.floor(Math.random()*k.length)]); }
-        const many = await this.choose(q);
-        if(many && many.length > 1){ suggest(false);
-          return this.runMany(many.map(m=>m.tile)); }
-        if(sim >= WALLLM.THRESHOLD){
-          suggest(false);
-          return this.run(id);
-        }
-        this.miss(); return 'no tile matched';
-      }catch(e){ /* fall through */ }
-    }
+    const ids = this.matchAll(q);
+    if(ids.length > 1) return this.runMany(ids);
+    if(ids.length === 1) return this.run(ids[0]);
+    // and the intents that were never a tile
+    const w = this.matchWords(q);
+    if(w === '_all') return this.all();
+    if(w === '_help') return this.about();
+    if(w === '_surprise'){ const k=Object.keys(TILE);
+      return this.run(k[Math.floor(Math.random()*k.length)]); }
+    if(w === '_chat')
+      return this.say(WALLLM.CHAT[Math.floor(Math.random()*WALLLM.CHAT.length)]);
     this.miss(); return 'no tile matched';
   },
+  matchAll(q){ return WALLLM.matchTiles(q); },   // for an agent, not for ask()
   matchWords(q){ return WALLLM.matchWords(q); },
   // Twenty sentences, all true, all written here. The model may choose one; it
   // may not write one. See the note at the top of llm.js for why.
@@ -714,8 +693,6 @@ window.wall = {
           + '<i>' + (ids.indexOf(id) + 1) + ' of ' + ids.length + '</i>'
           + '<a onclick="wall.page(1)" title="the next tile">&rsaquo;</a></span>'
         : '')
-      + '<a data-t="'+id+'" onclick="wall.tryit(this.dataset.t)">'
-      + 'try it yourself</a><b>&middot;</b>'
       + '<a data-t="'+id+'" onclick="wall.tell(this.dataset.t)">'
       + 'find out more</a>';
     el.className = 'more on';
@@ -754,57 +731,33 @@ window.wall = {
     let s = null;
     const st = document.getElementById('mstat');
     if(this._pickLine && q){
-      if(st) st.textContent = 'SmolLM2: picking a reply\u2026';
       try{
-        s = (await this._pickLine(q, ls)).line;
+        s = (await this._pickLine(q, ls, id)).line;
         if(!s && this._improvise){
-          if(st) st.textContent = 'SmolLM2: none fitted, writing its own\u2026';
-          const own = await this._improvise(q);
-          if(own){ if(st) st.textContent = 'SmolLM2, its own words';
-                   return this.say(own, id); }
+          // nothing on the list fitted, so it writes one -- for this tile
+          const own = await this._improvise(q, id);
+          if(own) return this.say(own, id);
         }
-        if(st) st.textContent = s ? 'SmolLM2 chose a reply' : 'MiniLM + SmolLM2 135M';
-      }catch(e){ if(st) st.textContent = 'MiniLM + SmolLM2 135M'; }
+      }catch(e){ if(st) st.textContent = ''; }
     }
-    if(!s && Math.random() < 0.13)
-      return this.say(WALLLM.ASIDE[Math.floor(Math.random()*WALLLM.ASIDE.length)], id);
-    let line = s || ls[Math.floor(Math.random()*ls.length)];
+    // No model, no pretending. The tile says the first of its ten, which is
+    // written as its headline. Not a lottery -- and not a second hand-tuned
+    // matcher pretending to have read the question either. If you want one of
+    // the other nine chosen for you, there is a button for that.
+    let line = s || ls[0];
     if(line.length < 62 && Math.random() < 0.28){
       const t = WALLLM.TAG.filter(x => x.length + line.length < 118);
       if(t.length) line += ' ' + t[Math.floor(Math.random()*t.length)];
     }
+    // The aside is an aside. It used to arrive *instead of* the measurement,
+    // which is the one thing on this page nobody should have to gamble for.
+    if(Math.random() < 0.13){
+      const a = WALLLM.ASIDE.filter(x => x.length + line.length < 168);
+      if(a.length) line += ' \u2026 ' + a[Math.floor(Math.random()*a.length)];
+    }
     return this.say(line, id);
   },
-  // The routing tool: it may return several tiles when a question spans them.
-  // Anything within 0.04 of the best, capped at three.
-  // Proportional, not absolute: "are you a fractal or just complicated?" puts
-  // cut at 0.60 of frac and both belong; "are you a fractal?" puts it at 0.44
-  // and only one does. Half the leader, with a floor, and never more than three.
-  async choose(q, ratio=0.5, cap=3){
-    if(!this._all_model) return null;
-    const scored = (await this._all_model(String(q||'')))
-                     .filter(([id]) => !id.startsWith('_'));
-    const top = scored[0][1];
-    if(top < WALLLM.THRESHOLD) return [];
-    return scored.filter(([,s]) => s >= top*ratio && s >= 0.15)
-                 .slice(0, cap).map(([id,s]) => ({tile:id, sim:s}));
-  },
   miss(){ return this.say(WALLLM.MISS[Math.floor(Math.random()*WALLLM.MISS.length)]); },
-  async pick(q){
-    if(!this._model) return null;
-    const ls = WALLLM.LINES;
-    if(!this._lineVecs){
-      const o = await this._embed(ls.map(([,l]) => l));
-      this._lineVecs = o;
-    }
-    const e = (await this._embed([String(q||'')]))[0];
-    let best = null;
-    this._lineVecs.forEach((v,i) => {
-      const s = v.reduce((a,x,k)=>a+x*e[k],0);
-      if(!best || s > best.sim) best = {tile: ls[i][0], line: ls[i][1], sim: s};
-    });
-    return best;
-  },
   askWords(q){ const h=this.matchWords(q); return h ? this.run(h) : 'no tile matched'; },
   async converse(qs, ms=90){
     stopped=false;
@@ -849,8 +802,12 @@ const HELLO = [
 setTimeout(()=>{ if(!document.getElementById('said').textContent)
   wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 900);
 
-let exi=0; setInterval(()=>{ if(document.activeElement!==qi && !qi.value){
-  const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; } }, 3200);
+// The examples only start cycling once a model is here to read them. Before
+// that the box says what it is waiting for rather than inviting nine questions
+// it cannot answer.
+let exi=0; setInterval(()=>{
+  if(document.activeElement===qi || qi.value) return;
+  const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 // The top strip and the spoken line are set to the wall's real width, measured,
 // rather than to a formula that guessed at the header height and was 16 px out.
@@ -864,123 +821,117 @@ addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 })();
 </script>
 <script type="module">
-// A real model, in the page, with no server and no key: transformers.js runs
-// all-MiniLM-L6-v2 in the browser and embeds the question. The regular
-// expression stays as the instant answer while the weights are still arriving,
-// and as the answer if they never do.
-const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.", "perc": "When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses."};
+// Nothing is downloaded when the page opens. The wall answers from its own
+// words -- phrase rules for which tile, and word overlap for which of that
+// tile's ten sentences -- and that is the whole of it unless somebody asks for
+// a model, on a button that says what it costs.
+//
+// The model is SmolLM2-135M. It never writes a number and it always knows
+// which tile it is standing on. Three calls:
+//
+//   one    which tile, or NONE
+//   two    which of that tile's ten replies, or NONE
+//   three  only after two said NONE: write one, for that tile, no digits
+//
+// all-MiniLM-L6-v2 used to load itself on open, 23 MB, to route the question by
+// embedding. It was a good router and nobody agreed to it, so it is gone. What
+// it was never asked -- which of the ten -- the words do now.
+const DESC = ''' + json.dumps(DESC) + ''';
+const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
+                chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
+                ship:'IDENTITY', attn:'ATTENTION' };
 const st = document.getElementById('mstat');
-try{
-  const { pipeline } = await import(
-    'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
-  st.textContent = 'loading a model\u2026'; st.className = 'on';
-  const ex = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2',
-                            { dtype: 'q8' });
-  const ids = Object.keys(DESC);
-  const out = await ex(Object.values(DESC), { pooling: 'mean', normalize: true });
-  const V = out.tolist();
-  window.wall._embed = async arr =>
-    (await ex(arr, { pooling: 'mean', normalize: true })).tolist();
-  window.wall._all_model = async q => {
-    const e = (await ex([q], { pooling: 'mean', normalize: true })).tolist()[0];
-    return ids.map((id,i) => [id, V[i].reduce((a,v,k)=>a+v*e[k],0)])
-              .sort((a,b) => b[1]-a[1]);
-  };
-  window.wall._model = async q => {
-    const e = (await ex([q], { pooling: 'mean', normalize: true })).tolist()[0];
-    let best = null;
-    ids.forEach((id, i) => {
-      const s = V[i].reduce((a, v, k) => a + v * e[k], 0);
-      if (!best || s > best[1]) best = [id, s];
-    });
-    return best;                      // [tile, cosine similarity]
-  };
-  window.wall._name = 'all-MiniLM-L6-v2';
-  st.textContent = 'MiniLM';
+const btn = document.getElementById('speak');
+st.textContent = ''; st.className = 'mstat';
 
-  // SmolLM2-135M is back, but only as a chooser. It never writes a sentence --
-  // handed this tile's facts it once answered "I'm a fractal" about the one tile
-  // that is not, and looped "I'm a painting tile" until it ran out of tokens.
-  // Choosing a label out of a short list is the one thing a 135M can do, and
-  // Unt1l1f1nd/coalescence measured the same boundary from the other side.
-  // The list is repeated in the user turn, not parked in the system prompt,
-  // because that is what makes a model this size actually look at it.
-  document.getElementById('speak').style.display = '';
-  document.getElementById('speak').onclick = async () => {
-    const b = document.getElementById('speak');
-    b.disabled = true; b.textContent = 'fetching 117 MB\u2026';
-    try{
-      const { pipeline } = await import(
-        'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
-      const tries = navigator.gpu ? [['webgpu','q4f16'],['wasm','q4']] : [['wasm','q4']];
-      let gen = null, dev = null, err = null;
-      for(const [device, dtype] of tries){
-        try{
-          gen = await pipeline('text-generation','onnx-community/SmolLM2-135M-Instruct-ONNX',
-            { dtype, device, progress_callback: p => { if(p.status==='progress' && p.total)
-                b.textContent = Math.round(100*p.loaded/p.total) + ' %'; } });
-          dev = device; break;
-        }catch(e){ err = e; }
-      }
-      if(!gen) throw err;
-      const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
-                      chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
-                      ship:'IDENTITY', attn:'ATTENTION' };
-      const say = async (sys, user, n) => {
-        const o = await gen([{role:'system',content:sys},{role:'user',content:user}],
-                            { max_new_tokens: n, do_sample: false });
-        const m = o[0].generated_text;
-        return (Array.isArray(m) ? m[m.length-1].content : String(m)).trim();
-      };
-      // Call one: which tile, or none. Nothing else in the prompt.
-      window.wall._pickTile = async q => {
-        const list = Object.values(NAMES).join(', ') + ', NONE';
-        const said = (await say(
-          'You are a tiled kitchen wall of nine tiles, each about one thing. First you pick '
-          + 'the tile. Then you will be asked to pick its reply. Answer with one word.',
-          'A visitor asks: "' + q + '" \u2014 which tile? ' + list, 6)).toUpperCase();
-        const hit = Object.entries(NAMES).find(([,n]) => said.includes(n));
-        return { raw: said.slice(0,20), tile: hit ? hit[0] : null };
-      };
-      // Call two: which of these lines. Nothing else in the prompt.
-      window.wall._pickLine = async (q, opts) => {
-        const numbered = opts.map((l,i) => (i+1) + '. ' + l).join(' ');
-        const said = await say(
-          'You are a tile on a kitchen wall. You have already picked the tile. Now pick its '
-          + 'reply by number. If none of them fits, answer NONE and you will get to write '
-          + 'your own instead. Answer with one number, or NONE.',
-          'A visitor asks: "' + q + '" \u2014 which reply? ' + numbered + ' or NONE', 4);
-        if(/NONE/i.test(said)) return { raw: 'NONE', line: null };
-        const d = (said.match(/[1-9]/) || [])[0];
-        const i = d ? (+d - 1) : -1;
-        return { raw: said.slice(0,12), line: opts[i] || null };
-      };
-      // Call three, and only if the first two came back empty: let it write its
-      // own sentence. It can only fire when no tile was chosen, so there is no
-      // measured claim for it to contradict -- and it may not contain a digit,
-      // because every number on this page was measured off a photograph. One
-      // digit and the sentence is thrown away for a written one.
-      window.wall._improvise = async q => {
-        let t = await say(
-          'You are one painted tile on a kitchen wall in a Czech valley. Nothing on the list '
-          + 'fitted, so this one is yours. One short sentence, first person, no numbers.',
-                          '"' + q + '" \u2014 reply in fewer than twelve words.', 26);
-        t = String(t).split(String.fromCharCode(10))[0]
-                     .replace(/^[\"\u201c]+|[\"\u201d]+$/g, '').trim();
-        if(!t || t.length < 6 || t.length > 90) return null;
-        if(/[0-9]/.test(t)) return null;                       // no invented numbers, ever
-        const half = t.slice(0, Math.floor(t.length/2)).trim();
-        if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
-        return t;
-      };
-      window.wall._think = true;
-      window.wall._genName = 'SmolLM2-135M on ' + dev;
-      b.textContent = 'thinking here';
-      st.textContent = 'MiniLM + SmolLM2 135M';
-    }catch(e){ b.textContent = 'could not load'; console.warn(e); }
-  };
-}catch(e){ st.textContent = 'no model \u2014 words only'; st.className='on warn';
-  console.warn('model unavailable, falling back to the router', e); }
+btn.onclick = async () => {
+  btn.disabled = true; btn.textContent = 'fetching\u2026';
+  try{
+    const { pipeline } = await import(
+      'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+    // navigator.gpu exists in plenty of browsers that cannot actually give you
+    // an adapter, and asking for a webgpu pipeline there fetches 117 MB and
+    // then throws "no available backend" -- after which the wasm retry inherits
+    // the wreckage and throws too. So ask for the adapter first.
+    let gpu = false;
+    try{ gpu = !!(navigator.gpu && await navigator.gpu.requestAdapter()); }catch(e){}
+    const tries = gpu ? [['webgpu','q4f16'],['wasm','q4']] : [['wasm','q4']];
+    let gen = null, dev = null, err = null;
+    for(const [device, dtype] of tries){
+      try{
+        gen = await pipeline('text-generation','onnx-community/SmolLM2-135M-Instruct-ONNX',
+          { dtype, device, progress_callback: p => { if(p.status==='progress' && p.total)
+              btn.textContent = Math.round(100*p.loaded/p.total) + ' %'; } });
+        dev = device; break;
+      }catch(e){ err = e; }
+    }
+    if(!gen) throw err;
+    // return_full_text:false, or transformers.js hands back the prompt with the
+    // answer on the end of it and every "answer" is the question, upper-cased.
+    // This is why the three calls have never actually run: the router in front
+    // of them was answering first, so nobody ever saw the model say anything.
+    const say = async (sys, user, n) => {
+      const o = await gen([{role:'system',content:sys},{role:'user',content:user}],
+                          { max_new_tokens: n, do_sample: false, return_full_text: false });
+      const m = o[0].generated_text;
+      let t = Array.isArray(m) ? (m[m.length-1] && m[m.length-1].content || '') : String(m);
+      // and if it came back full anyway, keep only what follows the last turn
+      const cut = t.lastIndexOf(user);
+      if(cut >= 0) t = t.slice(cut + user.length);
+      return t.replace(/^\s*(assistant|<\|im_start\|>assistant)?\s*/i, '').trim();
+    };
+    // Call one: which tile, or none. Nothing else in the prompt.
+    window.wall._pickTile = async q => {
+      const list = Object.values(NAMES).join(', ') + ', NONE';
+      const said = (await say(
+        'You are a tiled kitchen wall of nine tiles, each about one thing. First you pick '
+        + 'the tile. Then you will be asked to pick its reply. Answer with one word.',
+        'A visitor asks: "' + q + '" \u2014 which tile? ' + list, 6)).toUpperCase();
+      const hit = Object.entries(NAMES).find(([,n]) => said.includes(n));
+      return { raw: said.slice(0,20), tile: hit ? hit[0] : null };
+    };
+    // Call two: which of these lines. The tile it is standing on is named, and
+    // its subject given, because the same ten sentences mean different things
+    // depending on which tile is saying them.
+    window.wall._pickLine = async (q, opts, id) => {
+      const numbered = opts.map((l,i) => (i+1) + '. ' + l).join(' ');
+      const said = await say(
+        'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall. '
+        + (DESC[id] || '') + ' The tile is already chosen. Now pick its reply by number. '
+        + 'If none of them fits, answer NONE and you will get to write your own instead. '
+        + 'Answer with one number, or NONE.',
+        'A visitor asks: "' + q + '" \u2014 which reply? ' + numbered + ' or NONE', 4);
+      if(/NONE/i.test(said)) return { raw: 'NONE', line: null };
+      const d = (said.match(/[1-9]/) || [])[0];
+      const i = d ? (+d - 1) : -1;
+      return { raw: said.slice(0,12), line: opts[i] || null };
+    };
+    // Call three, and only once call two has come back empty: its own sentence,
+    // for this tile, with the tile's subject in front of it. It may not contain
+    // a digit -- every number on this page was measured off one photograph and
+    // the model does not get to invent one. One digit and it is thrown away.
+    window.wall._improvise = async (q, id) => {
+      let t = await say(
+        'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall in a Czech '
+        + 'valley. ' + (DESC[id] || '') + ' None of your written replies fitted, so this '
+        + 'one is yours. One short sentence, first person, no numbers.',
+        '"' + q + '" \u2014 reply in fewer than twelve words.', 26);
+      t = String(t).split(String.fromCharCode(10))[0]
+                   .replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
+      if(!t || t.length < 6 || t.length > 90) return null;
+      if(/[0-9]/.test(t)) return null;                       // no invented numbers, ever
+      const half = t.slice(0, Math.floor(t.length/2)).trim();
+      if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
+      return t;
+    };
+    window.wall._say = say;          // so src/eval_flow.py can score the raw model
+    window.wall._names = NAMES;
+    window.wall._think = true;
+    window.wall._genName = 'SmolLM2-135M on ' + dev;
+    btn.remove(); st.remove();      // it is here; saying so again is furniture
+  }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
+             console.warn(e); }
+};
 </script></body></html>
 '''
 RULES_JS = """// The contract, in one place: the phrase rules that run first, the descriptions
@@ -1010,6 +961,7 @@ window.WALLLM = (function(){
   const INTENTS = %s;
   const RULES = %s;
   const DESC = %s;
+  const LOOK = %s;
   const LINES = %s;
   const MISS = %s;
   const CHAT = %s;
@@ -1022,9 +974,20 @@ window.WALLLM = (function(){
     const h = RULES.find(([,re]) => re.test(k));
     return h ? h[0] : null;
   }
-  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, matchWords };
+  // Which tiles the words reach, in the order the rules are written, at most
+  // three. matchWords stops at the first; a question can be about two.
+  function matchTiles(q){
+    const t = String(q || '').toLowerCase(), hit = [];
+    for(const [id, re] of RULES) if(re.test(t)) hit.push(id);
+    return hit.slice(0, 3);
+  }
+  // the words that are in every question and so tell you nothing
+  // Only the words that are in every question. An earlier, greedier list threw
+  // away "see" and "look" and "way", which on this wall are half the subject.
+  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
+           matchWords, matchTiles };
 })();
-""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
+""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
 io.open("web/llm.js","w",encoding="utf-8").write(RULES_JS)
 io.open("web/wall.html","w",encoding="utf-8").write(html)
 print("web/wall.html  %.0f kB" % (len(html)/1000))

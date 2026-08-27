@@ -29,10 +29,10 @@ window.WALLLM = (function(){
  ['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
  ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\b|what are you\?/],
  ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]];
-  const RULES = [['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous/],
+  const RULES = [['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous|blue|flower|colour|color/],
  ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
- ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze/],
- ['copy',/copy|copied|\bold\b|\bage\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit/],
+ ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze|cobalt/],
+ ['copy',/copy|copied|\bold\b|\bage\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit|paint|cobalt|onion|meissen|zwiebel/],
  ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
  ['attn',/attention|\bai\b|language model|\bmodel\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
  ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
@@ -52,6 +52,16 @@ window.WALLLM = (function(){
   "_all": "Show me everything. Run all of them. Tell me everything you know. Do the whole wall.",
   "_help": "What can you do? What can I ask you? Help. How does this work? What are you?"
 };
+  const LOOK = [
+ "Watch this one.",
+ "Here. Look at this one.",
+ "Keep your eye on this one.",
+ "This one. Watch what happens to it.",
+ "That one. Go on, watch.",
+ "Hold on \u2014 watch this.",
+ "Look what happens to this one.",
+ "This one has something to show you."
+];
   const LINES = [
  [
   "cut",
@@ -485,5 +495,16 @@ window.WALLLM = (function(){
     const h = RULES.find(([,re]) => re.test(k));
     return h ? h[0] : null;
   }
-  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, matchWords };
+  // Which tiles the words reach, in the order the rules are written, at most
+  // three. matchWords stops at the first; a question can be about two.
+  function matchTiles(q){
+    const t = String(q || '').toLowerCase(), hit = [];
+    for(const [id, re] of RULES) if(re.test(t)) hit.push(id);
+    return hit.slice(0, 3);
+  }
+  // the words that are in every question and so tell you nothing
+  // Only the words that are in every question. An earlier, greedier list threw
+  // away "see" and "look" and "way", which on this wall are half the subject.
+  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
+           matchWords, matchTiles };
 })();
