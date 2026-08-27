@@ -44,7 +44,7 @@ body.knobs .wall{aspect-ratio:.845}
    gradients cannot do relief, so it is a generated photograph of one -- 512 px,
    seamless, lit from the same 116 degrees as the glaze. See src/plaster.py.
    Pinned at 512 px rather than a percentage so the sand stays sand at any size. */
-.pic{position:relative;flex:1 1 auto;min-height:0;display:flex;perspective:760px;
+.pic{position:relative;flex:1 1 auto;min-height:0;display:flex;
  background:url(plaster.jpg) 0 0/512px 512px repeat, linear-gradient(168deg,#ded8cd,#cdc6b8);
  box-shadow:inset 0 0 0 2px rgba(84,68,48,.20),      /* grout squeezed out at the rim */
             inset 0 3px 9px rgba(42,33,23,.24),      /* the tile sat proud of this */
@@ -58,14 +58,15 @@ body.knobs .wall{aspect-ratio:.845}
 .wall .tile:nth-child(7) .pic{background-position:-389px -37px}
 .wall .tile:nth-child(8) .pic{background-position:-22px -463px}
 .wall .tile:nth-child(9) .pic{background-position:-334px -287px}
-/* the tile itself is one loose object hinged on its bottom edge; ? takes it off the wall */
-.face{position:absolute;inset:0;z-index:1;display:flex;transform-origin:50% 100%;
- backface-visibility:hidden;
- transition:transform .52s cubic-bezier(.42,.02,.24,1), box-shadow .52s}
-/* -84deg leaves the bottom edge of the tile in the frame, tipped out and lit along the
-   rim, so it reads as taken off and leaning there rather than as a tile that vanished */
-.tile.open .face{transform:rotateX(-84deg) translateY(1%);
- box-shadow:0 15px 24px rgba(60,50,38,.45)}
+/* The tile itself is one loose object. ? slides it out of its recess, sideways
+   and slowly -- it was tipping forward on its bottom edge before, which was
+   over in half a second and read as the tile vanishing rather than as somebody
+   taking it off the wall. A degree and a half of tilt and a shadow trailing off
+   its near edge, because a tile being slid out of mortar does not stay square. */
+.face{position:absolute;inset:0;z-index:1;display:flex;
+ transition:transform .9s cubic-bezier(.36,.02,.18,1), box-shadow .9s}
+.tile.open .face{transform:translateX(103%) rotate(1.4deg);
+ box-shadow:-16px 6px 26px rgba(60,50,38,.42)}
 /* glaze: one soft highlight across the top corner, the way fired tiles catch a window */
 .face:before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
  background:linear-gradient(116deg, rgba(255,255,255,.62) 0%, rgba(255,255,255,.10) 22%,
@@ -74,8 +75,9 @@ body.knobs .wall{aspect-ratio:.845}
 .q{position:absolute;top:2px;right:2px;z-index:2;
  width:clamp(13px,8cqw,19px);height:clamp(13px,8cqw,19px);padding:0;
  font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;line-height:1;
- font-size:clamp(8px,5cqw,12px);color:var(--grey);background:rgba(255,255,255,.85);
- border:1px solid var(--rule);border-radius:50%;cursor:pointer}
+ font-size:clamp(8px,5cqw,12px);color:var(--warm);background:rgba(255,255,255,.93);
+ border:1px solid rgba(176,85,74,.45);border-radius:50%;cursor:pointer;
+ box-shadow:0 1px 2px rgba(60,50,38,.14)}
 .q:hover{color:#fff;background:var(--warm);border-color:var(--warm)}
 .tile.open .q{color:#fff;background:var(--warm);border-color:var(--warm)}
 .ex{display:block;margin-top:7px;padding-top:6px;border-top:1px solid var(--rule);
@@ -100,6 +102,21 @@ body.knobs .wall{aspect-ratio:.845}
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
 .said.on{opacity:1}
+/* Two ways into the tile that just answered, because the answer is a sentence
+   and the page is a set of knobs, and nothing said so. Its own row, always
+   reserved, so the wall does not jump when it appears. */
+.more{margin:0;width:100%;max-width:var(--wallw,100%);height:1.5em;overflow:hidden;
+ font:italic clamp(12px,1.8vh,16px)/1.5 Georgia,serif;color:var(--grey);
+ opacity:0;transition:opacity .3s}
+.more.on{opacity:1}
+.more a{color:var(--warm);cursor:pointer;border-bottom:1px solid rgba(176,85,74,.45)}
+.more a:hover{border-bottom-color:var(--warm);background:rgba(176,85,74,.07)}
+.more b{font-weight:400;margin:0 .7em;color:var(--grey)}
+/* and when "try it yourself" brings the sliders out, say which slider */
+@keyframes nudge{0%,100%{box-shadow:0 1px 2px rgba(60,50,38,.30),
+                                   inset 0 0 0 .5px rgba(255,255,255,.7)}
+                 50%{box-shadow:0 0 0 4px rgba(176,85,74,.5)}}
+.tile.nudge{animation:nudge 1s ease-in-out 2}
 .say{position:absolute;inset:0;z-index:0;cursor:pointer;padding:5% 5%;
  overflow:auto;line-height:1.45;font-family:Georgia,serif;
  font-size:clamp(8px,5.4cqw,12.5px);color:var(--dark);
@@ -112,12 +129,14 @@ body.knobs .wall{aspect-ratio:.845}
  box-shadow:0 0 0 6px rgba(251,248,241,.40), 0 0 18px 13px rgba(251,248,241,.30)}
 .say b{display:block;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:clamp(7px,4.4cqw,10px);line-height:1.3;letter-spacing:.09em;
+ padding-right:2.4em;                       /* clear of the ? in the corner */
  text-transform:uppercase;color:var(--warm);margin-bottom:5px}
-.tile.open .say{opacity:1;visibility:visible;transition:opacity .3s .18s, visibility 0s}
+.tile.open .say{opacity:1;visibility:visible;transition:opacity .38s .42s, visibility 0s}
 .tag{position:absolute;top:2px;left:2px;font-family:'DejaVu Sans',system-ui,sans-serif;
  font-weight:600;font-size:clamp(6px,4.4cqw,9.5px);line-height:1;
  letter-spacing:.09em;text-transform:uppercase;color:var(--grey);background:rgba(255,255,255,.82);
- padding:2px 4px;border-radius:2px}
+ padding:2px 4px;border-radius:2px;
+ max-width:calc(100% - 26px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile input[type=range]{flex:0 0 auto;width:calc(100% - 16px);accent-color:var(--ink);
  height:14px;cursor:grab;margin:3px 8px 0;display:none}
 body.knobs .tile input[type=range]{display:block}
@@ -140,7 +159,7 @@ body:not(.knobs) .tag{opacity:0}
 .tile.speaking{outline:2px solid var(--warm);outline-offset:1px}
 /* the quiet ones go into shadow rather than fading out -- fading let the mortar
    through and the wall stopped looking like a wall */
-.wall.busy .tile{filter:brightness(.9) saturate(.5)}
+.wall.busy .tile{filter:brightness(.94) saturate(.62)}
 .wall.busy .tile.speaking{filter:none;z-index:5;transform:scale(1.045);
  box-shadow:0 8px 20px rgba(60,50,38,.45), inset 0 0 0 .5px rgba(255,255,255,.7)}
 #bub{position:fixed;z-index:50;max-width:330px;background:#fff;border:1px solid var(--ink);
@@ -166,7 +185,16 @@ footer a{color:var(--grey)}
  .bar{flex-wrap:wrap;max-width:none}
  .bar input[type=text]{order:3;flex:1 1 100%;font-size:16px}
  .pic{aspect-ratio:1;height:auto;flex:0 0 auto}
- .say{font-size:11.5px;padding:10px 11px}
+ /* On a phone the tile is a square and the writing is not: the description was
+    being cut off mid-sentence inside a scroller nobody can see. So an opened
+    tile stops being square and grows to its own text. */
+ .say{font-size:12.5px;padding:8px}
+ /* the row grows to the opened tile, so its neighbour must not stretch with it
+    and end in a slab of blank white -- let the mortar show instead */
+ .tile{align-self:start}
+ .tile.open .pic{aspect-ratio:auto}
+ .tile.open .say{position:relative;inset:auto;overflow:visible}
+ .note{padding:11px 12px 12px}
  .kv{font-size:12px;height:auto;white-space:normal}
  #bub{left:0!important;right:0;top:auto!important;bottom:0;max-width:none;border-radius:12px 12px 0 0;
   border-left:0;border-right:0;border-bottom:0;max-height:56vh;overflow:auto;
@@ -187,6 +215,7 @@ footer a{color:var(--grey)}
 </div></div>
 
 <div class="saidwrap"><p class="said" id="said"></p></div>
+<div class="saidwrap"><p class="more" id="more"></p></div>
 <div class="wallbox"><div class="wall">
 <div class="tile" data-tile="cut">
 <div class="pic">
@@ -344,7 +373,8 @@ window.wall = {
     document.getElementById('bubt').innerHTML='One kitchen wall in a valley under the '
       + 'Krkonoše, photographed once. Nine tiles, nine different questions, nine numbers '
       + 'back. Every coefficient is measured off that photograph, none chosen, and the results '
-      + 'that spoiled the story were kept.<br><br>Drag a tile, or type a question. '
+      + 'that spoiled the story were kept.<br><br>Type a question, or take a tile '
+      + 'off the wall with the <b>?</b> in its corner and read what is written under it. '
       + 'Nine things it will answer:<br>' + Object.values(EX).map(q=>'&middot; '+q).join('<br>')
       + '<br><br>A browser agent can drive it: <code>wall.ask()</code>, <code>wall.list()</code>, '
       + '<code>wall.runMany([ids])</code>.<br><br>'
@@ -356,6 +386,7 @@ window.wall = {
     return 'about';
   },
   stop(){ stopped=true; clearInterval(this._rt); clearInterval(this._typing);
+    this.hint(null);
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
@@ -416,6 +447,7 @@ window.wall = {
     // Measured on 30 questions neither router had seen: words alone 14/30, model
     // alone 21/30, words-then-model 22/30. So: words first, model for the rest.
     this._lastQ = String(q||'');
+    this.reset();
     this.say('');
     if(this._pickTile){
       const st=document.getElementById('mstat');
@@ -514,12 +546,49 @@ window.wall = {
     // recital gives it before the next tile speaks
     const per = Math.max(7, Math.min(24, 1050 / Math.max(1, body.length)));
     let i = 0;
+    this.hint(null);
     this._typing = setInterval(() => {
       i += body.length > 90 ? 2 : 1;
       out.textContent = body.slice(0, i);
-      if(i >= body.length){ clearInterval(this._typing); out.textContent = body; }
+      if(i >= body.length){ clearInterval(this._typing); out.textContent = body;
+                            this.hint(who); }
     }, per);
     return text;
+  },
+  // The answer is a sentence and the page is a wall of knobs, and until now
+  // nothing joined the two. One link brings the sliders out and says which
+  // one; the other takes the tile off the wall, which is where the writing is.
+  hint(id){
+    const el = document.getElementById('more');
+    if(!el) return id;
+    if(!id || !TILE[id]){ el.className = 'more'; el.innerHTML = ''; return id; }
+    // the id rides on a data attribute, the way .ex carries its question: the
+    // onclick is inside a python string inside a python string and a quote put
+    // in here does not arrive as a quote out there
+    el.innerHTML = '<a data-t="'+id+'" onclick="wall.tryit(this.dataset.t)">'
+                 + 'try it yourself</a><b>&middot;</b>'
+                 + '<a data-t="'+id+'" onclick="wall.tell(this.dataset.t)">'
+                 + 'find out more</a>';
+    el.className = 'more on';
+    return id;
+  },
+  tryit(id){ this.reset(); this.knobs(true);
+    const c = document.querySelector('[data-tile="'+id+'"]');
+    if(c){ c.classList.remove('nudge'); void c.offsetWidth; c.classList.add('nudge'); }
+    return 'sliders out'; },
+  tell(id){ this.close(); this.open(id); return this.why(id); },
+  // Every question starts from the wall as it was found. Otherwise the second
+  // question is answered by tiles still holding the first one's damage, and a
+  // tile somebody left off the wall stays off through everything after it.
+  reset(){
+    Object.keys(TILE).forEach(k => {
+      const r = document.getElementById(k+'r');
+      if(r) this.set(k, +r.defaultValue);
+    });
+    document.querySelectorAll('.tile').forEach(c =>
+      c.classList.remove('speaking','open','nudge'));
+    document.querySelector('.wall').classList.remove('busy');
+    return 'reset';
   },
   async line(id, q){
     const ls = this.lines(id); if(!ls.length) return null;
@@ -616,7 +685,7 @@ setInterval(() => {
 const HELLO = [
   "I am nine tiles off one kitchen wall. Ask me anything about myself.",
   "Nine tiles, one photograph, nine questions somebody actually measured. Ask away.",
-  "I am a kitchen wall in a Czech valley. Type a question, or drag any of me.",
+  "I am a kitchen wall in a Czech valley. Ask me something, or take a tile off with its ?",
 ];
 setTimeout(()=>{ if(!document.getElementById('said').textContent)
   wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 900);
