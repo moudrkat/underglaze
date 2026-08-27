@@ -28,7 +28,7 @@ import time
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("WALL_URL", "http://localhost:8777/web/wall.html")
-OUT = "evals/flow.md"
+OUT = os.environ.get("WALL_EVAL_OUT", "evals/flow.md")
 
 # The nine, one question each in the plainest words somebody would use, then
 # nine more that are not about this wall at all and should come back NONE.
@@ -63,9 +63,14 @@ GOLD = [
 ]
 
 
-def load(pg, timeout=420000):
+MODEL = os.environ.get("WALL_MODEL", "")
+
+
+def load(pg, timeout=900000):
     pg.goto(URL)
     pg.wait_for_timeout(1200)
+    if MODEL:
+        pg.evaluate("m => { window.WALLMODEL = m; }", MODEL)
     t0 = time.monotonic()
     pg.click("#speak")
     pg.wait_for_function(
@@ -82,7 +87,7 @@ def main():
         b = p.chromium.launch()
         pg = b.new_page(viewport={"width": 1280, "height": 900})
         secs = load(pg)
-        print("model up in %.0f s" % secs)
+        print("model up in %.0f s  %s" % (secs, MODEL or "SmolLM2-135M"))
 
         print("\ncall one -- which tile")
         t0 = time.monotonic()

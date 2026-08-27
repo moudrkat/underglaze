@@ -52,43 +52,57 @@ tiles are one print or nine is undecided: tile-to-tile correlation came out at +
 
 ## Which model drives it?
 
-Nothing is downloaded when the page opens. That was not true until today: a 23 MB
-embedding model, **all-MiniLM-L6-v2**, fetched itself the moment anybody arrived, to route
-questions to tiles. It was a good router and nobody agreed to it, so it is gone.
+Nothing is downloaded when the page opens. That was not true until today: **all-MiniLM-L6-v2**,
+23 MB, fetched itself the moment anybody arrived. It was a good router and nobody agreed to it.
 
-What routes the question now is a table of phrase rules, and what answers is the tile's own
-headline sentence. No model, no download, no waiting. There is a button — **let it think ·
-117 MB** — that fetches **SmolLM2-135M-Instruct** and runs it in the browser, no server and
-no key, and once it is here the button and the notice remove themselves.
+There is a button now — **let it read · 23 MB** — and once the model is here the button and the
+notice take themselves off the bar. Before it is pressed, phrase rules route the question and
+the tile answers with its own headline sentence. No model, no download, no waiting.
 
-## What SmolLM2-135M can actually do here, measured
+## What a small model can and cannot do here, measured
 
 The design was three calls in a row: *which tile*, then *which of that tile's ten written
 replies*, then — only if the second came back empty — *one sentence of its own for that tile*.
-It never writes a number: a digit in call three and the sentence is thrown away, because every
-number on this page was measured off one photograph.
+It never writes a number: a digit in call three and the sentence is thrown away.
 
 `src/eval_flow.py` presses the real button in a real browser and scores the real calls, so it
-cannot drift from what ships. Twenty-seven questions: nine tiles asked plainly twice over, and
-nine that are not about this wall at all.
+cannot drift from what ships. Twenty-seven questions: the nine tiles asked plainly twice over,
+and nine that are not about this wall at all.
 
-| | |
-|---|---|
-| call one, the nine asked plainly | **0 / 18** |
-| call one, not about the wall, should be NONE | **9 / 9** |
-| call two, distinct lines reached across nine tiles | **9** |
-| call two, took the first option | **18 / 18** |
+| call one — which of the nine tiles | on the wall | should refuse |
+|---|---|---|
+| SmolLM2-135M-Instruct, 117 MB | **0 / 18** | 9 / 9 |
+| Qwen2.5-0.5B-Instruct, 483 MB | **3 / 18** | 0 / 9 |
+| all-MiniLM-L6-v2, 23 MB | **21 / 30** ¹ | — |
+| the phrase rules | 14 / 30 ¹ | **25 / 30** |
 
-It picks a tile zero times out of eighteen, and it answers "1" to every list of ten. The 9/9 is
-not judgement, it is a model that refuses everything. Five prompt shapes were tried — bare
-names, names with glosses, an options list, a labels list, the nine headline sentences numbered
-— and the best of them reached 5/12 on a smaller set, almost all of it refusals. Asked whether
-it was a fractal it still says *"I'm a fractal"*, which is the one thing this page spends a page
-disproving.
+¹ on the fresh and weird sets in `src/eval_wall.py`, which are larger and harder.
 
-So the button is honest about what it fetches and the eval is honest about what arrives. The
-phrase rules route the question; the model is loaded, measured, and not yet load-bearing.
-`evals/flow.md` has every answer it gave.
+Neither generator can pick a tile. SmolLM2 restates the question; Qwen latches onto one number
+and gives it to everything — ATTENTION to all twenty-seven, then 8 to everything, then 3. Seven
+prompt shapes were tried across the two: bare names, names with glosses, an options list, a
+labels list, numbered names, numbered subjects, and the nine headline sentences numbered. The
+best reached 5 of 12. Asked whether it is a fractal, SmolLM2 still answers *"I'm a fractal"*.
+
+**The one they can do is the next one down.** Given the tile, Qwen2.5-0.5B picks which of its
+ten sentences answers the question, and picks well:
+
+| call two — which of that tile's ten | distinct lines reached | took the first |
+|---|---|---|
+| SmolLM2-135M | 9 of 9 tiles, always line 0 | **18 / 18** |
+| Qwen2.5-0.5B | **10** | 3 / 18 |
+
+*who painted you?* → "Printed from steel, copied from a painting, copied from a Chinese bowl."
+*do you repeat at every scale?* → "A fractal is equally rough at every zoom."
+
+That is the shape of it: **a 23 MB model that produces no words beats a 483 MB one at deciding
+what a question is about, and loses to it at deciding which sentence answers it.** Routing is a
+nearest-neighbour lookup in an embedding space — nothing has to be said. Choosing a reply is
+reading. They are not the same job and they do not want the same model.
+
+So the button fetches the router, at 23 MB, because that is the job the page cannot do without.
+The generator is in the code, measured, and off. `evals/flow.md` and `evals/flow-qwen05b.md`
+have every answer either of them gave.
 
 **The rules, for comparison.** Four question sets, in `src/eval_wall.py`. The first 51 were
 written next to the patterns; the next 30 blind; the next 30 after both routers existed and
@@ -102,8 +116,8 @@ typos, Czech, emoji, boredom, prompt injection, nothing at all.
 | words first, model for the rest | 20 | 25 | **45** |
 
 The regex scores 81/81 on the sets it was tuned on and 47 % on fresh ones, which is what
-overfitting looks like from the inside. That 45 is the number the page used to run at, with
-MiniLM arriving uninvited to earn it. It runs on the 39 now, and asks first.
+overfitting looks like from the inside. The page runs the cascade — words first, router for
+what they do not recognise, at a confidence of 0.20 — but only once you have said yes to it.
 
 ## The wall opens as a wall
 

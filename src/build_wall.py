@@ -375,7 +375,7 @@ footer a{color:var(--grey)}
 <input type="text" id="q" placeholder="ask it something…"
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
-<button class="go" id="speak" title="download SmolLM2-135M and run it in this browser, no server and no key">let it think &middot; 117 MB</button>
+<button class="go" id="speak" title="download all-MiniLM-L6-v2 and run it in this browser, no server and no key">let it read &middot; 23 MB</button>
 <button class="go" id="knobs" onclick="wall.knobs()" title="show the sliders and the numbers">&#9707;</button>
 <button class="go" onclick="wall.about()" title="what is this">?</button>
 <span id="mstat" class="mstat"></span>
@@ -620,7 +620,15 @@ window.wall = {
         if(t.tile) return this.run(t.tile);
       }catch(e){ if(st) st.textContent = ''; }
     }
+    // The words first -- they are unbeaten on nonsense, 25 of 30 -- and the
+    // router for everything they do not recognise, 21 of 30 where they get 14.
     const ids = this.matchAll(q);
+    if(!ids.length && this._model){
+      try{
+        const [id, sim] = await this._model(this._lastQ);
+        if(sim >= WALLLM.THRESHOLD) return this.run(id);
+      }catch(e){}
+    }
     if(ids.length > 1) return this.runMany(ids);
     if(ids.length === 1) return this.run(ids[0]);
     // and the intents that were never a tile
@@ -849,17 +857,49 @@ btn.onclick = async () => {
   try{
     const { pipeline } = await import(
       'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+
+    // First the router, because it is the job the generators cannot do. Nine
+    // descriptions and the question, all embedded, nearest one wins -- no words
+    // to produce, which is why a 23 MB model beats a 483 MB one at it here.
+    // src/eval_flow.py: SmolLM2-135M picks the tile 0 times in 18, Qwen2.5-0.5B
+    // 3, and both answer with whichever number they have latched onto. MiniLM
+    // does 21 of 30 on questions nobody tuned it for.
+    btn.textContent = 'routing\u2026';
+    const ex = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2',
+      { dtype: 'q8', progress_callback: p => { if(p.status==='progress' && p.total)
+          btn.textContent = Math.round(100*p.loaded/p.total) + ' %'; } });
+    const dids = Object.keys(DESC);
+    const V = (await ex(Object.values(DESC), { pooling:'mean', normalize:true })).tolist();
+    window.wall._embed = async arr =>
+      (await ex(arr, { pooling:'mean', normalize:true })).tolist();
+    window.wall._all_model = async q => {
+      const e = (await ex([q], { pooling:'mean', normalize:true })).tolist()[0];
+      return dids.map((id,i) => [id, V[i].reduce((a,v,k)=>a+v*e[k],0)])
+                 .sort((a,b) => b[1]-a[1]);
+    };
+    window.wall._model = async q => {
+      const e = (await ex([q], { pooling:'mean', normalize:true })).tolist()[0];
+      let best = null;
+      dids.forEach((id,i) => { const sc = V[i].reduce((a,v,k)=>a+v*e[k],0);
+        if(!best || sc > best[1]) best = [id, sc]; });
+      return best;
+    };
+    window.wall._name = 'all-MiniLM-L6-v2';
+    btn.remove(); st.remove();
+    if(!window.WALLGEN) return;      // the generator is a second, larger ask
     // navigator.gpu exists in plenty of browsers that cannot actually give you
     // an adapter, and asking for a webgpu pipeline there fetches 117 MB and
     // then throws "no available backend" -- after which the wasm retry inherits
     // the wreckage and throws too. So ask for the adapter first.
+    btn.textContent = 'generator\u2026';
     let gpu = false;
     try{ gpu = !!(navigator.gpu && await navigator.gpu.requestAdapter()); }catch(e){}
     const tries = gpu ? [['webgpu','q4f16'],['wasm','q4']] : [['wasm','q4']];
     let gen = null, dev = null, err = null;
     for(const [device, dtype] of tries){
       try{
-        gen = await pipeline('text-generation','onnx-community/SmolLM2-135M-Instruct-ONNX',
+        gen = await pipeline('text-generation', window.WALLMODEL ||
+            'onnx-community/SmolLM2-135M-Instruct-ONNX',
           { dtype, device, progress_callback: p => { if(p.status==='progress' && p.total)
               btn.textContent = Math.round(100*p.loaded/p.total) + ' %'; } });
         dev = device; break;
@@ -880,15 +920,28 @@ btn.onclick = async () => {
       if(cut >= 0) t = t.slice(cut + user.length);
       return t.replace(/^\s*(assistant|<\|im_start\|>assistant)?\s*/i, '').trim();
     };
-    // Call one: which tile, or none. Nothing else in the prompt.
+    // Call one: which tile, or none.
+    //
+    // Numbered, and answered with a number, because that is the shape call two
+    // was already in and call two was the one that worked. Asked to answer with
+    // a *name* out of nine names, Qwen2.5-0.5B said ATTENTION to all twenty-
+    // seven questions in the eval -- the last item on the list -- and SmolLM2
+    // restated the question. Same models, same nine tiles, 3/27 to 15/27 on the
+    // shape of the prompt alone. Each option carries its subject, not just its
+    // label, since the label is a pun half the time.
     window.wall._pickTile = async q => {
-      const list = Object.values(NAMES).join(', ') + ', NONE';
-      const said = (await say(
-        'You are a tiled kitchen wall of nine tiles, each about one thing. First you pick '
-        + 'the tile. Then you will be asked to pick its reply. Answer with one word.',
-        'A visitor asks: "' + q + '" \u2014 which tile? ' + list, 6)).toUpperCase();
-      const hit = Object.entries(NAMES).find(([,n]) => said.includes(n));
-      return { raw: said.slice(0,20), tile: hit ? hit[0] : null };
+      const ids = Object.keys(NAMES);
+      const numbered = ids.map((k,i) =>
+        (i+1) + '. ' + NAMES[k] + ' \u2014 ' + (DESC[k]||'').split('.')[0]).join(' ');
+      const said = await say(
+        'You match a question to one of nine tiles on a kitchen wall. Answer with the '
+        + 'number of the tile it belongs to. If it belongs to none of them, answer NONE. '
+        + 'Answer with one number, or NONE.',
+        'A visitor asks: "' + q + '" \u2014 which tile? ' + numbered + ' or NONE', 4);
+      if(/NONE/i.test(said)) return { raw: 'NONE', tile: null };
+      const d = (said.match(/[1-9]/) || [])[0];
+      const k = d ? ids[+d - 1] : null;
+      return { raw: said.slice(0,16), tile: k || null };
     };
     // Call two: which of these lines. The tile it is standing on is named, and
     // its subject given, because the same ten sentences mean different things
@@ -928,7 +981,6 @@ btn.onclick = async () => {
     window.wall._names = NAMES;
     window.wall._think = true;
     window.wall._genName = 'SmolLM2-135M on ' + dev;
-    btn.remove(); st.remove();      // it is here; saying so again is furniture
   }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
              console.warn(e); }
 };
