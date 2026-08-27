@@ -1,0 +1,47 @@
+{
+ "cut": {
+  "start": 24,
+  "likeness": 0.9318,
+  "n": 25
+ },
+ "kiln": {
+  "start": 0,
+  "likeness": 0.9318,
+  "n": 25
+ },
+ "perc": {
+  "start": 8,
+  "likeness": 0.9089,
+  "n": 26
+ },
+ "eye": {
+  "start": 0,
+  "likeness": 0.8361,
+  "n": 26
+ },
+ "chi": {
+  "start": 19,
+  "likeness": 0.9319,
+  "n": 31
+ },
+ "frac": {
+  "start": 0,
+  "likeness": 0.9197,
+  "n": 26
+ },
+ "copy": {
+  "start": 1,
+  "likeness": 0.7511,
+  "n": 26
+ },
+ "ship": {
+  "start": 0,
+  "likeness": 0.8278,
+  "n": 26
+ },
+ "attn": {
+  "start": 25,
+  "likeness": 0.9343,
+  "n": 26
+ }
+}

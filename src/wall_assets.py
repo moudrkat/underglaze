@@ -19,9 +19,39 @@ PAPER, INK, WARM = (247, 245, 240), (33, 54, 96), (176, 85, 74)
 NF = 26
 
 
+def palette():
+    """One fixed palette for every frame of every tile.
+
+    MAXCOVERAGE picks its 32 colours per image, so each tile ended up with its
+    own idea of what the paper was -- (247,245,240) here, (255,244,234) there,
+    pure white on a frame where the heat map happened to be flat. Nine tiles,
+    six different whites, and a wall that looked wrong before you touched it.
+
+    So the palette is fixed instead: the page's three colours exactly, plus the
+    ramps between them for what LANCZOS leaves along an edge. Paper is paper in
+    every frame of all nine.
+    """
+    cols = [PAPER, INK, WARM]
+    def ramp(a, b, n):
+        return [tuple(int(round(a[c] + (b[c] - a[c]) * i / n)) for c in range(3))
+                for i in range(1, n)]
+    cols += ramp(PAPER, INK, 20) + ramp(PAPER, WARM, 28) + ramp(WARM, INK, 16)
+    cols = list(dict.fromkeys(cols))[:256]
+    pal = Image.new("P", (1, 1))
+    flat = [v for c in cols for v in c]
+    pal.putpalette(flat + [0] * (768 - len(flat)))
+    return pal
+
+
+PALETTE = None
+
+
 def save(rgb, path):
+    global PALETTE
+    if PALETTE is None:
+        PALETTE = palette()
     Image.fromarray(rgb).resize((460, 460), Image.LANCZOS) \
-        .quantize(colors=32, method=Image.MAXCOVERAGE).save(path, optimize=True)
+        .quantize(palette=PALETTE, dither=Image.Dither.NONE).save(path, optimize=True)
 
 
 def two(mask, path):

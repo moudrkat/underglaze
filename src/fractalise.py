@@ -181,6 +181,28 @@ def build_page_assets(webdir="web"):
     print("wrote %s/fractal.gif (%.1f MB), frac_frilled.png, frac_mould.png" % (webdir, mb))
 
 
+_PAL = None
+
+
+def _slider_palette():
+    """Paper, ink, and the ramp between them -- fixed, not chosen per frame.
+
+    MAXCOVERAGE was landing the paper on (243,241,236) here while the other
+    eight tiles sat on (247,245,240), which is visible as a dirty tile in a
+    clean wall. Same fix as wall_assets.palette().
+    """
+    global _PAL
+    if _PAL is None:
+        cols = [PAPER_RGB, INK_RGB] + [
+            tuple(int(round(PAPER_RGB[c] + (INK_RGB[c] - PAPER_RGB[c]) * i / 16))
+                  for c in range(3)) for i in range(1, 16)]
+        cols = list(dict.fromkeys(cols))
+        flat = [v for c in cols for v in c]
+        _PAL = Image.new("P", (1, 1))
+        _PAL.putpalette(flat + [0] * (768 - len(flat)))
+    return _PAL
+
+
 def build_slider(webdir="web", n=26, top=26.0, H=0.5):
     """Precomputed frames for the page's fourth slider.
 
@@ -202,7 +224,7 @@ def build_slider(webdir="web", n=26, top=26.0, H=0.5):
         rgb = np.where(mask[..., None], np.array(INK_RGB, np.uint8),
                        np.array(PAPER_RGB, np.uint8))
         im = Image.fromarray(rgb).resize((460, 460), Image.LANCZOS)
-        im.quantize(colors=16, method=Image.MAXCOVERAGE).save(
+        im.quantize(palette=_slider_palette(), dither=Image.Dither.NONE).save(
             os.path.join(d, "w%02d.png" % i), optimize=True)
     kb = sum(os.path.getsize(os.path.join(d, f)) for f in os.listdir(d)) / 1000
     print("wrote %d frames to %s, %.0f kB total  (wobble 0-%.0f px, H=%.2f)"

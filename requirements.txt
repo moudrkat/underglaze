@@ -1,2 +1,3 @@
 numpy
 Pillow
+playwright        # src/film_wall.py only, for the post video
