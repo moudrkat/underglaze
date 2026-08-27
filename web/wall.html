@@ -46,9 +46,9 @@ body.knobs .wall{aspect-ratio:.845}
    Pinned at 512 px rather than a percentage so the sand stays sand at any size. */
 .pic{position:relative;flex:1 1 auto;min-height:0;display:flex;perspective:760px;
  background:url(plaster.jpg) 0 0/512px 512px repeat, linear-gradient(168deg,#ded8cd,#cdc6b8);
- box-shadow:inset 0 0 0 2px rgba(84,68,48,.30),      /* grout squeezed out at the rim */
-            inset 0 4px 11px rgba(42,33,23,.40),     /* the tile sat proud of this */
-            inset 0 -3px 8px rgba(42,33,23,.24)}
+ box-shadow:inset 0 0 0 2px rgba(84,68,48,.20),      /* grout squeezed out at the rim */
+            inset 0 3px 9px rgba(42,33,23,.24),      /* the tile sat proud of this */
+            inset 0 -2px 7px rgba(42,33,23,.15)}
 /* nine holes in one wall, not one hole nine times */
 .wall .tile:nth-child(2) .pic{background-position:-181px -74px}
 .wall .tile:nth-child(3) .pic{background-position:-63px -229px}
@@ -104,12 +104,12 @@ body.knobs .wall{aspect-ratio:.845}
  overflow:auto;line-height:1.45;font-family:Georgia,serif;
  font-size:clamp(8px,5.4cqw,12.5px);color:var(--dark);
  opacity:0;visibility:hidden;transition:opacity .3s, visibility 0s .3s}
-/* Nobody writes on bare render. The sand ate the thin strokes of the serif and
-   a text-shadow could not save it, so the writing sits on a patch of limewash
-   -- brushed on, soft at the edge, thin enough that the grain still reads
-   through it. It shrink-wraps the words, so the rest of the recess stays wall. */
-.note{background:rgba(249,245,236,.90);padding:6% 7% 7%;border-radius:2px;
- box-shadow:0 0 0 5px rgba(249,245,236,.62), 0 0 16px 11px rgba(249,245,236,.44)}
+/* A patch of limewash under the words -- brushed on, soft at the edge. It was
+   nearly opaque while the mortar was still loud; now that the mortar whispers
+   it only has to lift the serif off the grain, so it is mostly transparent and
+   the wall reads straight through it. It shrink-wraps the words. */
+.note{background:rgba(251,248,241,.58);padding:6% 7% 7%;border-radius:2px;
+ box-shadow:0 0 0 6px rgba(251,248,241,.40), 0 0 18px 13px rgba(251,248,241,.30)}
 .say b{display:block;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:clamp(7px,4.4cqw,10px);line-height:1.3;letter-spacing:.09em;
  text-transform:uppercase;color:var(--warm);margin-bottom:5px}
@@ -133,7 +133,16 @@ body:not(.knobs) .tag{opacity:0}
 .kv b{color:var(--ink);font-variant-numeric:tabular-nums}
 .kv em{color:var(--grey);font-style:normal;font-size:.88em}
 .why{display:none}
+/* The tile that is answering leans out of the wall and the rest of the wall
+   steps back, because a 2 px outline on one of nine is not something you catch
+   while you are reading the line underneath. */
+.tile{transition:transform .26s, box-shadow .26s, opacity .26s, filter .26s}
 .tile.speaking{outline:2px solid var(--warm);outline-offset:1px}
+/* the quiet ones go into shadow rather than fading out -- fading let the mortar
+   through and the wall stopped looking like a wall */
+.wall.busy .tile{filter:brightness(.9) saturate(.5)}
+.wall.busy .tile.speaking{filter:none;z-index:5;transform:scale(1.045);
+ box-shadow:0 8px 20px rgba(60,50,38,.45), inset 0 0 0 .5px rgba(255,255,255,.7)}
 #bub{position:fixed;z-index:50;max-width:330px;background:#fff;border:1px solid var(--ink);
  border-radius:9px;padding:11px 13px;box-shadow:0 8px 26px rgba(0,0,0,.18);display:none;
  font:13px/1.5 Georgia,serif}
@@ -346,7 +355,8 @@ window.wall = {
     b.style.top='60px';
     return 'about';
   },
-  stop(){ stopped=true; clearInterval(this._rt);
+  stop(){ stopped=true; clearInterval(this._rt); clearInterval(this._typing);
+    document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
   async run(id, ms=90){
@@ -359,7 +369,9 @@ window.wall = {
     cell.classList.add('speaking');
     this.line(id, this._lastQ);
     const t=TILE[id];
+    document.querySelector('.wall').classList.add('busy');
     for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
+    document.querySelector('.wall').classList.remove('busy');
     return t.out.textContent;
   },
   // With more than one tile moving there is no single speaker, so the wall
@@ -389,10 +401,12 @@ window.wall = {
     // recites: each tile's line in turn, held long enough to read. It outlasts
     // the sweep by design -- the wall finishes its sentence after it stops.
     this._recite(ids);
+    document.querySelector('.wall').classList.add('busy');
     await Promise.all(ids.map(async id=>{
       const t=TILE[id];
       for(let k=0;k<t.n && !stopped;k++){ this.set(id,k); await sleep(ms); }
     }));
+    document.querySelector('.wall').classList.remove('busy');
     ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.remove('speaking'));
     running=false; if(btn) btn.innerHTML='&#9654;';
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
@@ -481,12 +495,30 @@ window.wall = {
     if(btn) btn.style.background = b.classList.contains('knobs') ? 'var(--ink)' : '';
     return b.classList.contains('knobs') ? 'knobs out' : 'knobs away';
   },
+  // The wall types. It used to drop the whole sentence in at once, which read
+  // as a caption rather than as an answer, and there is no other cue that the
+  // thing is talking to you. The label lands whole and the words arrive after
+  // it; whatever was still being typed is cancelled, because when the wall is
+  // reciting nine tiles the next line must not race the last one.
   say(text, who){
     const el = document.getElementById('said');
     const cell = who && document.querySelector('[data-tile="'+who+'"] .tag');
-    el.innerHTML = text ? (cell ? '<b>' + cell.textContent + '</b> ' : '')
-                          + String(text).replace(/[<>]/g,'') : '';
+    clearInterval(this._typing);
     el.classList.toggle('on', !!text);
+    if(!text){ el.innerHTML = ''; return text; }
+    const body = String(text).replace(/[<>]/g,'');
+    el.innerHTML = (cell ? '<b>' + cell.textContent + '</b> ' : '') + '<span></span>';
+    const out = el.lastChild;
+    // a fixed budget of about a second, not a fixed rate: long enough to read
+    // as typing, short enough that a long line does not outstay the 1.6 s a
+    // recital gives it before the next tile speaks
+    const per = Math.max(7, Math.min(24, 1050 / Math.max(1, body.length)));
+    let i = 0;
+    this._typing = setInterval(() => {
+      i += body.length > 90 ? 2 : 1;
+      out.textContent = body.slice(0, i);
+      if(i >= body.length){ clearInterval(this._typing); out.textContent = body; }
+    }, per);
     return text;
   },
   async line(id, q){

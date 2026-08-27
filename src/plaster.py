@@ -81,10 +81,10 @@ def build():
     n = N
 
     # ---- height: what the light will actually be reading -------------------
-    h  = 0.95 * fbm(n, 3.0, octaves=6)            # slow undulation, a bad float
-    h += 0.42 * fbm(n, 14.0, octaves=4)           # trowel-scale lumps
-    h += 0.34 * fbm(n, 70.0, octaves=2)           # sand
-    h += 0.26 * periodic_noise(n, 190.0)          # grit, near pixel scale
+    h  = 0.80 * fbm(n, 3.0, octaves=6)            # slow undulation, a bad float
+    h += 0.36 * fbm(n, 14.0, octaves=4)           # trowel-scale lumps
+    h += 0.24 * fbm(n, 70.0, octaves=2)           # sand
+    h += 0.17 * periodic_noise(n, 190.0)          # grit, near pixel scale
 
     # the comb: whoever bedded this tile dragged a notched trowel through it.
     # 7 ridges across the tile at -22 degrees, both integers, so it wraps.
@@ -93,11 +93,11 @@ def build():
     # rounded to integer wave numbers in x and y or the seam shows
     kx, ky = 7, 3
     comb = np.sin(2 * np.pi * (kx * xx + ky * yy) / n)
-    h += 0.46 * np.sign(comb) * np.abs(comb) ** 1.7      # flat-topped ridges
+    h += 0.17 * np.sign(comb) * np.abs(comb) ** 1.7      # flat-topped ridges
 
-    h += pits(n, 140, 2.0, 7.0, 0.85)             # air holes
-    h += pits(n, 18, 8.0, 17.0, 0.70)             # the bigger blow-outs
-    h -= 0.9 * np.clip(fbm(n, 5.0, octaves=3) - 0.75, 0, None) * 4   # crumbled chips
+    h += pits(n, 110, 2.0, 6.0, 0.42)             # air holes
+    h += pits(n, 12, 8.0, 15.0, 0.32)             # the bigger blow-outs
+    h -= 0.5 * np.clip(fbm(n, 5.0, octaves=3) - 0.82, 0, None) * 4   # crumbled chips
     h = (h - h.mean()) / h.std()
 
     # ---- albedo: the colour before any light ------------------------------
@@ -105,10 +105,14 @@ def build():
     #   (84,83,73) / (119.1,122.5,121.5) = (0.705, 0.678, 0.601)
     # times the page's paper (247,245,240) -> a dirty warm mortar.
     # ...then opened up, because that ratio is the *shadowed* joint between two
-    # tiles and nineteenth-century lime plaster is pale. Dark mortar also drowned
-    # the writing that has to sit on it; this lands the surface near L* 0.70,
-    # which is 9:1 against the page's ink.
-    base = np.array([174.0, 166.0, 144.0]) * 1.19
+    # tiles and nineteenth-century lime plaster is pale.
+    #
+    # The first version that was rough enough was also far too loud: bright,
+    # lumpy, high-contrast, reading as a different material from the tile it
+    # came out from under, and the writing had no chance on it. So the relief
+    # is shallow now and the light nearly flat -- the surface is still sand and
+    # air holes and a dragged comb, but it whispers them.
+    base = np.array([174.0, 166.0, 144.0]) * 1.34
     alb  = np.repeat(base[None, None, :], n, 0).repeat(n, 1)
 
     # Plaster is one colour with dirt on it. Every earlier attempt that gave the
@@ -116,37 +120,37 @@ def build():
     # only as changes in value, near enough neutral, and the surface carries its
     # ugliness in the relief instead.
     tone  = fbm(n, 2.5, octaves=4)                       # patchiness, value only
-    alb  *= (1.0 + 0.085 * tone)[..., None]
+    alb  *= (1.0 + 0.045 * tone)[..., None]
 
     damp  = np.clip(fbm(n, 1.8, octaves=3) - 0.30, 0, None)   # darker, barely cooler
-    alb  -= (damp * 26)[..., None]
+    alb  -= (damp * 13)[..., None]
     alb[..., 2] += damp * 5
 
     lime  = np.clip(fbm(n, 6.0, octaves=3) - 0.70, 0, None) * 2.0   # dried lime, paler
-    alb  += (lime * 26)[..., None]
+    alb  += (lime * 13)[..., None]
 
     stain = np.clip(fbm(n, 3.2, octaves=4) - 0.92, 0, None) * 2.0   # rust, rare
-    alb[..., 0] += stain * 16
+    alb[..., 0] += stain * 8
     alb[..., 1] += stain * 6
     alb[..., 2] -= stain * 6
 
-    sand  = (rng.random((n, n)) < 0.014) * rng.uniform(14, 40, (n, n))  # quartz specks
+    sand  = (rng.random((n, n)) < 0.010) * rng.uniform(7, 20, (n, n))  # quartz specks
     alb  += sand[..., None]
 
     # ---- light: same 116 degrees the glaze highlight uses on the tile ------
     # so the wall and the tile that came off it are lit by the same window.
     gy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * 0.5
     gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * 0.5
-    relief = 2.6
+    relief = 1.05
     nz = 1.0 / np.sqrt(1.0 + relief ** 2 * (gx ** 2 + gy ** 2))
     nx, ny = -relief * gx * nz, -relief * gy * nz
 
     a = np.deg2rad(116.0)
     L = np.array([np.sin(a), -np.cos(a), 0.80]);  L /= np.linalg.norm(L)
     diff = np.clip(nx * L[0] + ny * L[1] + nz * L[2], 0, 1)
-    shade = 0.64 + 0.50 * diff                      # ambient + directional
+    shade = 0.845 + 0.215 * diff                      # ambient + directional
     # cavity: pits keep their own shadow even where the light would reach
-    shade *= 1.0 + 0.11 * np.clip(h, -3, 0.6)
+    shade *= 1.0 + 0.045 * np.clip(h, -3, 0.6)
 
     out = np.clip(alb * shade[..., None], 0, 255).astype(np.uint8)
     return Image.fromarray(out, "RGB")
