@@ -392,7 +392,11 @@ footer a{color:var(--grey)}
 const D = ''' + json.dumps(DATA) + ''', FRW = ''' + json.dumps(FRW) + ''';
 const sp = n => n.toLocaleString('en-US').replace(/,/g,'\\u2009');
 const TILE = {};
-let stopped=false, running=false, bubFor=null;
+// `gen` is bumped by whatever starts a run. A loop that finds gen has moved on
+// gives up: stopped alone was not enough, because asking a second question sets
+// stopped and then immediately clears it again, and the previous loop woke up
+// into a world where it was allowed to carry on.
+let stopped=false, running=false, gen=0, bubFor=null;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function wire(id,dir,pre,n,read){
   const img=document.getElementById(id+'img'), r=document.getElementById(id+'r'),
@@ -401,7 +405,7 @@ function wire(id,dir,pre,n,read){
     im.src=dir+'/'+pre+String(i).padStart(2,'0')+'.png'; return im;});
   const show=()=>{const i=+r.value; img.src=f[i].src; out.innerHTML=read(i);
   };
-  r.addEventListener('input',show); show();
+  r.addEventListener('input',()=>{ wall.stop(); show(); }); show();
   TILE[id]={r,out,n,show};
 }
 ''' + "\n".join(f"wire('{t[0]}','{t[1]}','{t[2]}',{t[3]},{READ[t[0]]});" for t in T) + '''
@@ -422,7 +426,8 @@ window.wall = {
   read(id){ return TILE[id]?TILE[id].out.textContent:'no such tile'; },
   why(id){ const w=document.getElementById(id+'why');
     return w?w.textContent.trim():'no such tile'; },
-  open(id){ if(id===undefined||id==='all'){ document.querySelectorAll('.tile')
+  open(id){ this.stop();
+    if(id===undefined||id==='all'){ document.querySelectorAll('.tile')
       .forEach(c=>c.classList.add('open')); return 'all open'; }
     if(!TILE[id]) return 'no such tile';
     document.querySelector('[data-tile="'+id+'"]').classList.toggle('open'); return this.read(id); },
@@ -453,10 +458,11 @@ window.wall = {
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
-  async run(id, ms=135, keep){
+  async run(id, ms=150, keep, passes){
     if(Array.isArray(id)) return this.runMany(id, ms);
     if(!TILE[id]) return 'no such tile';
-    if(ms === undefined) ms = 135;
+    if(ms === undefined) ms = 150;
+    if(passes === undefined) passes = 12;
     stopped=false;
     document.getElementById('bub').classList.remove('on');
     document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
@@ -468,9 +474,62 @@ window.wall = {
     const t=TILE[id];
     if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
-    for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
+    this.label(id);
+    running = true;
+    const my = ++gen;
+    // It keeps going. Two passes was a guess at how long somebody needs to
+    // work out which of nine tiles to watch, and any guess is wrong for
+    // somebody: it loops until you do something -- type, drag a slider, take a
+    // tile off the wall -- and stops the moment you do. The cap is there so an
+    // abandoned tab is not animating a wall to itself at four in the morning.
+    for(let pass = 0; pass < passes && !stopped && my === gen; pass++){
+      await this._sweep(id, ms, pass ? null : () => this.line(id, this._lastQ), my);
+      if(!stopped && my === gen) await sleep(800);
+    }
+    if(my !== gen) return t.out.textContent;      // somebody else is driving now
+    running = false;
     document.querySelector('.wall').classList.remove('busy');
     return t.out.textContent;
+  },
+  // The wall typing and the tile moving were both trying to catch the eye at
+  // the same moment, so neither did. They take turns now: the tile's name lands
+  // first and it starts moving, and the sentence waits for the turn -- which is
+  // where the tile is furthest from itself and where the sentence is about
+  // something you are looking at.
+  label(id){
+    const el = document.getElementById('said');
+    const tag = document.querySelector('[data-tile="'+id+'"] .tag');
+    clearInterval(this._typing);
+    el.innerHTML = tag ? '<b>' + tag.textContent + '</b>' : '';
+    el.classList.add('on');
+    this.hint(id);
+    return id;
+  },
+  // Out to the far end and back, with a beat at the turn.
+  //
+  // One pass left the tile wherever the slider ended and was over before
+  // anybody worked out which of nine to watch. Going back means you see the
+  // tile, then the damage, then the tile again -- the pair is the answer, and
+  // one of them alone is not. It also puts the wall back the way it was found.
+  //
+  // "Far" is whichever end is further from where this slider rests, so the
+  // cosines build up from one ripple and the kiln fires from cold, each in the
+  // direction its own number runs.
+  async _sweep(id, ms, atTurn, my){
+    const dead = () => stopped || (my !== undefined && my !== gen);
+    const t = TILE[id];
+    const r = document.getElementById(id+'r');
+    const rest = r ? +r.defaultValue : 0;
+    const far = rest * 2 < t.n ? t.n - 1 : 0;
+    const d = far > rest ? 1 : -1;
+    for(let i = rest; d > 0 ? i <= far : i >= far; i += d){
+      if(dead()) return; this.set(id, i); await sleep(ms); }
+    if(dead()) return;
+    if(atTurn) atTurn();
+    await sleep(atTurn ? 1900 : 340);        // long enough to read what arrived
+    for(let i = far; d > 0 ? i >= rest : i <= rest; i -= d){
+      if(dead()) return; this.set(id, i); await sleep(ms); }
+    if(!dead()) this.set(id, rest);
   },
   // With more than one tile moving there is no single speaker. This used to
   // recite -- a new line every 1.6 s until it ran out -- and with nine tiles
@@ -481,7 +540,7 @@ window.wall = {
     clearInterval(this._rt);
     this._said = ids.slice();
     this._at = 0;
-    this.line(ids[0]);
+    this.label(ids[0]);
     return ids.length;
   },
   // Turning a page runs that tile again rather than only swapping the sentence:
@@ -494,7 +553,7 @@ window.wall = {
     this._at = (this._at + d + ids.length) % ids.length;
     return this.run(ids[this._at], undefined, true);
   },
-  async runMany(ids, ms=135){
+  async runMany(ids, ms=150){
     ids = (ids===undefined||ids==='all') ? Object.keys(TILE)
         : (Array.isArray(ids) ? ids : [ids]);
     ids = ids.filter(i=>TILE[i]);
@@ -510,20 +569,24 @@ window.wall = {
     // the sweep by design -- the wall finishes its sentence after it stops.
     this._recite(ids);
     document.querySelector('.wall').classList.add('busy');
-    await Promise.all(ids.map(async id=>{
-      const t=TILE[id];
-      for(let k=0;k<t.n && !stopped;k++){ this.set(id,k); await sleep(ms); }
-    }));
+    const my = ++gen;
+    for(let pass = 0; pass < 12 && !stopped && my === gen; pass++){
+      await Promise.all(ids.map(id =>
+        this._sweep(id, ms, pass || id !== ids[0] ? null : () => this.line(id), my)));
+      if(!stopped && my === gen) await sleep(800);
+    }
+    if(my !== gen) return 'handed over';
     document.querySelector('.wall').classList.remove('busy');
     ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.remove('speaking'));
     running=false; if(btn) btn.innerHTML='&#9654;';
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
-  all(ms=135){ return this.runMany(Object.keys(TILE), ms); },
+  all(ms=150){ return this.runMany(Object.keys(TILE), ms); },
   async ask(q){
     // Measured on 30 questions neither router had seen: words alone 14/30, model
     // alone 21/30, words-then-model 22/30. So: words first, model for the rest.
     this._lastQ = String(q||'');
+    this.stop();
     this.reset();
     this.say('');
     if(this._pickTile){
@@ -597,6 +660,7 @@ window.wall = {
   // may not write one. See the note at the top of llm.js for why.
   lines(id){ return WALLLM.LINES.filter(([t]) => t === id).map(([,l]) => l); },
   knobs(on){
+    this.stop();
     const b = document.body;
     b.classList.toggle('knobs', on === undefined ? !b.classList.contains('knobs') : !!on);
     const btn = document.getElementById('knobs');
@@ -621,7 +685,7 @@ window.wall = {
     // a fixed budget of about a second, not a fixed rate: long enough to read
     // as typing, short enough that a long line does not outstay the 1.6 s a
     // recital gives it before the next tile speaks
-    const per = Math.max(7, Math.min(24, 1050 / Math.max(1, body.length)));
+    const per = Math.max(8, Math.min(30, 1350 / Math.max(1, body.length)));
     let i = 0;
     // the pager and the spotlight land with the label, not after the last
     // character: turning a page should move the wall the moment you click it
@@ -666,7 +730,7 @@ window.wall = {
     if(c) c.classList.add('current');
     return id;
   },
-  tryit(id){ this.reset(); this.knobs(true);
+  tryit(id){ this.stop(); this.reset(); this.knobs(true);
     const c = document.querySelector('[data-tile="'+id+'"]');
     if(c){ c.classList.remove('nudge'); void c.offsetWidth; c.classList.add('nudge'); }
     return 'sliders out'; },
@@ -774,7 +838,7 @@ setInterval(() => {
   if (running || Date.now() - lastTouch < 12000) return;
   lastTouch = Date.now();
   const k = Object.keys(TILE);
-  wall.run(k[Math.floor(Math.random() * k.length)], 160);
+  wall.run(k[Math.floor(Math.random() * k.length)], 160, false, 1);
 }, 3000);
 
 const HELLO = [

@@ -42,15 +42,15 @@ TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question
 # somebody actually types at a wall.
 SCRIPT = [
     ("who painted you?", 1, 0),
-    ("why are you blue?", 3, 2),      # and page through the other two answers
+    ("why are you blue?", 3, 0),      # paging is on the page; in the film it cost 7 s
     ("tell me everything", 9, 0),
 ]
 
 TYPE_MS = 42
-HOLD_OPEN = 1200       # on the bare wall before anything is typed
-HOLD_READ = 1000       # on each finished answer
-HOLD_PAGE = 1500       # on each answer paged to
-HOLD_END = 2200        # on the last one
+HOLD_OPEN = 1000       # on the bare wall before anything is typed
+HOLD_READ = 700        # after each finished pass
+HOLD_PAGE = 700        # after each answer paged to
+HOLD_END = 1400        # on the last one
 
 READ = ("() => [...document.querySelectorAll('.tile input[type=range]')]"
         ".map(r => r.value).join(',')")
@@ -61,26 +61,22 @@ def touch(pg):
     pg.evaluate("dispatchEvent(new KeyboardEvent('keydown'))")
 
 
-def wait_quiet(pg, timeout=30.0):
-    """Until the sweep has started and then stopped moving.
+def wait_pass(pg, timeout=40.0):
+    """Wait for exactly one sweep: out to the far end and back.
 
-    Not by watching .speaking: a single-tile run never takes that class off
-    again -- whatever runs next clears it -- so waiting for it to go is waiting
-    forever. What does end is the sliders, so watch those.
+    The page no longer stops after a pass -- it loops until somebody touches
+    something -- so waiting for the wall to go quiet waits for twelve of them.
+    A pass is over when every slider is back on the value it was authored with,
+    which is where the return leg puts it and where nothing else does.
     """
-    t0 = time.monotonic()
-    before = pg.evaluate(READ)
-    while pg.evaluate(READ) == before and time.monotonic() - t0 < 8:
-        pg.wait_for_timeout(50)
+    ALL = "[...document.querySelectorAll('.tile input[type=range]')]"
+    at_rest = "() => %s.every(r => r.value === r.defaultValue)" % ALL
+    moved = "() => %s.some(r => r.value !== r.defaultValue)" % ALL
+    pg.wait_for_function(moved, timeout=int(timeout * 1000))
     lit = pg.evaluate(
         "[...document.querySelectorAll('.tile.speaking')].map(t=>t.dataset.tile)")
     started = time.monotonic()
-    last, still = pg.evaluate(READ), 0.0
-    while still < 0.45 and time.monotonic() - t0 < timeout:
-        pg.wait_for_timeout(70)
-        now = pg.evaluate(READ)
-        still = 0.0 if now != last else still + 0.07
-        last = now
+    pg.wait_for_function(at_rest, timeout=int(timeout * 1000))
     return lit, started
 
 
@@ -128,13 +124,14 @@ def film():
             pg.type("#q", q, delay=TYPE_MS)
             t_ask = time.monotonic() - clock
             pg.keyboard.press("Enter")
-            lit, t_lit = wait_quiet(pg)
+            lit, t_lit = wait_pass(pg)
             pg.wait_for_timeout(HOLD_READ)
             # the wall no longer recites: with more than one tile answering it
             # says the first and waits, so the film has to turn the pages
             for _ in range(pages):
                 touch(pg)
                 pg.click(".pg a:last-child")
+                wait_pass(pg)
                 pg.wait_for_timeout(HOLD_PAGE)
             if i == len(SCRIPT) - 1:
                 pg.wait_for_timeout(HOLD_END)
