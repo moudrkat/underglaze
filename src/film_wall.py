@@ -13,10 +13,8 @@ Two things are honest to state if anyone asks:
 
   - The page is filmed at 920x560 and scaled up, not rendered at 1080. Below
     900 px the page reflows to a phone layout, so 920 is as small -- and the
-    type therefore as large -- as it can be filmed and still be the wall.
-  - The two caption lines are drawn here, not screen-captured. They are the
-    page's own question and the page's own tile names, set large enough to
-    survive a phone-sized feed, which the 26 px UI does not.
+    type therefore as large -- as it can be filmed and still be the wall. Every
+    word in the film is the page's own, at about twice the size it is authored.
 
     python -m http.server 8777          # from the repo root
     python src/film_wall.py             # -> out/talk_to_a_brick_wall.mp4
@@ -27,8 +25,6 @@ import shutil
 import subprocess
 import time
 
-import numpy as np
-from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 
 URL = os.environ.get("WALL_URL", "http://localhost:8777/web/wall.html")
@@ -36,17 +32,11 @@ URL = os.environ.get("WALL_URL", "http://localhost:8777/web/wall.html")
 VW, VH = 920, 560               # smallest viewport that is still the desktop wall
 OW, OH = 1080, 1350             # 4:5, the shape a feed gives the most room to
 FPS = 30
-PAGE_W = 820                    # the page column, scaled, inside the frame
-PAGE_X, PAGE_Y = (OW - PAGE_W) // 2, 24
-
-PAPER, INK, WARM, GREY = (247, 245, 240), (33, 54, 96), (176, 85, 74), (139, 136, 128)
-SERIF = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf"
-SANS = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+PAPER = (247, 245, 240)
 
 OUT = "out/talk_to_a_brick_wall.mp4"
 RAW = "out/talk_to_a_brick_wall.webm"
 TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question lit
-TITLE = "talk to a brick wall"
 
 # (question, how many tiles it should reach). Short, and the sort of thing
 # somebody actually types at a wall.
@@ -169,94 +159,31 @@ def film():
     return beats
 
 
-def fit(draw, text, font_path, size, width):
-    """Largest size at or below `size` that fits `width`, and the font."""
-    while size > 10:
-        f = ImageFont.truetype(font_path, size)
-        if draw.textlength(text, font=f) <= width:
-            return f
-        size -= 2
-    return ImageFont.truetype(font_path, size)
-
-
-def spaced(draw, xy, text, font, fill, track):
-    x, y = xy
-    for ch in text:
-        draw.text((x, y), ch, font=font, fill=fill)
-        x += draw.textlength(ch, font=font) + track
-
-
-def spaced_width(draw, text, font, track):
-    return sum(draw.textlength(c, font=font) for c in text) + track * (len(text) - 1)
-
-
 def compose(take, raw=RAW):
-    """Decode, place the page on a 4:5 card, draw the two caption lines, encode.
+    """Crop the page column out of the capture and let it fill the frame.
 
-    Done frame by frame in Pillow rather than as an ffmpeg filter graph, because
-    the captions need real text metrics -- shrink-to-fit and letter tracking --
-    and drawtext has neither.
+    There used to be a caption band under the wall with the question and the
+    tile names drawn large. It was there because the page was filmed small and
+    its own type came out at 26 px. Dropping the band gives the page the whole
+    1080x1350 instead of 820 of it -- the column is 433x548, which is 0.79 to
+    the frame's 0.80, so it very nearly fits exactly -- and everything the band
+    was restating is now legible in the page itself at about twice the size.
     """
     crop, ss, dur, beats = (take["crop"], take["start"], take["dur"], take["beats"])
     x0, y0, x1, y1 = crop
     cw, ch = x1 - x0, y1 - y0
-    scale = PAGE_W / cw
-    ph = int(round(ch * scale))
-    band = PAGE_Y + ph                       # where the caption area starts
-    print("page %dx%d -> %dx%d, caption band %d px" % (cw, ch, PAGE_W, ph, OH - band))
-
-    dec = subprocess.Popen(
-        ["ffmpeg", "-v", "error", "-ss", "%.2f" % ss, "-t", "%.2f" % dur, "-i", raw,
-         "-vf", "fps=%d,crop=%d:%d:%d:%d,scale=%d:%d:flags=lanczos"
-                % (FPS, cw, ch, x0, y0, PAGE_W, ph),
-         "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
-        stdout=subprocess.PIPE)
-    enc = subprocess.Popen(
-        ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
-         "-s", "%dx%d" % (OW, OH), "-r", str(FPS), "-i", "-",
-         "-c:v", "libx264", "-profile:v", "high", "-level", "4.0",
-         "-preset", "slow", "-crf", "19", "-pix_fmt", "yuv420p",
-         "-movflags", "+faststart", "-an", OUT],
-        stdin=subprocess.PIPE)
-
-    nbytes = PAGE_W * ph * 3
-    probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
-    n = 0
-    while True:
-        buf = dec.stdout.read(nbytes)
-        if len(buf) < nbytes:
-            break
-        t = n / FPS
-        card = Image.new("RGB", (OW, OH), PAPER)
-        card.paste(Image.frombytes("RGB", (PAGE_W, ph), buf), (PAGE_X, PAGE_Y))
-        d = ImageDraw.Draw(card)
-
-        beat = next((b for b in beats if b["ask"] <= t < b["end"]), None)
-        if beat is None and t < beats[0]["ask"]:
-            # the opening hold, otherwise 287 px of blank paper: name the thing
-            f = ImageFont.truetype(SERIF, 46)
-            d.text(((OW - probe.textlength(TITLE, font=f)) / 2, band + 68), TITLE,
-                   font=f, fill=GREY)
-        if beat:
-            q = "“" + beat["q"] + "”"
-            f = fit(probe, q, SERIF, 52, OW - 120)
-            d.text(((OW - probe.textlength(q, font=f)) / 2, band + 68), q,
-                   font=f, fill=INK)
-            if t >= beat["answer"]:
-                names = "  ·  ".join(beat["names"]) if len(beat["lit"]) < 9 \
-                        else "ALL NINE"
-                g = fit(probe, names, SANS, 28, OW - 160)
-                track = 2.0
-                w = spaced_width(probe, names, g, track)
-                spaced(d, ((OW - w) / 2, band + 156), names, g, WARM, track)
-        enc.stdin.write(card.tobytes())
-        n += 1
-
-    dec.stdout.close()
-    enc.stdin.close()
-    dec.wait()
-    enc.wait()
-    print("%d frames" % n)
+    print("page %dx%d -> fills %dx%d at %.2fx" % (cw, ch, OW, OH, min(OW / cw, OH / ch)))
+    subprocess.run([
+        "ffmpeg", "-v", "error", "-y",
+        "-ss", "%.2f" % ss, "-t", "%.2f" % dur, "-i", raw,
+        "-vf", ("fps=%d,crop=%d:%d:%d:%d,"
+                "scale=%d:%d:force_original_aspect_ratio=decrease:flags=lanczos,"
+                "pad=%d:%d:(ow-iw)/2:(oh-ih)/2:color=0x%02x%02x%02x,format=yuv420p"
+                % (FPS, cw, ch, x0, y0, OW, OH, OW, OH, *PAPER)),
+        "-c:v", "libx264", "-profile:v", "high", "-level", "4.0",
+        "-preset", "slow", "-crf", "19",
+        "-movflags", "+faststart", "-an", OUT,
+    ], check=True)
     print(subprocess.run(["ffprobe", "-v", "error",
                           "-show_entries", "stream=width,height,r_frame_rate",
                           "-show_entries", "format=duration,size",

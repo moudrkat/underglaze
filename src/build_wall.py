@@ -14,51 +14,66 @@ FRW = [0.0,1.0,2.1,3.1,4.2,5.2,6.2,7.3,8.3,9.4,10.4,11.4,12.5,13.5,14.6,15.6,16.
 
 T = [
  ("cut","cut","k",25,24,"how many cosines I take","K = 1","K = 200","HOW I'M DRAWN",
-  "Any pattern can be written as a stack of ripples added together, and the slider adds mine, "
-  "broadest first. It takes 62 815 of them to get 99 % of me — and the first 90 % costs 16 975, "
-  "while the last 9 % costs three times that. Somebody priced me in brush strokes instead: "
-  "worse at every budget."),
+(
+   "Any pattern can be written as a stack of ripples added together, broadest first.",
+   "Mine needs 62 815 of them for 99 % of me. The first 90 % costs 16 975; the last 9 % "
+   "costs three times that.",
+   "Priced in brush strokes instead, the same picture comes out worse at every budget.")),
  ("kil","kiln","s",25,0,"what the fire does to me","unfired","2.4 mm","THE FIRE",
-  "A tile is painted, then baked, and the heat makes the cobalt creep — every firing blurs my "
-  "lines a little and the blur never comes back. The slider fires me again and again. My "
-  "outline falls from 40 744 to 6 210 over sixty of them and never settles: left alone, fire "
-  "does not preserve a pattern, it removes one. One real firing is the first three steps."),
+(
+   "A tile is painted, then baked, and the heat makes the cobalt creep. Every firing blurs "
+   "the lines, and the blur never comes back.",
+   "Sixty firings take my outline from 40 744 down to 6 210, and it never settles: fire does "
+   "not preserve a pattern, it removes one.",
+   "One real firing is the first three steps of the slider.")),
  ("perc","perc","p",26,10,"when my blue joins up","θ = 0.78","θ = 0.24","WHEN I JOIN UP",
-  "My blue is wherever the wave sum rises above a cut-off. The slider moves that cut-off, so my "
-  "flowers swell until they touch, and warm marks the largest piece that is joined up. Between "
-  "θ = 0.55 and 0.53 it jumps from 10.7 % to 46.3 % of the ink, in one step. I am painted just "
-  "above that jump, so the flowers stay apart."),
+(
+   "The blue is wherever the wave sum rises above a cut-off. Move the cut-off and the "
+   "flowers swell until they touch.",
+   "Warm is the largest joined-up piece. Between θ = 0.55 and 0.53 it jumps from 10.7 % to "
+   "46.3 % of the ink, in one step.",
+   "I am painted just above that jump, so my flowers stay apart.")),
  ("eye","eye","e",26,0,"what you actually see of me","0.3 m","12 m","FROM ACROSS THE ROOM",
-  "The slider walks you backwards away from me and throws away whatever your eye can no longer "
-  "resolve at that distance. At 0.30 m you match the camera exactly. At 2 m only 26 129 of my "
-  "62 815 ripples still reach you; at 4 m, 6 427. Somebody painted detail into me that nobody "
-  "standing up has ever seen."),
+(
+   "An eye resolves about one arcminute, so distance throws detail away whether it was "
+   "painted or not.",
+   "At 0.30 m you match the camera exactly. At 2 m, 26 129 of my 62 815 ripples still reach "
+   "you; at 4 m, 6 427.",
+   "Somebody painted detail into me that nobody standing up has ever seen.")),
  ("chi","chi","t",31,20,"which way I curl","p4m","past the tile","WHICH WAY I CURL",
-  "My tendrils all curl the same way, so I have quarter-turns but no mirrors — p4, not p4m. "
-  "Measured: rotations score +0.54, mirrors +0.18, and a meaningless shift scores +0.12, which "
-  "is where the mirrors sit. The slider forces the mirrors on anyway, and by χ = 0 my tendrils "
-  "have forgotten which way they were going."),
+(
+   "A repeating pattern has a symmetry group. p4 has quarter-turns; p4m has mirrors as well.",
+   "My rotations score +0.54, my mirrors +0.18, and a meaningless shift +0.12 — so the "
+   "mirrors are noise.",
+   "p4, then. Force the mirrors on anyway and by χ = 0 my tendrils have forgotten which way "
+   "they were going.")),
  ("frac","frac","w",26,0,"the fractal I am not","0 px","26 px","AM I A FRACTAL",
-  "A fractal is equally rough however far in you zoom. Measure my roughness and it climbs from "
-  "0.90 at 1–2 px to 1.95 at 64–128 px, where one steady number is what a fractal would give — "
-  "Koch's curve holds 1.26–1.43. So, no. The slider builds a version of me that really is one, "
-  "to show the ruler is not broken."),
+(
+   "A fractal is equally rough however far in you zoom: one dimension at every scale. Koch's "
+   "curve holds 1.26–1.43.",
+   "Mine climbs from 0.90 at 1–2 px to 1.95 at 64–128 px. So, no.",
+   "The slider builds a version of me that really is one, to show the ruler is not broken.")),
  ("copy","copy","c",26,0,"three centuries of being copied","new","25 firings","THREE CENTURIES",
-  "This pattern was copied by hand for three centuries: repainted, refired, passed on. Every "
-  "step of the slider is one firing with a copyist repainting between them. With the original "
-  "in front of her she still holds 0.795 after twenty-five. A copyist working from memory alone "
-  "did worse than nobody at all. I did not survive by being memorable — somebody kept the "
-  "original on the desk."),
+(
+   "This pattern was copied by hand for three centuries: repainted, refired, passed on.",
+   "Every step is one firing, with a copyist repainting between them. With the original in "
+   "front of her she still holds 0.795 after twenty-five.",
+   "Working from memory alone she did worse than nobody at all. I survived because somebody "
+   "kept the original on the desk.")),
  ("ship","ship","s",26,0,"how much of me can be replaced","nothing","every plank","HOW MUCH OF ME",
-  "Take the numbers I am made of and give them fresh random signs, a plank at a time, and ask "
-  "when I stop being this tile. Two unrelated rebuilds overlap by 0.186; that is chance. "
-  "Replace 5 % of me, largest first, and I score 0.149 — below chance, somebody else. Replace "
-  "95 % of the smallest and I am still 0.618. It is not how much. It is which."),
+(
+   "The ship of Theseus: swap the planks one at a time and ask when it stops being the ship. "
+   "My planks are the numbers I am made of.",
+   "Two unrelated rebuilds overlap by 0.186 — that is chance. Replace 5 % of me, largest "
+   "first, and I score 0.149, below chance.",
+   "Replace 95 % of the smallest and I am still 0.618. It is not how much. It is which.")),
  ("attn","attn","a",26,25,"what attention finds in me","β = 1","β = 400","WHAT AN AI SEES",
-  "Cut me into patches and let one patch look at the others the way a transformer does — no "
-  "training, no positions, only similarity. Warm is where it looks. It finds where I repeat and "
-  "never where I turn: it lands on my quarter-turn partners less often than chance. Similarity "
-  "survives sliding and not rotation, and rotation is most of what I am."),
+(
+   "Attention is patches looking at each other by similarity. No training here and no "
+   "positions — only the patches.",
+   "Warm is where one patch looks. It lands on my quarter-turn partners less often than "
+   "chance would.",
+   "Similarity survives sliding and not rotation, and rotation is most of what I am.")),
 ]
 
 READ = {
@@ -104,14 +119,18 @@ T = [t[:4] + (LIKE.get(DIRNAME[t[0]], t[4]),) + t[5:] for t in T]
 cells = "\n".join(
 f'''<div class="tile" data-tile="{i}">
 <div class="pic">
-<div class="say" id="{i}say" onclick="wall.close('{i}')"><div class="note"><b>{nm}</b><span>{why}</span>
+<div class="say" id="{i}say" onclick="wall.close('{i}')"><div class="note"><b>{nm}</b><ul>{pts}</ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="{ex}">try: &ldquo;{ex}&rdquo;</i></div></div>
 <div class="face"><img id="{i}img" src="" alt="{nm}"><span class="tag">{fld}</span></div>
 <button class="q" onclick="wall.open('{i}')" aria-label="what {nm} means">?</button></div>
 <input type="range" id="{i}r" min="0" max="{n-1}" value="{st}" step="1" aria-label="{nm}"
  onclick="event.stopPropagation()">
 <p class="kv" id="{i}out"></p>
-<div class="why" id="{i}why" data-name="{nm}">{why}</div></div>''' for (i,dr,pr,n,st,nm,lo,hi,fld,why) in T for ex in [EX[i]])
+<div class="why" id="{i}why" data-name="{nm}">{why}</div></div>'''
+    for (i,dr,pr,n,st,nm,lo,hi,fld,pt) in T
+    for ex in [EX[i]]
+    for pts in ["".join("<li>" + b + "</li>" for b in pt)]
+    for why in [" ".join(pt)])
 
 API = json.dumps({t[0]: {"name": t[5], "field": t[8], "steps": t[3]} for t in T})
 
@@ -261,6 +280,13 @@ body.knobs .wall{aspect-ratio:.845}
    the wall reads straight through it. It shrink-wraps the words. */
 .note{background:rgba(251,248,241,.58);padding:6% 7% 7%;border-radius:2px;
  box-shadow:0 0 0 6px rgba(251,248,241,.40), 0 0 18px 13px rgba(251,248,241,.30)}
+/* Points, not a paragraph: what the thing is, then what it did to this tile.
+   A paragraph in a 400 px square is a wall of type nobody starts. */
+.say ul{margin:0;padding:0;list-style:none}
+.say li{position:relative;padding-left:.95em;margin-bottom:.5em}
+.say li:last-child{margin-bottom:0}
+.say li:before{content:"";position:absolute;left:0;top:.55em;
+ width:.3em;height:.3em;border-radius:50%;background:var(--warm);opacity:.65}
 .say b{display:block;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:clamp(7px,4.4cqw,10px);line-height:1.3;letter-spacing:.09em;
  padding-right:2.4em;                       /* clear of the ? in the corner */
@@ -427,17 +453,20 @@ window.wall = {
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
-  async run(id, ms=135){
+  async run(id, ms=135, keep){
     if(Array.isArray(id)) return this.runMany(id, ms);
     if(!TILE[id]) return 'no such tile';
+    if(ms === undefined) ms = 135;
     stopped=false;
     document.getElementById('bub').classList.remove('on');
     document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
     const cell=document.querySelector('[data-tile="'+id+'"]');
     cell.classList.add('speaking');
+    const r0=document.getElementById(id+'r');
+    if(r0) this.set(id, +r0.defaultValue);
     this.line(id, this._lastQ);
     const t=TILE[id];
-    this._said = [id]; this._at = 0;
+    if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
     for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
     document.querySelector('.wall').classList.remove('busy');
@@ -455,12 +484,15 @@ window.wall = {
     this.line(ids[0]);
     return ids.length;
   },
+  // Turning a page runs that tile again rather than only swapping the sentence:
+  // the answer *is* the animation, and a line about the fire with a still wall
+  // under it is half an answer.
   page(d){
     const ids = this._said || [];
     if(ids.length < 2) return 'nothing to page through';
     clearInterval(this._rt);
     this._at = (this._at + d + ids.length) % ids.length;
-    return this.line(ids[this._at]);
+    return this.run(ids[this._at], undefined, true);
   },
   async runMany(ids, ms=135){
     ids = (ids===undefined||ids==='all') ? Object.keys(TILE)

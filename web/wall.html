@@ -144,6 +144,13 @@ body.knobs .wall{aspect-ratio:.845}
    the wall reads straight through it. It shrink-wraps the words. */
 .note{background:rgba(251,248,241,.58);padding:6% 7% 7%;border-radius:2px;
  box-shadow:0 0 0 6px rgba(251,248,241,.40), 0 0 18px 13px rgba(251,248,241,.30)}
+/* Points, not a paragraph: what the thing is, then what it did to this tile.
+   A paragraph in a 400 px square is a wall of type nobody starts. */
+.say ul{margin:0;padding:0;list-style:none}
+.say li{position:relative;padding-left:.95em;margin-bottom:.5em}
+.say li:last-child{margin-bottom:0}
+.say li:before{content:"";position:absolute;left:0;top:.55em;
+ width:.3em;height:.3em;border-radius:50%;background:var(--warm);opacity:.65}
 .say b{display:block;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:clamp(7px,4.4cqw,10px);line-height:1.3;letter-spacing:.09em;
  padding-right:2.4em;                       /* clear of the ? in the corner */
@@ -236,94 +243,94 @@ footer a{color:var(--grey)}
 <div class="wallbox"><div class="wall">
 <div class="tile" data-tile="cut">
 <div class="pic">
-<div class="say" id="cutsay" onclick="wall.close('cut')"><div class="note"><b>how many cosines I take</b><span>Any pattern can be written as a stack of ripples added together, and the slider adds mine, broadest first. It takes 62 815 of them to get 99 % of me — and the first 90 % costs 16 975, while the last 9 % costs three times that. Somebody priced me in brush strokes instead: worse at every budget.</span>
+<div class="say" id="cutsay" onclick="wall.close('cut')"><div class="note"><b>how many cosines I take</b><ul><li>Any pattern can be written as a stack of ripples added together, broadest first.</li><li>Mine needs 62 815 of them for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that.</li><li>Priced in brush strokes instead, the same picture comes out worse at every budget.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how many cosines does it take to draw you?">try: &ldquo;how many cosines does it take to draw you?&rdquo;</i></div></div>
 <div class="face"><img id="cutimg" src="" alt="how many cosines I take"><span class="tag">HOW I'M DRAWN</span></div>
 <button class="q" onclick="wall.open('cut')" aria-label="what how many cosines I take means">?</button></div>
 <input type="range" id="cutr" min="0" max="24" value="24" step="1" aria-label="how many cosines I take"
  onclick="event.stopPropagation()">
 <p class="kv" id="cutout"></p>
-<div class="why" id="cutwhy" data-name="how many cosines I take">Any pattern can be written as a stack of ripples added together, and the slider adds mine, broadest first. It takes 62 815 of them to get 99 % of me — and the first 90 % costs 16 975, while the last 9 % costs three times that. Somebody priced me in brush strokes instead: worse at every budget.</div></div>
+<div class="why" id="cutwhy" data-name="how many cosines I take">Any pattern can be written as a stack of ripples added together, broadest first. Mine needs 62 815 of them for 99 % of me. The first 90 % costs 16 975; the last 9 % costs three times that. Priced in brush strokes instead, the same picture comes out worse at every budget.</div></div>
 <div class="tile" data-tile="kil">
 <div class="pic">
-<div class="say" id="kilsay" onclick="wall.close('kil')"><div class="note"><b>what the fire does to me</b><span>A tile is painted, then baked, and the heat makes the cobalt creep — every firing blurs my lines a little and the blur never comes back. The slider fires me again and again. My outline falls from 40 744 to 6 210 over sixty of them and never settles: left alone, fire does not preserve a pattern, it removes one. One real firing is the first three steps.</span>
+<div class="say" id="kilsay" onclick="wall.close('kil')"><div class="note"><b>what the fire does to me</b><ul><li>A tile is painted, then baked, and the heat makes the cobalt creep. Every firing blurs the lines, and the blur never comes back.</li><li>Sixty firings take my outline from 40 744 down to 6 210, and it never settles: fire does not preserve a pattern, it removes one.</li><li>One real firing is the first three steps of the slider.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what did the fire do to you?">try: &ldquo;what did the fire do to you?&rdquo;</i></div></div>
 <div class="face"><img id="kilimg" src="" alt="what the fire does to me"><span class="tag">THE FIRE</span></div>
 <button class="q" onclick="wall.open('kil')" aria-label="what what the fire does to me means">?</button></div>
 <input type="range" id="kilr" min="0" max="24" value="0" step="1" aria-label="what the fire does to me"
  onclick="event.stopPropagation()">
 <p class="kv" id="kilout"></p>
-<div class="why" id="kilwhy" data-name="what the fire does to me">A tile is painted, then baked, and the heat makes the cobalt creep — every firing blurs my lines a little and the blur never comes back. The slider fires me again and again. My outline falls from 40 744 to 6 210 over sixty of them and never settles: left alone, fire does not preserve a pattern, it removes one. One real firing is the first three steps.</div></div>
+<div class="why" id="kilwhy" data-name="what the fire does to me">A tile is painted, then baked, and the heat makes the cobalt creep. Every firing blurs the lines, and the blur never comes back. Sixty firings take my outline from 40 744 down to 6 210, and it never settles: fire does not preserve a pattern, it removes one. One real firing is the first three steps of the slider.</div></div>
 <div class="tile" data-tile="perc">
 <div class="pic">
-<div class="say" id="percsay" onclick="wall.close('perc')"><div class="note"><b>when my blue joins up</b><span>My blue is wherever the wave sum rises above a cut-off. The slider moves that cut-off, so my flowers swell until they touch, and warm marks the largest piece that is joined up. Between θ = 0.55 and 0.53 it jumps from 10.7 % to 46.3 % of the ink, in one step. I am painted just above that jump, so the flowers stay apart.</span>
+<div class="say" id="percsay" onclick="wall.close('perc')"><div class="note"><b>when my blue joins up</b><ul><li>The blue is wherever the wave sum rises above a cut-off. Move the cut-off and the flowers swell until they touch.</li><li>Warm is the largest joined-up piece. Between θ = 0.55 and 0.53 it jumps from 10.7 % to 46.3 % of the ink, in one step.</li><li>I am painted just above that jump, so my flowers stay apart.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="when does your blue join up?">try: &ldquo;when does your blue join up?&rdquo;</i></div></div>
 <div class="face"><img id="percimg" src="" alt="when my blue joins up"><span class="tag">WHEN I JOIN UP</span></div>
 <button class="q" onclick="wall.open('perc')" aria-label="what when my blue joins up means">?</button></div>
 <input type="range" id="percr" min="0" max="25" value="8" step="1" aria-label="when my blue joins up"
  onclick="event.stopPropagation()">
 <p class="kv" id="percout"></p>
-<div class="why" id="percwhy" data-name="when my blue joins up">My blue is wherever the wave sum rises above a cut-off. The slider moves that cut-off, so my flowers swell until they touch, and warm marks the largest piece that is joined up. Between θ = 0.55 and 0.53 it jumps from 10.7 % to 46.3 % of the ink, in one step. I am painted just above that jump, so the flowers stay apart.</div></div>
+<div class="why" id="percwhy" data-name="when my blue joins up">The blue is wherever the wave sum rises above a cut-off. Move the cut-off and the flowers swell until they touch. Warm is the largest joined-up piece. Between θ = 0.55 and 0.53 it jumps from 10.7 % to 46.3 % of the ink, in one step. I am painted just above that jump, so my flowers stay apart.</div></div>
 <div class="tile" data-tile="eye">
 <div class="pic">
-<div class="say" id="eyesay" onclick="wall.close('eye')"><div class="note"><b>what you actually see of me</b><span>The slider walks you backwards away from me and throws away whatever your eye can no longer resolve at that distance. At 0.30 m you match the camera exactly. At 2 m only 26 129 of my 62 815 ripples still reach you; at 4 m, 6 427. Somebody painted detail into me that nobody standing up has ever seen.</span>
+<div class="say" id="eyesay" onclick="wall.close('eye')"><div class="note"><b>what you actually see of me</b><ul><li>An eye resolves about one arcminute, so distance throws detail away whether it was painted or not.</li><li>At 0.30 m you match the camera exactly. At 2 m, 26 129 of my 62 815 ripples still reach you; at 4 m, 6 427.</li><li>Somebody painted detail into me that nobody standing up has ever seen.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what do I see of you from the door?">try: &ldquo;what do I see of you from the door?&rdquo;</i></div></div>
 <div class="face"><img id="eyeimg" src="" alt="what you actually see of me"><span class="tag">FROM ACROSS THE ROOM</span></div>
 <button class="q" onclick="wall.open('eye')" aria-label="what what you actually see of me means">?</button></div>
 <input type="range" id="eyer" min="0" max="25" value="0" step="1" aria-label="what you actually see of me"
  onclick="event.stopPropagation()">
 <p class="kv" id="eyeout"></p>
-<div class="why" id="eyewhy" data-name="what you actually see of me">The slider walks you backwards away from me and throws away whatever your eye can no longer resolve at that distance. At 0.30 m you match the camera exactly. At 2 m only 26 129 of my 62 815 ripples still reach you; at 4 m, 6 427. Somebody painted detail into me that nobody standing up has ever seen.</div></div>
+<div class="why" id="eyewhy" data-name="what you actually see of me">An eye resolves about one arcminute, so distance throws detail away whether it was painted or not. At 0.30 m you match the camera exactly. At 2 m, 26 129 of my 62 815 ripples still reach you; at 4 m, 6 427. Somebody painted detail into me that nobody standing up has ever seen.</div></div>
 <div class="tile" data-tile="chi">
 <div class="pic">
-<div class="say" id="chisay" onclick="wall.close('chi')"><div class="note"><b>which way I curl</b><span>My tendrils all curl the same way, so I have quarter-turns but no mirrors — p4, not p4m. Measured: rotations score +0.54, mirrors +0.18, and a meaningless shift scores +0.12, which is where the mirrors sit. The slider forces the mirrors on anyway, and by χ = 0 my tendrils have forgotten which way they were going.</span>
+<div class="say" id="chisay" onclick="wall.close('chi')"><div class="note"><b>which way I curl</b><ul><li>A repeating pattern has a symmetry group. p4 has quarter-turns; p4m has mirrors as well.</li><li>My rotations score +0.54, my mirrors +0.18, and a meaningless shift +0.12 — so the mirrors are noise.</li><li>p4, then. Force the mirrors on anyway and by χ = 0 my tendrils have forgotten which way they were going.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="which way do you curl?">try: &ldquo;which way do you curl?&rdquo;</i></div></div>
 <div class="face"><img id="chiimg" src="" alt="which way I curl"><span class="tag">WHICH WAY I CURL</span></div>
 <button class="q" onclick="wall.open('chi')" aria-label="what which way I curl means">?</button></div>
 <input type="range" id="chir" min="0" max="30" value="19" step="1" aria-label="which way I curl"
  onclick="event.stopPropagation()">
 <p class="kv" id="chiout"></p>
-<div class="why" id="chiwhy" data-name="which way I curl">My tendrils all curl the same way, so I have quarter-turns but no mirrors — p4, not p4m. Measured: rotations score +0.54, mirrors +0.18, and a meaningless shift scores +0.12, which is where the mirrors sit. The slider forces the mirrors on anyway, and by χ = 0 my tendrils have forgotten which way they were going.</div></div>
+<div class="why" id="chiwhy" data-name="which way I curl">A repeating pattern has a symmetry group. p4 has quarter-turns; p4m has mirrors as well. My rotations score +0.54, my mirrors +0.18, and a meaningless shift +0.12 — so the mirrors are noise. p4, then. Force the mirrors on anyway and by χ = 0 my tendrils have forgotten which way they were going.</div></div>
 <div class="tile" data-tile="frac">
 <div class="pic">
-<div class="say" id="fracsay" onclick="wall.close('frac')"><div class="note"><b>the fractal I am not</b><span>A fractal is equally rough however far in you zoom. Measure my roughness and it climbs from 0.90 at 1–2 px to 1.95 at 64–128 px, where one steady number is what a fractal would give — Koch's curve holds 1.26–1.43. So, no. The slider builds a version of me that really is one, to show the ruler is not broken.</span>
+<div class="say" id="fracsay" onclick="wall.close('frac')"><div class="note"><b>the fractal I am not</b><ul><li>A fractal is equally rough however far in you zoom: one dimension at every scale. Koch's curve holds 1.26–1.43.</li><li>Mine climbs from 0.90 at 1–2 px to 1.95 at 64–128 px. So, no.</li><li>The slider builds a version of me that really is one, to show the ruler is not broken.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="are you a fractal?">try: &ldquo;are you a fractal?&rdquo;</i></div></div>
 <div class="face"><img id="fracimg" src="" alt="the fractal I am not"><span class="tag">AM I A FRACTAL</span></div>
 <button class="q" onclick="wall.open('frac')" aria-label="what the fractal I am not means">?</button></div>
 <input type="range" id="fracr" min="0" max="25" value="0" step="1" aria-label="the fractal I am not"
  onclick="event.stopPropagation()">
 <p class="kv" id="fracout"></p>
-<div class="why" id="fracwhy" data-name="the fractal I am not">A fractal is equally rough however far in you zoom. Measure my roughness and it climbs from 0.90 at 1–2 px to 1.95 at 64–128 px, where one steady number is what a fractal would give — Koch's curve holds 1.26–1.43. So, no. The slider builds a version of me that really is one, to show the ruler is not broken.</div></div>
+<div class="why" id="fracwhy" data-name="the fractal I am not">A fractal is equally rough however far in you zoom: one dimension at every scale. Koch's curve holds 1.26–1.43. Mine climbs from 0.90 at 1–2 px to 1.95 at 64–128 px. So, no. The slider builds a version of me that really is one, to show the ruler is not broken.</div></div>
 <div class="tile" data-tile="copy">
 <div class="pic">
-<div class="say" id="copysay" onclick="wall.close('copy')"><div class="note"><b>three centuries of being copied</b><span>This pattern was copied by hand for three centuries: repainted, refired, passed on. Every step of the slider is one firing with a copyist repainting between them. With the original in front of her she still holds 0.795 after twenty-five. A copyist working from memory alone did worse than nobody at all. I did not survive by being memorable — somebody kept the original on the desk.</span>
+<div class="say" id="copysay" onclick="wall.close('copy')"><div class="note"><b>three centuries of being copied</b><ul><li>This pattern was copied by hand for three centuries: repainted, refired, passed on.</li><li>Every step is one firing, with a copyist repainting between them. With the original in front of her she still holds 0.795 after twenty-five.</li><li>Working from memory alone she did worse than nobody at all. I survived because somebody kept the original on the desk.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="who painted you?">try: &ldquo;who painted you?&rdquo;</i></div></div>
 <div class="face"><img id="copyimg" src="" alt="three centuries of being copied"><span class="tag">THREE CENTURIES</span></div>
 <button class="q" onclick="wall.open('copy')" aria-label="what three centuries of being copied means">?</button></div>
 <input type="range" id="copyr" min="0" max="25" value="1" step="1" aria-label="three centuries of being copied"
  onclick="event.stopPropagation()">
 <p class="kv" id="copyout"></p>
-<div class="why" id="copywhy" data-name="three centuries of being copied">This pattern was copied by hand for three centuries: repainted, refired, passed on. Every step of the slider is one firing with a copyist repainting between them. With the original in front of her she still holds 0.795 after twenty-five. A copyist working from memory alone did worse than nobody at all. I did not survive by being memorable — somebody kept the original on the desk.</div></div>
+<div class="why" id="copywhy" data-name="three centuries of being copied">This pattern was copied by hand for three centuries: repainted, refired, passed on. Every step is one firing, with a copyist repainting between them. With the original in front of her she still holds 0.795 after twenty-five. Working from memory alone she did worse than nobody at all. I survived because somebody kept the original on the desk.</div></div>
 <div class="tile" data-tile="ship">
 <div class="pic">
-<div class="say" id="shipsay" onclick="wall.close('ship')"><div class="note"><b>how much of me can be replaced</b><span>Take the numbers I am made of and give them fresh random signs, a plank at a time, and ask when I stop being this tile. Two unrelated rebuilds overlap by 0.186; that is chance. Replace 5 % of me, largest first, and I score 0.149 — below chance, somebody else. Replace 95 % of the smallest and I am still 0.618. It is not how much. It is which.</span>
+<div class="say" id="shipsay" onclick="wall.close('ship')"><div class="note"><b>how much of me can be replaced</b><ul><li>The ship of Theseus: swap the planks one at a time and ask when it stops being the ship. My planks are the numbers I am made of.</li><li>Two unrelated rebuilds overlap by 0.186 — that is chance. Replace 5 % of me, largest first, and I score 0.149, below chance.</li><li>Replace 95 % of the smallest and I am still 0.618. It is not how much. It is which.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="how much of you can I replace?">try: &ldquo;how much of you can I replace?&rdquo;</i></div></div>
 <div class="face"><img id="shipimg" src="" alt="how much of me can be replaced"><span class="tag">HOW MUCH OF ME</span></div>
 <button class="q" onclick="wall.open('ship')" aria-label="what how much of me can be replaced means">?</button></div>
 <input type="range" id="shipr" min="0" max="25" value="0" step="1" aria-label="how much of me can be replaced"
  onclick="event.stopPropagation()">
 <p class="kv" id="shipout"></p>
-<div class="why" id="shipwhy" data-name="how much of me can be replaced">Take the numbers I am made of and give them fresh random signs, a plank at a time, and ask when I stop being this tile. Two unrelated rebuilds overlap by 0.186; that is chance. Replace 5 % of me, largest first, and I score 0.149 — below chance, somebody else. Replace 95 % of the smallest and I am still 0.618. It is not how much. It is which.</div></div>
+<div class="why" id="shipwhy" data-name="how much of me can be replaced">The ship of Theseus: swap the planks one at a time and ask when it stops being the ship. My planks are the numbers I am made of. Two unrelated rebuilds overlap by 0.186 — that is chance. Replace 5 % of me, largest first, and I score 0.149, below chance. Replace 95 % of the smallest and I am still 0.618. It is not how much. It is which.</div></div>
 <div class="tile" data-tile="attn">
 <div class="pic">
-<div class="say" id="attnsay" onclick="wall.close('attn')"><div class="note"><b>what attention finds in me</b><span>Cut me into patches and let one patch look at the others the way a transformer does — no training, no positions, only similarity. Warm is where it looks. It finds where I repeat and never where I turn: it lands on my quarter-turn partners less often than chance. Similarity survives sliding and not rotation, and rotation is most of what I am.</span>
+<div class="say" id="attnsay" onclick="wall.close('attn')"><div class="note"><b>what attention finds in me</b><ul><li>Attention is patches looking at each other by similarity. No training here and no positions — only the patches.</li><li>Warm is where one patch looks. It lands on my quarter-turn partners less often than chance would.</li><li>Similarity survives sliding and not rotation, and rotation is most of what I am.</li></ul>
 <i class="ex" onclick="event.stopPropagation();wall.ask(this.dataset.q)" data-q="what does attention find in you?">try: &ldquo;what does attention find in you?&rdquo;</i></div></div>
 <div class="face"><img id="attnimg" src="" alt="what attention finds in me"><span class="tag">WHAT AN AI SEES</span></div>
 <button class="q" onclick="wall.open('attn')" aria-label="what what attention finds in me means">?</button></div>
 <input type="range" id="attnr" min="0" max="25" value="25" step="1" aria-label="what attention finds in me"
  onclick="event.stopPropagation()">
 <p class="kv" id="attnout"></p>
-<div class="why" id="attnwhy" data-name="what attention finds in me">Cut me into patches and let one patch look at the others the way a transformer does — no training, no positions, only similarity. Warm is where it looks. It finds where I repeat and never where I turn: it lands on my quarter-turn partners less often than chance. Similarity survives sliding and not rotation, and rotation is most of what I am.</div></div>
+<div class="why" id="attnwhy" data-name="what attention finds in me">Attention is patches looking at each other by similarity. No training here and no positions — only the patches. Warm is where one patch looks. It lands on my quarter-turn partners less often than chance would. Similarity survives sliding and not rotation, and rotation is most of what I am.</div></div>
 </div></div>
 
 </div>
@@ -407,17 +414,20 @@ window.wall = {
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
-  async run(id, ms=135){
+  async run(id, ms=135, keep){
     if(Array.isArray(id)) return this.runMany(id, ms);
     if(!TILE[id]) return 'no such tile';
+    if(ms === undefined) ms = 135;
     stopped=false;
     document.getElementById('bub').classList.remove('on');
     document.querySelectorAll('.tile').forEach(c=>c.classList.remove('speaking'));
     const cell=document.querySelector('[data-tile="'+id+'"]');
     cell.classList.add('speaking');
+    const r0=document.getElementById(id+'r');
+    if(r0) this.set(id, +r0.defaultValue);
     this.line(id, this._lastQ);
     const t=TILE[id];
-    this._said = [id]; this._at = 0;
+    if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
     for(let i=0;i<t.n && !stopped;i++){ this.set(id,i); await sleep(ms); }
     document.querySelector('.wall').classList.remove('busy');
@@ -435,12 +445,15 @@ window.wall = {
     this.line(ids[0]);
     return ids.length;
   },
+  // Turning a page runs that tile again rather than only swapping the sentence:
+  // the answer *is* the animation, and a line about the fire with a still wall
+  // under it is half an answer.
   page(d){
     const ids = this._said || [];
     if(ids.length < 2) return 'nothing to page through';
     clearInterval(this._rt);
     this._at = (this._at + d + ids.length) % ids.length;
-    return this.line(ids[this._at]);
+    return this.run(ids[this._at], undefined, true);
   },
   async runMany(ids, ms=135){
     ids = (ids===undefined||ids==='all') ? Object.keys(TILE)
