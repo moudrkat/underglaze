@@ -104,11 +104,11 @@ through call one — 141 of them, over four sets.
 
 | set | what it is | on the wall | refuses |
 |---|---|---|---|
-| CASES | written next to the patterns | 37 / 49 | 2 / 2 |
-| HARD | written blind | 23 / 30 | — |
-| FRESH | shown to neither router while being written | 20 / 30 | — |
+| CASES | written next to the patterns | 36 / 49 | 2 / 2 |
+| HARD | written blind | 25 / 30 | — |
+| FRESH | shown to neither router while being written | 24 / 30 | — |
 | WEIRD | what people actually type | 10 / 14 | 12 / 16 |
-| **all** | | **90 / 123** | **14 / 18** |
+| **all** | | **95 / 123** | **14 / 18** |
 
 Two things moved that number a long way, and neither was the model.
 
@@ -121,13 +121,19 @@ rather than to a tile. They have buttons of their own. Out of the pool, and the 
 
 | threshold | on the wall | refuses | total |
 |---|---|---|---|
-| 0.10 | 94 / 123 | 9 / 18 | 103 |
-| **0.12** | **90 / 123** | **14 / 18** | **104** |
-| 0.14 | 87 / 123 | 15 / 18 | 102 |
-| 0.20 | 75 / 123 | 17 / 18 | 92 |
+| 0.10 | 98 / 123 | 9 / 18 | 107 |
+| 0.12 | 95 / 123 | 11 / 18 | 106 |
+| **0.14** | **95 / 123** | **14 / 18** | **109** |
+| 0.20 | 82 / 123 | 17 / 18 | 99 |
 
-Higher refuses nonsense better and answers real questions worse. 0.12 is where the two stop
+Higher refuses nonsense better and answers real questions worse. 0.14 is where the two stop
 paying for each other. The page ran at 0.20.
+
+**And the nine subjects were overlapping.** *from across the room* said "the smallest detail you
+can resolve", so it took *does it repeat if I look closer?*, *is there detail all the way down?*
+and *what if I keep magnifying?* — all of which belong to the fractal — plus *how much
+information is in you?*, which belongs to the cosines. Rewritten so the nine stop reaching into
+each other, the blind set went 23 to 25 and the fresh set 20 to 24.
 
 ### Neither generator can pick a tile
 
@@ -135,7 +141,7 @@ paying for each other. The page ran at 0.20.
 |---|---|---|
 | SmolLM2-135M-Instruct, 117 MB | 0 / 18 | 9 / 9 |
 | Qwen2.5-0.5B-Instruct, 483 MB | 3 / 18 | 0 / 9 |
-| **all-MiniLM-L6-v2, 23 MB** | **90 / 123** | **14 / 18** |
+| **all-MiniLM-L6-v2, 23 MB** | **95 / 123** | **14 / 18** |
 
 SmolLM2 restates the question; Qwen latches onto one number and gives it to everything —
 ATTENTION to all twenty-seven, then 8 to everything, then 3. Seven prompt shapes were tried
