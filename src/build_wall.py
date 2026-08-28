@@ -527,8 +527,9 @@ window.wall = {
     const el = document.getElementById('said');
     const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
     clearInterval(this._typing);
-    el.innerHTML = (tag ? '<b>' + tag.textContent + '</b> ' : '')
-      + '<em class="think">is thinking<i>.</i><i>.</i><i>.</i></em>';
+    el.innerHTML = (tag ? '<b>' + tag.textContent + '</b> <em class="think">is thinking'
+                        : '<em class="think">the wall is thinking')
+      + '<i>.</i><i>.</i><i>.</i></em>';
     el.classList.add('on');
     return 'thinking';
   },
@@ -683,6 +684,17 @@ window.wall = {
     this.say('');
     suggest(false);
     if(!this._model) return this.say(WALLLM.WAIT);
+    // Take the wall before anything is awaited. Whatever it was doing on its
+    // own is over the moment somebody presses return, and the page has to show
+    // that in the same frame -- otherwise the last thing the wall said sits
+    // there under a typed question for as long as the router takes to answer,
+    // and it reads as the answer.
+    gen++;                     // whatever the wall was doing on its own is over
+    document.querySelectorAll('.tile').forEach(c =>
+      c.classList.remove('speaking','current'));
+    document.querySelector('.wall').classList.add('busy');
+    this.hint(null);
+    this.think(null);
     const st = document.getElementById('mstat');
     try{
       if(st) st.textContent = 'which tile\u2026';
