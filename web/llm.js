@@ -31,6 +31,23 @@ window.WALLLM = (function(){
   "ship": "How much of the tile can be replaced before it stops being this tile. Identity, what is essential about it, what makes it itself and not another pattern, the ship of Theseus, swapping and shuffling its coefficients, rebuilding it.",
   "attn": "What a machine learning model finds in the tile. Attention, transformers, neural networks, embeddings, software recognising or reading the pattern, what an AI notices and what it misses."
 };
+  const LEADQ = [
+ "The tile {} can answer that.",
+ "That one is for the tile {}.",
+ "The tile {} will explain.",
+ "That belongs to the tile {}.",
+ "The tile {} has something to say about that.",
+ "Ask the tile {}.",
+ "The tile {} was measured for exactly that.",
+ "The tile {} takes that one."
+];
+  const LEADS = [
+ "The tile {}.",
+ "From the tile {}.",
+ "The tile {} says:",
+ "Over here, the tile {}.",
+ "The tile {}, then."
+];
   const CHORUS = [
  "Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.",
  "I am a sum of cosines. Sixty-two thousand of them, and not a single sine.",
@@ -483,5 +500,6 @@ window.WALLLM = (function(){
 ];
   const WAIT = 'Fetch the two models above and I can read what you type. Until '
              + 'then I will keep talking, and every tile still comes off the wall.';
-  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS, WAIT };
+  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS,
+           LEADQ, LEADS, WAIT };
 })();

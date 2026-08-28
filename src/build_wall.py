@@ -94,6 +94,18 @@ LINES = [('cut', 'Sixty-two thousand cosines to draw me. Most of them are dots y
 TAG = ['And which of us is talking to a wall here?', 'Just so we are clear on who the wall is.', 'You asked, remember.', 'I did not start this.', 'Say what you like about my conversation, I have never left the room.', 'Anyway. You are still here.', 'No pressure. I have got until the building comes down.', 'That is the sort of thing you learn standing still for ninety years.', 'Do not let me keep you.', 'It is a strange hobby you have, but go on.', 'I would nod, but.', 'You may quote me. I am not going anywhere.', 'One of us has somewhere else to be.', 'This counts as my busiest day.', 'The kettle disagrees, but the kettle always does.', 'I only know nine things, and you have now heard one of them.', 'There is more where that came from. Eight more, to be exact.', 'Ask the tile next to me. She will say the same about herself.']
 ASIDE = ['You are talking to a wall. I would like that on the record.', 'This is going better than the phrase suggests.', 'Somebody photographed me and now I have opinions.', 'Ninety years on this wall and today is the first time anyone asked.', 'You could be outside. There is a whole valley out there.', 'I am a wall. You are doing most of the work in this conversation.', 'Nine tiles and a kettle. That is the entire social circle in here.', 'There is no polite way to put this: I am grouting.', 'The kettle has heard all of this before.', 'I cannot leave, so take your time.', 'You are the first thing to happen here since the boiler.', 'I answer, which is more than the phrase promised.']
 CHAT = ['Cold. It is a kitchen wall.', 'Still here. Fired once, and nothing since.', 'Grouted. You?', 'Somebody measured me and I have not stopped talking since.', 'Fine. Slightly crazed in the top left corner.', 'The same as yesterday, and the ninety years before that.', 'Warm on this side. The other one faces the pantry.', 'Hello. Ask me something narrow.', 'Upright. That is most of it.', 'Blue, mostly.']
+# How the wall hands an answer over. {} is where the tile is -- "at the bottom
+# left", "in the middle" -- worked out from the live grid, so it is still true
+# when the wall is two columns wide on a phone.
+LEADQ = ['The tile {} can answer that.', 'That one is for the tile {}.',
+         'The tile {} will explain.', 'That belongs to the tile {}.',
+         'The tile {} has something to say about that.',
+         'Ask the tile {}.', 'The tile {} was measured for exactly that.',
+         'The tile {} takes that one.']
+
+LEADS = ['The tile {}.', 'From the tile {}.', 'The tile {} says:',
+         'Over here, the tile {}.', 'The tile {}, then.']
+
 CHORUS = [
  'Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.',
  'I am a sum of cosines. Sixty-two thousand of them, and not a single sine.',
@@ -250,7 +262,9 @@ body.knobs .wall{aspect-ratio:.845}
 .think i:nth-child(2){animation-delay:.2s}
 .think i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.15}30%{opacity:1}}
-.said u{font-style:italic;text-decoration:none;color:var(--grey);margin-right:.5em}
+.said u{font-style:normal;text-decoration:none;color:var(--warm);
+ font-family:'DejaVu Sans',system-ui,sans-serif;font-size:.78em;letter-spacing:.02em;
+ margin-right:.55em}
 .said b{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
@@ -529,20 +543,42 @@ window.wall = {
   // there -- about thirty-five seconds a sentence with no GPU. That is the
   // honest price of no server and no key, so the wall says what it is doing
   // rather than sitting there looking broken.
-  // Which tile, in words, because a name in small caps and a tile lifting
-  // somewhere in a grid of nine are two facts the reader has to join up.
+  // Where the tile is, in words, because a name in small caps and a tile
+  // lifting somewhere in a grid of nine are two facts a reader has to join up.
+  //
+  // Counted off the live grid and not off a fixed three by three: on a phone
+  // the wall is two columns wide, and "top middle" would be a lie there.
   place(id){
     const k = Object.keys(TILE).indexOf(id);
     if(k < 0) return '';
-    return ['top left','top middle','top right','middle left','the middle',
-            'middle right','bottom left','bottom middle','bottom right'][k];
+    const cols = getComputedStyle(document.querySelector('.wall'))
+                   .gridTemplateColumns.split(' ').length;
+    const rows = Math.ceil(Object.keys(TILE).length / cols);
+    const r = Math.floor(k / cols), c = k % cols;
+    const across = cols === 1 ? '' : c === 0 ? 'left' : c === cols - 1 ? 'right' : 'middle';
+    // top/middle/bottom only holds while there are three rows or fewer. Two
+    // columns on a phone make five, and three different rows were all coming
+    // out as "middle left", which is not where any of them is.
+    if(rows > 3){
+      const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
+      return 'in the ' + ORD[r] + ' row' + (across ? ', on the ' + across : '');
+    }
+    const down = rows === 1 ? '' : r === 0 ? 'top' : r === rows - 1 ? 'bottom' : 'middle';
+    if(down === 'middle' && across === 'middle') return 'in the middle';
+    const w = (down + ' ' + across).trim();
+    return w ? 'at the ' + w : 'here';
+  },
+  // "the tile at the bottom left can answer that" -- varied, so nine answers in
+  // a row do not all open with the same six words
+  lead(id, asked){
+    const L = asked ? WALLLM.LEADQ : WALLLM.LEADS;
+    return L[Math.floor(Math.random()*L.length)].replace('{}', this.place(id));
   },
   think(id){
     const el = document.getElementById('said');
     const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
     clearInterval(this._typing);
-    el.innerHTML = (tag ? '<em class="think">the tile ' + (this.place(id) === 'the middle'
-                          ? 'in the middle' : 'at the ' + this.place(id)) + ' is thinking'
+    el.innerHTML = (tag ? '<em class="think">the tile ' + this.place(id) + ' is thinking'
                         : '<em class="think">the wall is thinking')
       + '<i>.</i><i>.</i><i>.</i></em>';
     el.classList.add('on');
@@ -777,9 +813,7 @@ window.wall = {
     el.classList.toggle('on', !!text);
     if(!text){ el.innerHTML = ''; return text; }
     const body = String(text).replace(/[<>]/g,'');
-    el.innerHTML = (cell ? '<b>' + cell.textContent + '</b> <u>'
-                           + (this.place(who) === 'the middle' ? 'in the middle'
-                              : 'at the ' + this.place(who)) + '</u> ' : '')
+    el.innerHTML = (cell ? '<u>' + this.lead(who, !!this._lastQ) + '</u> ' : '')
                    + '<span></span>';
     const out = el.lastChild;
     // a fixed budget of about a second, not a fixed rate: long enough to read
@@ -1155,6 +1189,8 @@ RULES_JS = """// The contract, in one place: the nine subjects the router is com
 window.WALLLM = (function(){
   const THRESHOLD = %s;
   const DESC = %s;
+  const LEADQ = %s;
+  const LEADS = %s;
   const CHORUS = %s;
   const LOOK = %s;
   const LINES = %s;
@@ -1164,9 +1200,10 @@ window.WALLLM = (function(){
   const TAG = %s;
   const WAIT = 'Fetch the two models above and I can read what you type. Until '
              + 'then I will keep talking, and every tile still comes off the wall.';
-  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS, WAIT };
+  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS,
+           LEADQ, LEADS, WAIT };
 })();
-""" % (THRESHOLD, json.dumps(DESC, indent=2), json.dumps(CHORUS, indent=1),
+""" % (THRESHOLD, json.dumps(DESC, indent=2), json.dumps(LEADQ, indent=1), json.dumps(LEADS, indent=1), json.dumps(CHORUS, indent=1),
        json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1),
        json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
 io.open("web/llm.js","w",encoding="utf-8").write(RULES_JS)

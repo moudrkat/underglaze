@@ -104,7 +104,9 @@ body.knobs .wall{aspect-ratio:.845}
 .think i:nth-child(2){animation-delay:.2s}
 .think i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.15}30%{opacity:1}}
-.said u{font-style:italic;text-decoration:none;color:var(--grey);margin-right:.5em}
+.said u{font-style:normal;text-decoration:none;color:var(--warm);
+ font-family:'DejaVu Sans',system-ui,sans-serif;font-size:.78em;letter-spacing:.02em;
+ margin-right:.55em}
 .said b{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
@@ -480,20 +482,42 @@ window.wall = {
   // there -- about thirty-five seconds a sentence with no GPU. That is the
   // honest price of no server and no key, so the wall says what it is doing
   // rather than sitting there looking broken.
-  // Which tile, in words, because a name in small caps and a tile lifting
-  // somewhere in a grid of nine are two facts the reader has to join up.
+  // Where the tile is, in words, because a name in small caps and a tile
+  // lifting somewhere in a grid of nine are two facts a reader has to join up.
+  //
+  // Counted off the live grid and not off a fixed three by three: on a phone
+  // the wall is two columns wide, and "top middle" would be a lie there.
   place(id){
     const k = Object.keys(TILE).indexOf(id);
     if(k < 0) return '';
-    return ['top left','top middle','top right','middle left','the middle',
-            'middle right','bottom left','bottom middle','bottom right'][k];
+    const cols = getComputedStyle(document.querySelector('.wall'))
+                   .gridTemplateColumns.split(' ').length;
+    const rows = Math.ceil(Object.keys(TILE).length / cols);
+    const r = Math.floor(k / cols), c = k % cols;
+    const across = cols === 1 ? '' : c === 0 ? 'left' : c === cols - 1 ? 'right' : 'middle';
+    // top/middle/bottom only holds while there are three rows or fewer. Two
+    // columns on a phone make five, and three different rows were all coming
+    // out as "middle left", which is not where any of them is.
+    if(rows > 3){
+      const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
+      return 'in the ' + ORD[r] + ' row' + (across ? ', on the ' + across : '');
+    }
+    const down = rows === 1 ? '' : r === 0 ? 'top' : r === rows - 1 ? 'bottom' : 'middle';
+    if(down === 'middle' && across === 'middle') return 'in the middle';
+    const w = (down + ' ' + across).trim();
+    return w ? 'at the ' + w : 'here';
+  },
+  // "the tile at the bottom left can answer that" -- varied, so nine answers in
+  // a row do not all open with the same six words
+  lead(id, asked){
+    const L = asked ? WALLLM.LEADQ : WALLLM.LEADS;
+    return L[Math.floor(Math.random()*L.length)].replace('{}', this.place(id));
   },
   think(id){
     const el = document.getElementById('said');
     const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
     clearInterval(this._typing);
-    el.innerHTML = (tag ? '<em class="think">the tile ' + (this.place(id) === 'the middle'
-                          ? 'in the middle' : 'at the ' + this.place(id)) + ' is thinking'
+    el.innerHTML = (tag ? '<em class="think">the tile ' + this.place(id) + ' is thinking'
                         : '<em class="think">the wall is thinking')
       + '<i>.</i><i>.</i><i>.</i></em>';
     el.classList.add('on');
@@ -728,9 +752,7 @@ window.wall = {
     el.classList.toggle('on', !!text);
     if(!text){ el.innerHTML = ''; return text; }
     const body = String(text).replace(/[<>]/g,'');
-    el.innerHTML = (cell ? '<b>' + cell.textContent + '</b> <u>'
-                           + (this.place(who) === 'the middle' ? 'in the middle'
-                              : 'at the ' + this.place(who)) + '</u> ' : '')
+    el.innerHTML = (cell ? '<u>' + this.lead(who, !!this._lastQ) + '</u> ' : '')
                    + '<span></span>';
     const out = el.lastChild;
     // a fixed budget of about a second, not a fixed rate: long enough to read
