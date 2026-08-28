@@ -45,6 +45,7 @@ SCRIPT = [
 ]
 
 PERFORM_MS = 13000     # of the wall talking to itself before anybody types
+OPEN_AT_ONE = 6.2      # of the opening kept; the rest of it is cut out
 
 TYPE_MS = 42
 HOLD_OPEN = 1000       # on the bare wall before anything is typed
@@ -195,12 +196,22 @@ def compose(take, raw=RAW):
     # nothing is faked, but those stretches run at 8x, because a minute of a
     # tile going out and back says the same thing as five seconds of it. The
     # typing, the sentence landing, and the wall's own performance stay at 1x.
-    fast = [(b["ask"] + 1.6, b["answer"] - 0.8) for b in beats
+    fast = [(b["ask"] + 1.6, b["answer"] - 0.8, 8.0) for b in beats
             if b["answer"] - b["ask"] > 4.4]
+    # The wall's opening performance is the point of the film, but not all of
+    # it. Sampled frame by frame: the first chorus line finishes landing at
+    # 5.5 s and then nothing changes for four seconds before the second one
+    # starts. That gap is cut out, not sped up -- rate 0 drops a segment -- so
+    # the film is one chorus and then somebody types.
+    if beats:
+        opening = beats[0]["ask"] - 1.2
+        if opening > OPEN_AT_ONE + 1.0:
+            fast.insert(0, (OPEN_AT_ONE, opening, 0.0))
+    fast.sort()
     segs, filt, k, t = [], [], 0, 0.0
-    for a, z in fast + [(dur, dur)]:
-        for lo, hi, rate in ((t, a, 1.0), (a, z, 8.0)):
-            if hi - lo <= 0.04:
+    for a, z, rate0 in fast + [(dur, dur, 1.0)]:
+        for lo, hi, rate in ((t, a, 1.0), (a, z, rate0)):
+            if hi - lo <= 0.04 or rate == 0.0:      # rate 0 means drop it
                 continue
             filt.append("[0:v]trim=%.3f:%.3f,setpts=(PTS-STARTPTS)/%.1f[v%d]"
                         % (lo, hi, rate, k))
@@ -208,7 +219,7 @@ def compose(take, raw=RAW):
         t = z
     graph = ";".join(filt) + ";" + "".join(segs) + \
             "concat=n=%d:v=1:a=0[cut];" % len(segs)
-    print("%d segments, %d of them at 8x" % (len(segs), len(fast)))
+    print("%d segments, %d of them sped up" % (len(segs), len(fast)))
 
     subprocess.run([
         "ffmpeg", "-v", "error", "-y",

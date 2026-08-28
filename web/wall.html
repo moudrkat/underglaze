@@ -948,8 +948,15 @@ st.textContent = ''; st.className = 'mstat';
 btn.onclick = async () => {
   btn.disabled = true; btn.textContent = 'fetching…';
   try{
-    const { pipeline } = await import(
+    const { pipeline, env } = await import(
       'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+    // Off the main thread, or the page freezes for the whole of every answer.
+    // Twenty-five seconds of generation on wasm was blocking everything: the
+    // tile stopped mid-sweep, the caret stopped blinking, and a return key
+    // pressed during it sat in the queue until the model had finished. All of
+    // which was filmed before anybody noticed, because a frozen screen
+    // recording of a still page looks like a still page.
+    env.backends.onnx.wasm.proxy = true;
 
     // First the router, because it is the job the generators cannot do. Nine
     // descriptions and the question, all embedded, nearest one wins -- no words
