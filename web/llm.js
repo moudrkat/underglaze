@@ -39,14 +39,43 @@ window.WALLLM = (function(){
  "The tile {} has something to say about that.",
  "Ask the tile {}.",
  "The tile {} was measured for exactly that.",
- "The tile {} takes that one."
+ "The tile {} takes that one.",
+ "That is the tile {}, and it has been waiting.",
+ "The tile {} knows. Here.",
+ "You want the tile {}.",
+ "The tile {} handles that one.",
+ "That question lives at the tile {}.",
+ "Try the tile {}.",
+ "The tile {} has the number for that.",
+ "That is a question for the tile {}.",
+ "The tile {} answers that, and briefly.",
+ "Over to the tile {}.",
+ "That falls to the tile {}.",
+ "The tile {} did the measuring on that.",
+ "The tile {} says it better than I would.",
+ "That is the tile {}.",
+ "The tile {} has been asked that before.",
+ "Down to the tile {}, then.",
+ "The tile {} is the one to ask.",
+ "That one wakes up the tile {}."
 ];
   const LEADS = [
  "The tile {}.",
  "From the tile {}.",
  "The tile {} says:",
  "Over here, the tile {}.",
- "The tile {}, then."
+ "The tile {}, then.",
+ "Now the tile {}.",
+ "The tile {} has one.",
+ "Something from the tile {}.",
+ "The tile {} speaks up.",
+ "And the tile {}.",
+ "Here is the tile {}.",
+ "The tile {} would add this.",
+ "The tile {}, since nobody asked.",
+ "While you are here: the tile {}.",
+ "The tile {} has been holding this.",
+ "This one is the tile {}."
 ];
   const CHORUS = [
  "Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.",

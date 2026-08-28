@@ -99,12 +99,25 @@ CHAT = ['Cold. It is a kitchen wall.', 'Still here. Fired once, and nothing sinc
 # when the wall is two columns wide on a phone.
 LEADQ = ['The tile {} can answer that.', 'That one is for the tile {}.',
          'The tile {} will explain.', 'That belongs to the tile {}.',
-         'The tile {} has something to say about that.',
-         'Ask the tile {}.', 'The tile {} was measured for exactly that.',
-         'The tile {} takes that one.']
+         'The tile {} has something to say about that.', 'Ask the tile {}.',
+         'The tile {} was measured for exactly that.', 'The tile {} takes that one.',
+         'That is the tile {}, and it has been waiting.', 'The tile {} knows. Here.',
+         'You want the tile {}.', 'The tile {} handles that one.',
+         'That question lives at the tile {}.', 'Try the tile {}.',
+         'The tile {} has the number for that.', 'That is a question for the tile {}.',
+         'The tile {} answers that, and briefly.', 'Over to the tile {}.',
+         'That falls to the tile {}.', 'The tile {} did the measuring on that.',
+         'The tile {} says it better than I would.', 'That is the tile {}.',
+         'The tile {} has been asked that before.', 'Down to the tile {}, then.',
+         'The tile {} is the one to ask.', 'That one wakes up the tile {}.']
 
 LEADS = ['The tile {}.', 'From the tile {}.', 'The tile {} says:',
-         'Over here, the tile {}.', 'The tile {}, then.']
+         'Over here, the tile {}.', 'The tile {}, then.', 'Now the tile {}.',
+         'The tile {} has one.', 'Something from the tile {}.',
+         'The tile {} speaks up.', 'And the tile {}.', 'Here is the tile {}.',
+         'The tile {} would add this.', 'The tile {}, since nobody asked.',
+         'While you are here: the tile {}.', 'The tile {} has been holding this.',
+         'This one is the tile {}.']
 
 CHORUS = [
  'Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.',
@@ -572,7 +585,10 @@ window.wall = {
   // a row do not all open with the same six words
   lead(id, asked){
     const L = asked ? WALLLM.LEADQ : WALLLM.LEADS;
-    return L[Math.floor(Math.random()*L.length)].replace('{}', this.place(id));
+    let i = Math.floor(Math.random()*L.length);
+    if(L.length > 2 && i === this._lastLead) i = (i + 1 + Math.floor(Math.random()*(L.length-1))) % L.length;
+    this._lastLead = i;
+    return L[i].replace('{}', this.place(id));
   },
   think(id){
     const el = document.getElementById('said');

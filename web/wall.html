@@ -511,7 +511,10 @@ window.wall = {
   // a row do not all open with the same six words
   lead(id, asked){
     const L = asked ? WALLLM.LEADQ : WALLLM.LEADS;
-    return L[Math.floor(Math.random()*L.length)].replace('{}', this.place(id));
+    let i = Math.floor(Math.random()*L.length);
+    if(L.length > 2 && i === this._lastLead) i = (i + 1 + Math.floor(Math.random()*(L.length-1))) % L.length;
+    this._lastLead = i;
+    return L[i].replace('{}', this.place(id));
   },
   think(id){
     const el = document.getElementById('said');
