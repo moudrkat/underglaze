@@ -527,8 +527,8 @@ window.WALLLM = (function(){
  "There is more where that came from. Eight more, to be exact.",
  "Ask the tile next to me. She will say the same about herself."
 ];
-  const WAIT = 'Fetch the two models above and I can read what you type. Until '
-             + 'then I will keep talking, and every tile still comes off the wall.';
+  const WAIT = 'Press “let it think” above and I can read what you type. '
+             + 'Until then I will keep talking, and every tile still comes off the wall.';
   return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS,
            LEADQ, LEADS, WAIT };
 })();

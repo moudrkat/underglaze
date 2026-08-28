@@ -111,22 +111,20 @@ def film():
         pg.wait_for_timeout(1000)
         pg.evaluate("wall.stop()")
         print("fetching both models…")
-        pg.click("#speak")
-        pg.wait_for_function("() => !!window.wall._model", timeout=600000)
-        # the 483 MB fetch fails about one attempt in two from a headless
-        # browser, so it gets three
+        # one button, both models; the 483 MB half fails about one attempt in
+        # two from a headless browser, so it gets three
         for attempt in range(3):
-            pg.click("#write")
+            pg.click("#speak")
             pg.wait_for_function(
-                "() => !!window.wall._improvise || (document.getElementById('write')"
-                " && document.getElementById('write').textContent === 'could not load')",
+                "() => !!window.wall._improvise || (document.getElementById('speak')"
+                " && document.getElementById('speak').textContent === 'could not load')",
                 timeout=1800000)
             if pg.evaluate("() => !!window.wall._improvise"):
                 break
-            print("  writer attempt %d failed, retrying" % (attempt + 1))
+            print("  attempt %d failed, retrying" % (attempt + 1))
             pg.wait_for_timeout(2000)
         if not pg.evaluate("() => !!window.wall._improvise"):
-            raise SystemExit("the writer did not load")
+            raise SystemExit("the models did not load")
         print("both up")
         pg.evaluate("wall.stop(); wall.reset(); wall.say('')")
         pg.wait_for_timeout(500)

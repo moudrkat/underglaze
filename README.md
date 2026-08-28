@@ -57,8 +57,9 @@ to say and it says them, all nine tiles moving at once for the ones the whole wa
 at a time for the rest, until somebody touches something. The question box is shut until both
 models are here, and says so.
 
-Two buttons, two models, both running in the visitor's own browser. No server, no key, nothing
-leaves the page. Each says its size before it spends it and removes itself once it has arrived.
+One button — **let it think · 506 MB** — two models, both running in the visitor's own browser.
+No server, no key, nothing leaves the page. It says what it costs before it spends it and takes
+itself off the bar once both have arrived.
 
 ```mermaid
 flowchart TD

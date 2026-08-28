@@ -238,11 +238,10 @@ footer a{color:var(--grey)}
 
 <div class="wrap">
 <div class="barwrap"><div class="bar">
-<input type="text" id="q" disabled placeholder="fetch both models above and you can ask it things"
+<input type="text" id="q" disabled placeholder="press &ldquo;let it think&rdquo; above and you can ask it things"
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
-<button class="go" id="speak" title="download all-MiniLM-L6-v2 and run it in this browser, no server and no key">let it read &middot; 23 MB</button>
-<button class="go" id="write" style="display:none" title="download Qwen2.5-0.5B and let it choose the reply, and write one when none of them fits">let it write &middot; 483 MB</button>
+<button class="go" id="speak" title="download both models and run them in this browser, no server and no key">let it think &middot; 506 MB</button>
 <button class="go" id="knobs" onclick="wall.knobs()" title="show the sliders and the numbers">&#9707;</button>
 <button class="go" onclick="wall.about()" title="what is this">?</button>
 <span id="mstat" class="mstat"></span>
@@ -979,24 +978,13 @@ btn.onclick = async () => {
       return best;
     };
     window.wall._name = 'all-MiniLM-L6-v2';
-    btn.remove();
-    st.textContent = ''; st.className = 'mstat';
-    document.getElementById('write').style.display = '';   // now the larger ask
-  }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
-             console.warn(e); }
-};
 
-// Call two and call three: which of the tile's ten, and -- when none of them
-// fits -- one sentence of its own. This is a generator's work and a router
-// cannot do it, the same way the generators could not route. Qwen2.5-0.5B, not
-// SmolLM2-135M, because SmolLM2 answered "1" to all eighteen lists of ten and
-// Qwen reached ten distinct lines and took the first only three times.
-const wbtn = document.getElementById('write');
-wbtn.onclick = async () => {
-  wbtn.disabled = true; wbtn.textContent = 'fetching…';
-  try{
-    const { pipeline } = await import(
-      'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
+    // Straight on to call two and call three: which of the tile's ten, and --
+    // when none of them fits -- one sentence of its own. A generator's work,
+    // which a router cannot do, the same way the generators could not route.
+    // Qwen2.5-0.5B and not SmolLM2-135M, because SmolLM2 answered "1" to all
+    // eighteen lists of ten and Qwen reached ten distinct lines.
+    const wbtn = btn;
     // navigator.gpu exists in plenty of browsers that cannot actually give you
     // an adapter, and asking for a webgpu pipeline there fetches 117 MB and
     // then throws "no available backend" -- after which the wasm retry inherits
@@ -1103,7 +1091,7 @@ wbtn.onclick = async () => {
     wbtn.remove(); st.remove();
     const qi2 = document.getElementById('q');
     qi2.disabled = false; qi2.placeholder = 'ask it something…';
-  }catch(e){ wbtn.disabled = false; wbtn.textContent = 'could not load';
+  }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
              console.warn(e); }
 };
 </script></body></html>
