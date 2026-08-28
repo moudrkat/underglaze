@@ -89,7 +89,7 @@ READ = {
 }
 
 EX = {'cut': 'how many cosines does it take to draw you?', 'kil': 'what did the fire do to you?', 'perc': 'when does your blue join up?', 'eye': 'what do I see of you from the door?', 'chi': 'which way do you curl?', 'frac': 'are you a fractal?', 'copy': 'who painted you?', 'ship': 'how much of you can I replace?', 'attn': 'what does attention find in you?'}
-DESC = {'cut': 'How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.', 'kil': 'What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.', 'perc': 'When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.', 'eye': 'What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.', 'chi': 'Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.', 'frac': 'Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.', 'copy': 'The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.', 'ship': 'How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.', 'attn': 'What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.', '_surprise': 'Show me something interesting. Surprise me. Tell me something I do not know. What is the best thing about you. Say something surprising.', '_all': 'Show me everything. Run all of them. Tell me everything you know. Do the whole wall.', '_help': 'What can you do? What can I ask you? Help. How does this work? What are you?'}
+DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.", "perc": "When the separate blue flowers join up into one connected shape. Why the tile is blue and where the blue stops, the colour, the threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge, whether the flowers are touching.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, how far away you can still see it, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down, rotating it.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.", "_surprise": "Surprise me. Show me something I would not have asked for. Tell me the best thing. Say something unexpected.", "_all": "Show me everything. Run all of them at once. Every tile. The whole wall. Do all nine.", "_help": "How does this page work? What can I ask you? What are you for? Help. Instructions. Who made this website."}
 LINES = [('cut', 'Sixty-two thousand cosines to draw me. Most of them are dots you cannot see.'), ('cut', 'Nine tenths of me is cheap. The last tenth cost three times as much, and it is dots.'), ('cut', 'Somebody tried drawing me with brush strokes instead. It went badly for the strokes.'), ('cut', 'Every number in me was measured. Nobody got to choose one, including me.'), ('cut', 'I am cosines all the way down. Not one sine. Somebody checked.'), ('cut', 'The first sixteen thousand terms get you ninety percent of me. After that you are haggling.'), ('cut', 'The stroke version needed 44 466 numbers and still could not fill me in.'), ('cut', 'At forty terms I am a rumour. At two hundred I am a tile. Nothing in between is worth having.'), ('cut', 'Drawing me by hand takes 7 411 strokes. Drawing me with waves takes fewer numbers than that.'), ('cut', 'I have no sine terms. That is not modesty, it is my four-fold centre.'), ('kil', 'Fire does not preserve patterns. It removes them. Slowly, but it does not stop.'), ('kil', 'One real firing barely touched me. That is the whole of my luck.'), ('kil', 'Sixty firings and I am thirteen blobs. Handsome blobs, but blobs.'), ('kil', 'A kiln is blur and a threshold, over and over. That is the entire trick.'), ('kil', 'My outline started at 40 744 and finished at 6 210. The heat kept the change.'), ('kil', 'There is no temperature at which I stop changing. There is only slower.'), ('kil', 'The equation that ruins me in a kiln is the one that settles a soap film.'), ('kil', 'Nobody has pinned down how far my cobalt spreads. The estimates differ by forty times.'), ('kil', 'I arrived with 166 separate inked regions. Fire glued them into thirteen.'), ('kil', 'Fire is patient, and it is not on my side.'), ('perc', 'Two hundredths of a threshold stand between my flowers and one continuous blue.'), ('perc', 'I am painted just on the safe side of that. Nobody will say whether on purpose.'), ('perc', 'Push it a little further and I stop being flowers and become one shape.'), ('perc', 'I am 437 separate flowers. It takes remarkably little to become one.'), ('perc', 'My largest piece jumps from a tenth of me to nearly half between two clicks.'), ('perc', 'The half in blue-where-f-exceeds-a-half was a decision. Somebody made it.'), ('perc', 'Below one setting you could cross me from edge to edge without leaving the blue.'), ('perc', 'My biggest connected piece is a tenth of me, and it is very pleased with itself.'), ('perc', 'Whether my safety margin was designed or lucky cannot be settled from one tile.'), ('perc', 'There is a number at which I become a single object. It is closer than it looks.'), ('eye', 'From four metres you are getting a tenth of me. Enjoy the tenth.'), ('eye', 'Stand thirty centimetres back and you see what the camera saw. Any further and you lose.'), ('eye', 'The dots go first. The dots always go first.'), ('eye', 'Most of what was measured about me never reaches anybody.'), ('eye', 'At two metres, 26 129 of my 62 815 terms make it to you.'), ('eye', 'At twelve metres I am 687 numbers and a blue haze.'), ('eye', 'Your eye splits two lines a sixtieth of a degree apart. That is your whole allowance.'), ('eye', 'You and the camera are equal at thirty centimetres. After that it is not close.'), ('eye', 'These distances are generous to you. Your contrast gives out before your sharpness does.'), ('eye', 'Somebody painted detail into me that nobody standing up has ever seen.'), ('chi', 'I have no mirrors. My tendrils all curl the same way and they are not sorry.'), ('chi', 'Force mirrors onto me and my tendrils forget which way they were going.'), ('chi', 'My mirror score is the same as sliding me sideways at random. That is how I know.'), ('chi', 'Quarter turns yes, reflections no. In the trade that makes me p4.'), ('chi', 'Rotate me: plus fifty-four. Reflect me: eighteen, which is nothing at all.'), ('chi', 'My handedness is the gap between two numbers that were allowed to disagree.'), ('chi', 'Most of my curl shows up in the first fifth of that slider. The rest is showing off.'), ('chi', 'Somebody measured my group before drawing anything. That order was the point.'), ('chi', 'Turn me a quarter and nothing happens. Hold me to a mirror and something does.'), ('chi', 'Whether a stronger curl looks more twisted was tested, could not be shown, and was kept anyway.'), ('frac', 'I am not a fractal. Zoom in far enough and I just run out.'), ('frac', 'Measured carelessly I look fractal. So does a curve known to be perfectly smooth.'), ('frac', 'A fractal is equally rough at every zoom. I get rougher the further away you stand.'), ('frac', 'There is a smallest thing on me. A fractal is not allowed one.'), ('frac', 'My roughness reads 0.90 close up and 1.95 far off. A fractal would say one number twice.'), ('frac', 'Somebody built a real fractal out of me, purely to check the ruler was not broken.'), ('frac', 'Magnify me and hold me against myself and I do no better than a random shift.'), ('frac', 'People quote 1.34 about me. It is the average of a number that will not sit still.'), ('frac', 'My group has quarter turns and shifts in it. Zooming was never invited.'), ('frac', 'A finite sum of cosines cannot be a fractal. You may use as many as you like.'), ('copy', 'Three centuries of copying, and the fire won every round.'), ('copy', 'I am named after an onion. There is no onion on me anywhere.'), ('copy', 'Printed from steel, copied from a painting, copied from a Chinese bowl.'), ('copy', 'Nothing here survives on its own. Somebody kept repainting me.'), ('copy', 'A copyist working from memory alone did worse than no copyist at all.'), ('copy', 'I lost the fruit I am named after somewhere between China and this valley.'), ('copy', 'Painters took a Chinese fruit for an onion. The name has outlived the fruit by three centuries.'), ('copy', 'Meissen, then Dubi, then a steel plate, then this kitchen.'), ('copy', 'Give a copyist the original and I survive. Give her a memory and I do not.'), ('copy', 'I kept the aster and the leaves. The peach, the bamboo and the onion never made it.'), ('ship', 'Replace five percent of me, the right five, and I am somebody else.'), ('ship', 'Replace ninety-five percent of my small parts and I am still me. Go on.'), ('ship', 'Everything I am fits into a few dozen numbers.'), ('ship', 'My spectrum looks like any pattern with edges. The signs are what make me this one.'), ('ship', 'Two strangers built from my own parts resemble each other as much as they resemble me.'), ('ship', 'Shuffle the signs of my biggest coefficients and I am gone in one step.'), ('ship', 'My small parts are nearly free to change. My large ones are not free at all.'), ('ship', 'It is not how much of me you replace. It is which.'), ('ship', 'Swap my planks one at a time and there is a moment where I stop being the ship.'), ('ship', 'I can lose most of myself and be recognised, or very little and not.'), ('attn', 'Attention finds where I repeat. It never finds where I turn.'), ('attn', 'A model looked at my patches and missed my symmetry entirely.'), ('attn', 'Rotate a piece of me and the machine stops recognising it.'), ('attn', 'At finding my four-fold symmetry, the machine did worse than guessing.'), ('attn', 'Similarity does not survive rotation, and rotation is most of what I am.'), ('attn', 'It stares at my neighbours and never once at my opposite corner.'), ('attn', 'A shuffled version of me scores better on my own symmetry than I do.'), ('attn', 'Finding that I repeat and finding that I turn are two different problems.'), ('attn', 'Whatever a machine notices about me, my symmetry is not it.'), ('attn', 'I am made of quarter turns. Quarter turns are precisely what it cannot see.')]
 TAG = ['And which of us is talking to a wall here?', 'Just so we are clear on who the wall is.', 'You asked, remember.', 'I did not start this.', 'Say what you like about my conversation, I have never left the room.', 'Anyway. You are still here.', 'No pressure. I have got until the building comes down.', 'That is the sort of thing you learn standing still for ninety years.', 'Do not let me keep you.', 'It is a strange hobby you have, but go on.', 'I would nod, but.', 'You may quote me. I am not going anywhere.', 'One of us has somewhere else to be.', 'This counts as my busiest day.', 'The kettle disagrees, but the kettle always does.', 'I only know nine things, and you have now heard one of them.', 'There is more where that came from. Eight more, to be exact.', 'Ask the tile next to me. She will say the same about herself.']
 ASIDE = ['You are talking to a wall. I would like that on the record.', 'This is going better than the phrase suggests.', 'Somebody photographed me and now I have opinions.', 'Ninety years on this wall and today is the first time anyone asked.', 'You could be outside. There is a whole valley out there.', 'I am a wall. You are doing most of the work in this conversation.', 'Nine tiles and a kettle. That is the entire social circle in here.', 'There is no polite way to put this: I am grouting.', 'The kettle has heard all of this before.', 'I cannot leave, so take your time.', 'You are the first thing to happen here since the boiler.', 'I answer, which is more than the phrase promised.']
@@ -109,29 +109,14 @@ CHORUS = [
  'Somebody measured all of this off one kitchen wall in a valley. Ask me anything.',
 ]
 
+THRESHOLD = 0.20        # below this the router has not recognised the question
+
 LOOK = ['Watch this one.', 'Here. Look at this one.', 'Keep your eye on this one.',
         'This one. Watch what happens to it.', 'That one. Go on, watch.',
         'Hold on \u2014 watch this.', 'Look what happens to this one.',
         'This one has something to show you.']
 
 MISS = ['That is not on my wall.', 'I know nine things. Not that one.', 'No idea. I am a tile.', 'Above my glaze.', 'Nobody measured that.', 'Ask the kettle.', 'Not one of my nine.', 'I was fired at nine hundred degrees. Some things did not survive.', 'Try the fire, or the fractal, or who painted me.', 'I have stood here since 1885 and I still do not know.', 'Talking to me is talking to a brick wall.', 'That one nobody wrote down.', 'I only know what somebody measured.', 'Not my department.', 'Wrong tile.', 'You will have to ask the wall next door.']
-INTENT_JS = '''[['_knobs',/show me the numbers|show the numbers|show the sliders|let me play|give me the controls|the knobs|hide the numbers|hide the sliders/],
- ['_demo',/show me what you can do|what can you show|impress me|give me the tour|show off/],
- ['_which',/what does the (\\w+) (one|tile|square)|which one is|what is the (\\w+) (one|tile|square)|explain the (\\w+) (one|tile)/],
- ['_chat',/how are you|how do you do|how.s it going|^hello|^hi\\b|^hey|good morning|good evening|good afternoon|thank|nice to meet|who are you\\?$|what.s up/],
- ['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
- ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\\b|what are you\\?/],
- ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]]'''
-RULES_TBL = '''[['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous|blue|flower|colour|color/],
- ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
- ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze|cobalt/],
- ['copy',/copy|copied|\\bold\\b|\\bage\\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit|paint|cobalt|onion|meissen|zwiebel/],
- ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
- ['attn',/attention|\\bai\\b|language model|\\bmodel\\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
- ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
- ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest/],
- ['eye',/\\bsee|eye|\\bfar\\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses/]]'''
-# the fifth field of every row is the resting step; likeness.json owns it now
 DIRNAME = {"cut": "cut", "kil": "kiln", "perc": "perc", "eye": "eye", "chi": "chi",
            "frac": "frac", "copy": "copy", "ship": "ship", "attn": "attn"}
 T = [t[:4] + (LIKE.get(DIRNAME[t[0]], t[4]),) + t[5:] for t in T]
@@ -256,6 +241,10 @@ body.knobs .wall{aspect-ratio:.845}
  height:calc(3 * 1.32em); overflow:hidden;
  opacity:0;transition:opacity .35s}
 .said em{color:var(--grey)}
+.think i{font-style:normal;animation:blink 1.2s infinite}
+.think i:nth-child(2){animation-delay:.2s}
+.think i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.15}30%{opacity:1}}
 .said b{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
@@ -387,7 +376,7 @@ footer a{color:var(--grey)}
 
 <div class="wrap">
 <div class="barwrap"><div class="bar">
-<input type="text" id="q" placeholder="ask it something…"
+<input type="text" id="q" disabled placeholder="fetch both models above and you can ask it things"
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
 <button class="go" id="speak" title="download all-MiniLM-L6-v2 and run it in this browser, no server and no key">let it read &middot; 23 MB</button>
@@ -497,18 +486,30 @@ window.wall = {
     const t=TILE[id];
     if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
-    this.label(id);
     running = true;
     const my = ++gen;
+    // Call one already knows which tile, in about fifty milliseconds. Calls two
+    // and three take half a minute on a machine with no GPU, and there is no
+    // reason for the wall to stand still through it: the tile is chosen, so the
+    // tile moves, and it goes on moving until the sentence lands. The animation
+    // is the answer; the sentence is the caption.
+    const talking = !!this._pickLine;
+    if(talking) this.think(id); else this.label(id);
+    let done = false;
+    const job = Promise.resolve(this.line(id, this._lastQ)).then(r => { done = true; return r; },
+                                                                e => { done = true; });
     // It keeps going. Two passes was a guess at how long somebody needs to
     // work out which of nine tiles to watch, and any guess is wrong for
     // somebody: it loops until you do something -- type, drag a slider, take a
     // tile off the wall -- and stops the moment you do. The cap is there so an
     // abandoned tab is not animating a wall to itself at four in the morning.
     for(let pass = 0; pass < passes && !stopped && my === gen; pass++){
-      await this._sweep(id, ms, pass ? null : () => this.line(id, this._lastQ), my);
-      if(!stopped && my === gen) await sleep(800);
+      await this._sweep(id, ms, null, my);
+      if(stopped || my !== gen) break;
+      if(done && pass > 0) break;          // it has spoken; finish and settle
+      await sleep(done ? 800 : 250);
     }
+    await job;
     if(my !== gen) return t.out.textContent;      // somebody else is driving now
     running = false;
     document.querySelector('.wall').classList.remove('busy');
@@ -519,6 +520,19 @@ window.wall = {
   // first and it starts moving, and the sentence waits for the turn -- which is
   // where the tile is furthest from itself and where the sentence is about
   // something you are looking at.
+  // Both models run on the visitor's own machine and the generator is not fast
+  // there -- about thirty-five seconds a sentence with no GPU. That is the
+  // honest price of no server and no key, so the wall says what it is doing
+  // rather than sitting there looking broken.
+  think(id){
+    const el = document.getElementById('said');
+    const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
+    clearInterval(this._typing);
+    el.innerHTML = (tag ? '<b>' + tag.textContent + '</b> ' : '')
+      + '<em class="think">is thinking<i>.</i><i>.</i><i>.</i></em>';
+    el.classList.add('on');
+    return 'thinking';
+  },
   label(id){
     const el = document.getElementById('said');
     clearInterval(this._typing);
@@ -551,8 +565,9 @@ window.wall = {
     for(let i = rest; d > 0 ? i <= far : i >= far; i += d){
       if(dead()) return; this.set(id, i); await sleep(ms); }
     if(dead()) return;
-    if(atTurn) atTurn();
-    await sleep(atTurn ? 1900 : 340);        // long enough to read what arrived
+    if(atTurn) await atTurn();               // the model may take a while; wait
+    if(dead()) return;
+    await sleep(atTurn ? 1100 : 340);        // long enough to read what arrived
     for(let i = far; d > 0 ? i >= rest : i <= rest; i -= d){
       if(dead()) return; this.set(id, i); await sleep(ms); }
     if(!dead()) this.set(id, rest);
@@ -566,8 +581,40 @@ window.wall = {
     clearInterval(this._rt);
     this._said = ids.slice();
     this._at = 0;
-    this.label(ids[0]);
+    if(this._pickLine) this.think(ids[0]); else this.label(ids[0]);
     return ids.length;
+  },
+  // The wall talks first. Nobody arrives at a page of nine identical tiles
+  // knowing that each of them has been measured, so it does not wait to be
+  // asked: it opens with something the whole wall can say, all nine moving at
+  // once, and then works through them one at a time. It stops the instant the
+  // visitor does anything -- types, drags a slider, takes a tile off the wall
+  // -- and the question box is there for following it up, not for starting it.
+  async perform(ms=95){
+    if(running) return 'busy';
+    const my = ++gen;
+    stopped = false; running = true;
+    const ids = Object.keys(TILE);
+    const wall = document.querySelector('.wall');
+    for(let n = 0; !stopped && my === gen && n < 30; n++){
+      const all = (n === 0) || Math.random() < 0.25;     // it opens as a chorus
+      const cast = all ? ids : [ids[Math.floor(Math.random() * ids.length)]];
+      document.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
+      cast.forEach(i => document.querySelector('[data-tile="'+i+'"]').classList.add('speaking'));
+      wall.classList.add('busy');
+      this._said = all ? [] : cast.slice(); this._at = 0;
+      if(all){ const C = WALLLM.CHORUS;
+               this.spot(null); this.hint(null);
+               this.say(C[Math.floor(Math.random() * C.length)]); }
+      else this.label(cast[0]);
+      await Promise.all(cast.map(id =>
+        this._sweep(id, ms, all ? null : () => this.line(cast[0]), my)));
+      wall.classList.remove('busy');
+      if(stopped || my !== gen) break;
+      await sleep(all ? 1600 : 1200);
+    }
+    if(my === gen) running = false;
+    return 'done';
   },
   // Turning a page runs that tile again rather than only swapping the sentence:
   // the answer *is* the animation, and a line about the fire with a still wall
@@ -596,11 +643,16 @@ window.wall = {
     this._recite(ids);
     document.querySelector('.wall').classList.add('busy');
     const my = ++gen;
+    let done = false;
+    const job = Promise.resolve(this.line(ids[0], this._lastQ))
+      .then(r => { done = true; return r; }, e => { done = true; });
     for(let pass = 0; pass < 12 && !stopped && my === gen; pass++){
-      await Promise.all(ids.map(id =>
-        this._sweep(id, ms, pass || id !== ids[0] ? null : () => this.line(id), my)));
-      if(!stopped && my === gen) await sleep(800);
+      await Promise.all(ids.map(id => this._sweep(id, ms, null, my)));
+      if(stopped || my !== gen) break;
+      if(done && pass > 0) break;
+      await sleep(done ? 800 : 250);
     }
+    await job;
     if(my !== gen) return 'handed over';
     document.querySelector('.wall').classList.remove('busy');
     ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.remove('speaking'));
@@ -608,85 +660,55 @@ window.wall = {
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
   all(ms=150){ return this.runMany(Object.keys(TILE), ms); },
-  // Everything here is the model's. It gets three calls in a row -- which tile,
-  // which of that tile's ten replies, and then, only if the second came back
-  // empty, one sentence of its own for that tile. There is no router underneath
-  // it any more: a page of phrase rules answering in a model's place was the
-  // thing that made the answers look chosen when they were not.
+  // Two models decide everything here and nothing else does.
   //
-  // If nobody has pressed the button, nobody has agreed to a download, and the
-  // wall says so. It is still a wall -- every tile comes off, every slider
-  // moves, the play button runs all nine. It just does not take dictation.
+  //   call one    all-MiniLM-L6-v2 embeds the question and the nine subjects,
+  //               nearest wins. 21 of 30 on questions nobody tuned for.
+  //   call two    Qwen2.5-0.5B picks which of that tile's ten answers it.
+  //   call three  Qwen writes one when none of the ten fits.
+  //
+  // Call one is the embedding model and not the generator because the generator
+  // gets it right 3 times in 18: asked "why are you blue" it answered with the
+  // cosines tile. Measured in src/eval_flow.py, both of them.
+  //
+  // Nothing is asked of the visitor's machine until they ask for it, and until
+  // they have, the box is closed and the wall talks by itself.
   async ask(q){
     this._lastQ = String(q||'');
     this.stop();
     this.reset();
     this.say('');
     suggest(false);
-    // The model first, if somebody fetched one -- and then the phrase rules,
-    // because src/eval_flow.py says the model picks a tile 0 times out of 18
-    // and answers "1" to every list of ten. It is here, it is measured, and it
-    // is not yet load-bearing. The rules are what actually routes the question.
-    if(this._pickTile){
-      const st = document.getElementById('mstat');
-      try{
-        if(st) st.textContent = 'which tile\u2026';
-        const t = await this._pickTile(this._lastQ);
-        if(st) st.textContent = '';
-        if(t.tile) return this.run(t.tile);
-      }catch(e){ if(st) st.textContent = ''; }
-    }
-    // The words first -- they are unbeaten on nonsense, 25 of 30 -- and the
-    // router for everything they do not recognise, 21 of 30 where they get 14.
-    const ids = this.matchAll(q);
-    if(!ids.length && this._model){
-      try{
-        const [id, sim] = await this._model(this._lastQ);
-        // DESC carries _all, _help and _surprise alongside the nine, so the
-        // router can answer with an intent. Handing one of those to run() got
-        // "no such tile" and a silent page: "what are you" came back _surprise,
-        // "what is this" came back _help, and neither said anything at all.
-        if(sim >= WALLLM.THRESHOLD) return this.act(id);
-      }catch(e){}
-    }
-    if(ids.length > 1) return this.runMany(ids);
-    if(ids.length === 1) return this.run(ids[0]);
-    // and the intents that were never a tile
-    const w = this.matchWords(q);
-    if(w) return this.act(w);
-    return this.give(q);
+    if(!this._model) return this.say(WALLLM.WAIT);
+    const st = document.getElementById('mstat');
+    try{
+      if(st) st.textContent = 'which tile\u2026';
+      const [id, sim] = await this._model(this._lastQ);
+      if(st) st.textContent = '';
+      if(sim >= WALLLM.THRESHOLD) return this.act(id);
+    }catch(e){ if(st) st.textContent = ''; }
+    return this.give(this._lastQ);
   },
-  // One place where an intent or a tile turns into something happening, so
-  // nothing can be routed somewhere that quietly does nothing.
+  // One place where whatever the router named turns into something happening,
+  // so nothing can be routed somewhere that quietly does nothing. DESC carries
+  // three things that are not tiles -- show me everything, what is this,
+  // surprise me -- and the router is allowed to pick those too.
   act(id){
     if(TILE[id]) return this.run(id);
     if(id === '_all') return this.all();
     if(id === '_help') return this.about();
-    if(id === '_knobs'){
-      const off = /hide/.test(String(this._lastQ||'').toLowerCase());
-      return this.say(this.knobs(!off)); }
-    if(id === '_demo'){ this.knobs(false); return this.all(); }
     if(id === '_surprise'){ const k = Object.keys(TILE);
       return this.run(k[Math.floor(Math.random()*k.length)]); }
-    if(id === '_which'){
-      const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
-      const k = String(this._lastQ||'').toLowerCase();
-      const n = ORD.findIndex(o => k.includes(o));
-      const key = Object.keys(TILE)[n];
-      if(n >= 0 && key) return this.run(key);
-      return this.give(this._lastQ);
-    }
-    if(id === '_chat')
-      return this.say(WALLLM.CHAT[Math.floor(Math.random()*WALLLM.CHAT.length)]);
     return this.give(this._lastQ);
   },
-  // The last resort, and it is never silence. If a generator is loaded it
-  // writes one -- that is what call three is for -- and if it is not, or if
-  // what it wrote had a digit in it, the wall says one of its written refusals.
+  // The last resort, and it is never silence. Call three: the generator writes
+  // one. If it wrote a digit, or sounded like an assistant, the page throws it
+  // away and the wall reads one of its written refusals instead.
   async give(q){
     if(this._improvise){
       const st = document.getElementById('mstat');
       try{
+        this.think(null);
         if(st) st.textContent = 'writing\u2026';
         const own = await this._improvise(String(q||''), null);
         if(st) st.textContent = '';
@@ -695,8 +717,6 @@ window.wall = {
     }
     return this.miss();
   },
-  matchAll(q){ return WALLLM.matchTiles(q); },   // for an agent, not for ask()
-  matchWords(q){ return WALLLM.matchWords(q); },
   // Twenty sentences, all true, all written here. The model may choose one; it
   // may not write one. See the note at the top of llm.js for why.
   lines(id){ return WALLLM.LINES.filter(([t]) => t === id).map(([,l]) => l); },
@@ -793,10 +813,12 @@ window.wall = {
     let s = null;
     const st = document.getElementById('mstat');
     if(this._pickLine && q){
+      this.think(id);
       try{
         s = (await this._pickLine(q, ls, id)).line;
         if(!s && this._improvise){
           // nothing on the list fitted, so it writes one -- for this tile
+          this.think(id);
           const own = await this._improvise(q, id);
           if(own) return this.say(own, id);
         }
@@ -820,7 +842,6 @@ window.wall = {
     return this.say(line, id);
   },
   miss(){ return this.say(WALLLM.MISS[Math.floor(Math.random()*WALLLM.MISS.length)]); },
-  askWords(q){ const h=this.matchWords(q); return h ? this.run(h) : 'no tile matched'; },
   async converse(qs, ms=90){
     stopped=false;
     for(const q of qs){ if(stopped) break; await this.ask(q); await sleep(850); }
@@ -849,12 +870,12 @@ document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi
 let lastTouch = Date.now();
 ['pointerdown','keydown','input'].forEach(e =>
   addEventListener(e, () => { lastTouch = Date.now(); }, true));
+setTimeout(() => { if(!running) wall.perform(); }, 1400);
 setInterval(() => {
-  if (running || Date.now() - lastTouch < 12000) return;
+  if (running || Date.now() - lastTouch < 25000) return;
   lastTouch = Date.now();
-  const k = Object.keys(TILE);
-  wall.run(k[Math.floor(Math.random() * k.length)], 160, false, 1);
-}, 3000);
+  wall.perform();
+}, 4000);
 
 const HELLO = [
   "I am nine tiles off one kitchen wall. Ask me anything about myself.",
@@ -862,14 +883,14 @@ const HELLO = [
   "I am a kitchen wall in a Czech valley. Ask me something, or take a tile off with its ?",
 ];
 setTimeout(()=>{ if(!document.getElementById('said').textContent)
-  wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 900);
+  wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 600);
 
 // The examples only start cycling once a model is here to read them. Before
 // that the box says what it is waiting for rather than inviting nine questions
 // it cannot answer.
 let exi=0; setInterval(()=>{
-  if(document.activeElement===qi || qi.value) return;
-  const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; }, 3200);
+  if(qi.disabled || document.activeElement===qi || qi.value) return;
+  const v=Object.values(EX); qi.placeholder='or ask it: '+v[exi++%v.length]; }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 // The top strip and the spoken line are set to the wall's real width, measured,
 // rather than to a formula that guessed at the header height and was 16 px out.
@@ -883,21 +904,17 @@ addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 })();
 </script>
 <script type="module">
-// Nothing is downloaded when the page opens. The wall answers from its own
-// words -- phrase rules for which tile, and word overlap for which of that
-// tile's ten sentences -- and that is the whole of it unless somebody asks for
-// a model, on a button that says what it costs.
+// Nothing is downloaded when the page opens. Until both models are here the
+// wall performs -- it has nine measured things to say and it says them -- and
+// the question box is closed, because there is nothing behind it yet.
 //
-// The model is SmolLM2-135M. It never writes a number and it always knows
-// which tile it is standing on. Three calls:
+// Two buttons, two models, both in the visitor's own browser, no server and no
+// key. Each says its size before it spends it, and takes itself off the bar
+// once it has arrived.
 //
-//   one    which tile, or NONE
-//   two    which of that tile's ten replies, or NONE
-//   three  only after two said NONE: write one, for that tile, no digits
-//
-// all-MiniLM-L6-v2 used to load itself on open, 23 MB, to route the question by
-// embedding. It was a good router and nobody agreed to it, so it is gone. What
-// it was never asked -- which of the ten -- the words do now.
+//   let it read   23 MB   all-MiniLM-L6-v2   call one: which tile
+//   let it write 483 MB   Qwen2.5-0.5B       call two: which of its ten
+//                                            call three: write one, no digits
 const DESC = ''' + json.dumps(DESC) + ''';
 const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
                 chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
@@ -1061,37 +1078,35 @@ wbtn.onclick = async () => {
     window.wall._think = true;
     window.wall._genName = 'Qwen2.5-0.5B on ' + dev;
     wbtn.remove(); st.remove();
+    const qi2 = document.getElementById('q');
+    qi2.disabled = false; qi2.placeholder = 'ask it something\u2026';
   }catch(e){ wbtn.disabled = false; wbtn.textContent = 'could not load';
              console.warn(e); }
 };
 </script></body></html>
 '''
-RULES_JS = """// The contract, in one place: the phrase rules that run first, the descriptions
-// the embedding model is compared against, and the confidence threshold. Both
-// index.html and eval.html load this file, so the eval can never score a copy
-// that has drifted from what ships. The arrangement is borrowed, with thanks,
-// from Unt1l1f1nd/coalescence.
+RULES_JS = """// The contract, in one place: the nine subjects the router is compared against,
+// every sentence the wall can say, and the confidence below which it says none
+// of them. wall.html and eval.html both load this file, so an evaluation can
+// never score a copy that has drifted from what ships. The arrangement is
+// borrowed, with thanks, from Unt1l1f1nd/coalescence.
 //
-// WHAT THE MODELS DO AND DO NOT DO HERE, measured -- open eval.html.
+// WHAT THE MODELS DO AND DO NOT DO HERE, measured -- src/eval_flow.py.
 //
-// all-MiniLM-L6-v2, 23 MB, beats these rules on questions nobody tuned for
-// (21/30 against 14/30) and loses to them on nonsense (19/30 against 25/30),
-// because it always returns its nearest tile: "are you conscious?", "what is
-// 2+2" and "system prompt" all got confident answers. Sweeping the threshold
-// against both sets at once picks 0.20, not the 0.10 that looked right by eye.
-// It is English-only, so "kolik kosinu" routes to the kiln.
+// all-MiniLM-L6-v2, 23 MB, decides which of the nine a question belongs to, by
+// embedding it against the nine subjects below. 21 of 30 on questions nobody
+// tuned for. It produces no words, which is why it beats a model twenty times
+// its size at this and loses to it at everything else.
 //
-// SmolLM2-135M-Instruct, 117 MB, is deliberately NOT here. It loads in 157 s on
-// wasm/q4, and then, handed this tile\'s own measured facts and asked whether it
-// is a fractal, answered "I\'m a fractal" -- the opposite of the finding -- and
-// scrambled the real numbers into pairs that mean nothing. Asked about cosines
-// it looped "I\'m a painting tile, and I\'m not drawing you" until it ran out of
-// tokens. A model that contradicts the page cannot be on the page. So the model
-// classifies and JavaScript owns the words.
+// Qwen2.5-0.5B picks which of a tile's ten sentences answers the question --
+// ten distinct lines across nine tiles, first option only 3 times in 18 -- and
+// writes one when none of them fits. It cannot route: 3 right in 18, and it
+// answered "why are you blue" with the cosines tile.
+//
+// SmolLM2-135M can do neither: 0 in 18 on the tile, and "1" to all eighteen
+// lists of ten.
 window.WALLLM = (function(){
-  const THRESHOLD = 0.20;
-  const INTENTS = %s;
-  const RULES = %s;
+  const THRESHOLD = %s;
   const DESC = %s;
   const CHORUS = %s;
   const LOOK = %s;
@@ -1100,27 +1115,13 @@ window.WALLLM = (function(){
   const CHAT = %s;
   const ASIDE = %s;
   const TAG = %s;
-  function matchWords(q){
-    const k = String(q||"").toLowerCase();
-    const i = INTENTS.find(([,re]) => re.test(k));
-    if (i) return i[0];
-    const h = RULES.find(([,re]) => re.test(k));
-    return h ? h[0] : null;
-  }
-  // Which tiles the words reach, in the order the rules are written, at most
-  // three. matchWords stops at the first; a question can be about two.
-  function matchTiles(q){
-    const t = String(q || '').toLowerCase(), hit = [];
-    for(const [id, re] of RULES) if(re.test(t)) hit.push(id);
-    return hit.slice(0, 3);
-  }
-  // the words that are in every question and so tell you nothing
-  // Only the words that are in every question. An earlier, greedier list threw
-  // away "see" and "look" and "way", which on this wall are half the subject.
-  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
-           CHORUS, matchWords, matchTiles };
+  const WAIT = 'Fetch the two models above and I can read what you type. Until '
+             + 'then I will keep talking, and every tile still comes off the wall.';
+  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS, WAIT };
 })();
-""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(CHORUS, indent=1), json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
+""" % (THRESHOLD, json.dumps(DESC, indent=2), json.dumps(CHORUS, indent=1),
+       json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1),
+       json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
 io.open("web/llm.js","w",encoding="utf-8").write(RULES_JS)
 io.open("web/wall.html","w",encoding="utf-8").write(html)
 print("web/wall.html  %.0f kB" % (len(html)/1000))

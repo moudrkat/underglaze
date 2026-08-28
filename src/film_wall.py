@@ -41,10 +41,11 @@ TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question
 # (question, how many tiles it should reach). Short, and the sort of thing
 # somebody actually types at a wall.
 SCRIPT = [
+    ("why are you blue?", 1, 0),
     ("who painted you?", 1, 0),
-    ("why are you blue?", 3, 0),      # paging is on the page; in the film it cost 7 s
-    ("tell me everything", 9, 0),
 ]
+
+PERFORM_MS = 13000     # of the wall talking to itself before anybody types
 
 TYPE_MS = 42
 HOLD_OPEN = 1000       # on the bare wall before anything is typed
@@ -81,6 +82,17 @@ def wait_pass(pg, timeout=40.0):
 
 
 def film():
+    """Roll on the wall talking to itself, then ask it two things.
+
+    Both models are fetched before the camera starts, because 506 MB of progress
+    bar is not the film. What is filmed is the wall performing without being
+    asked -- which is what it does the moment anybody opens the page -- and then
+    a question going into a box that only opens once both models are here.
+
+    The answers are slow. Thirty-five seconds a sentence on a machine with no
+    GPU, and the film does not cut that out: the wall says it is thinking,
+    because it is, and that is the price of no server and no key.
+    """
     os.makedirs("out", exist_ok=True)
     vdir = "out/_film"
     shutil.rmtree(vdir, ignore_errors=True)
@@ -97,25 +109,36 @@ def film():
         pg = ctx.new_page()
         clock = time.monotonic()
         pg.goto(URL)
-        print("waiting for MiniLM…")
-        pg.wait_for_function("() => !!window.wall && !!wall._model", timeout=180000)
+        pg.wait_for_timeout(1000)
         pg.evaluate("wall.stop()")
-        pg.wait_for_timeout(600)
-        touch(pg)
+        print("fetching both models…")
+        pg.click("#speak")
+        pg.wait_for_function("() => !!window.wall._model", timeout=600000)
+        pg.click("#write")
+        pg.wait_for_function(
+            "() => !!window.wall._improvise || (document.getElementById('write')"
+            " && document.getElementById('write').textContent === 'could not load')",
+            timeout=1800000)
+        if not pg.evaluate("() => !!window.wall._improvise"):
+            raise SystemExit("the writer did not load")
+        print("both up")
+        pg.evaluate("wall.stop(); wall.reset(); wall.say('')")
+        pg.wait_for_timeout(500)
 
         bar = pg.locator(".bar").first.bounding_box()
         wall = pg.locator(".wall").first.bounding_box()
         crop = (int(bar["x"]) - 2, int(bar["y"]) - 6,
                 int(bar["x"] + bar["width"]) + 2,
                 int(wall["y"] + wall["height"]) + 4)
-        # the field name the tile carries in its own corner, e.g. THREE CENTURIES
-        names = pg.evaluate(
-            "Object.fromEntries([...document.querySelectorAll('.tile')]"
-            ".map(t => [t.dataset.tile, t.querySelector('.tag').textContent]))")
 
         start = time.monotonic() - clock
         print("rolling at +%.1f s, crop %s" % (start, crop))
-        pg.wait_for_timeout(HOLD_OPEN)
+
+        # the wall, uninvited
+        pg.evaluate("() => { wall.perform(); }")
+        pg.wait_for_timeout(PERFORM_MS)
+        pg.evaluate("wall.stop()")
+        pg.wait_for_timeout(500)
 
         for i, (q, want, pages) in enumerate(SCRIPT):
             touch(pg)
@@ -126,21 +149,13 @@ def film():
             pg.keyboard.press("Enter")
             lit, t_lit = wait_pass(pg)
             pg.wait_for_timeout(HOLD_READ)
-            # the wall no longer recites: with more than one tile answering it
-            # says the first and waits, so the film has to turn the pages
-            for _ in range(pages):
-                touch(pg)
-                pg.click(".pg a:last-child")
-                wait_pass(pg)
-                pg.wait_for_timeout(HOLD_PAGE)
-            if i == len(SCRIPT) - 1:
-                pg.wait_for_timeout(HOLD_END)
             beats.append({"q": q, "wanted": want, "lit": lit,
-                          "names": [names.get(t, t) for t in lit],
                           "ask": round(t_ask - start, 2),
                           "answer": round(t_lit - clock - start, 2),
                           "end": round(time.monotonic() - clock - start, 2)})
-            print("  %-22s %d tile(s) %s" % (q, len(lit), beats[-1]["names"]))
+            print("  %-30s %d tile(s) %s" % (q, len(lit), lit))
+            if i == len(SCRIPT) - 1:
+                pg.wait_for_timeout(HOLD_END)
 
         end = time.monotonic() - clock
         path = pg.video.path()

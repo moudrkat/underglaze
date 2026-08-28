@@ -100,6 +100,10 @@ body.knobs .wall{aspect-ratio:.845}
  height:calc(3 * 1.32em); overflow:hidden;
  opacity:0;transition:opacity .35s}
 .said em{color:var(--grey)}
+.think i{font-style:normal;animation:blink 1.2s infinite}
+.think i:nth-child(2){animation-delay:.2s}
+.think i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.15}30%{opacity:1}}
 .said b{font-style:normal;font-family:'DejaVu Sans',system-ui,sans-serif;font-weight:600;
  font-size:.72em;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);
  margin-right:.55em}
@@ -231,7 +235,7 @@ footer a{color:var(--grey)}
 
 <div class="wrap">
 <div class="barwrap"><div class="bar">
-<input type="text" id="q" placeholder="ask it something…"
+<input type="text" id="q" disabled placeholder="fetch both models above and you can ask it things"
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
 <button class="go" id="speak" title="download all-MiniLM-L6-v2 and run it in this browser, no server and no key">let it read &middot; 23 MB</button>
@@ -438,18 +442,30 @@ window.wall = {
     const t=TILE[id];
     if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
-    this.label(id);
     running = true;
     const my = ++gen;
+    // Call one already knows which tile, in about fifty milliseconds. Calls two
+    // and three take half a minute on a machine with no GPU, and there is no
+    // reason for the wall to stand still through it: the tile is chosen, so the
+    // tile moves, and it goes on moving until the sentence lands. The animation
+    // is the answer; the sentence is the caption.
+    const talking = !!this._pickLine;
+    if(talking) this.think(id); else this.label(id);
+    let done = false;
+    const job = Promise.resolve(this.line(id, this._lastQ)).then(r => { done = true; return r; },
+                                                                e => { done = true; });
     // It keeps going. Two passes was a guess at how long somebody needs to
     // work out which of nine tiles to watch, and any guess is wrong for
     // somebody: it loops until you do something -- type, drag a slider, take a
     // tile off the wall -- and stops the moment you do. The cap is there so an
     // abandoned tab is not animating a wall to itself at four in the morning.
     for(let pass = 0; pass < passes && !stopped && my === gen; pass++){
-      await this._sweep(id, ms, pass ? null : () => this.line(id, this._lastQ), my);
-      if(!stopped && my === gen) await sleep(800);
+      await this._sweep(id, ms, null, my);
+      if(stopped || my !== gen) break;
+      if(done && pass > 0) break;          // it has spoken; finish and settle
+      await sleep(done ? 800 : 250);
     }
+    await job;
     if(my !== gen) return t.out.textContent;      // somebody else is driving now
     running = false;
     document.querySelector('.wall').classList.remove('busy');
@@ -460,6 +476,19 @@ window.wall = {
   // first and it starts moving, and the sentence waits for the turn -- which is
   // where the tile is furthest from itself and where the sentence is about
   // something you are looking at.
+  // Both models run on the visitor's own machine and the generator is not fast
+  // there -- about thirty-five seconds a sentence with no GPU. That is the
+  // honest price of no server and no key, so the wall says what it is doing
+  // rather than sitting there looking broken.
+  think(id){
+    const el = document.getElementById('said');
+    const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
+    clearInterval(this._typing);
+    el.innerHTML = (tag ? '<b>' + tag.textContent + '</b> ' : '')
+      + '<em class="think">is thinking<i>.</i><i>.</i><i>.</i></em>';
+    el.classList.add('on');
+    return 'thinking';
+  },
   label(id){
     const el = document.getElementById('said');
     clearInterval(this._typing);
@@ -492,8 +521,9 @@ window.wall = {
     for(let i = rest; d > 0 ? i <= far : i >= far; i += d){
       if(dead()) return; this.set(id, i); await sleep(ms); }
     if(dead()) return;
-    if(atTurn) atTurn();
-    await sleep(atTurn ? 1900 : 340);        // long enough to read what arrived
+    if(atTurn) await atTurn();               // the model may take a while; wait
+    if(dead()) return;
+    await sleep(atTurn ? 1100 : 340);        // long enough to read what arrived
     for(let i = far; d > 0 ? i >= rest : i <= rest; i -= d){
       if(dead()) return; this.set(id, i); await sleep(ms); }
     if(!dead()) this.set(id, rest);
@@ -507,8 +537,40 @@ window.wall = {
     clearInterval(this._rt);
     this._said = ids.slice();
     this._at = 0;
-    this.label(ids[0]);
+    if(this._pickLine) this.think(ids[0]); else this.label(ids[0]);
     return ids.length;
+  },
+  // The wall talks first. Nobody arrives at a page of nine identical tiles
+  // knowing that each of them has been measured, so it does not wait to be
+  // asked: it opens with something the whole wall can say, all nine moving at
+  // once, and then works through them one at a time. It stops the instant the
+  // visitor does anything -- types, drags a slider, takes a tile off the wall
+  // -- and the question box is there for following it up, not for starting it.
+  async perform(ms=95){
+    if(running) return 'busy';
+    const my = ++gen;
+    stopped = false; running = true;
+    const ids = Object.keys(TILE);
+    const wall = document.querySelector('.wall');
+    for(let n = 0; !stopped && my === gen && n < 30; n++){
+      const all = (n === 0) || Math.random() < 0.25;     // it opens as a chorus
+      const cast = all ? ids : [ids[Math.floor(Math.random() * ids.length)]];
+      document.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
+      cast.forEach(i => document.querySelector('[data-tile="'+i+'"]').classList.add('speaking'));
+      wall.classList.add('busy');
+      this._said = all ? [] : cast.slice(); this._at = 0;
+      if(all){ const C = WALLLM.CHORUS;
+               this.spot(null); this.hint(null);
+               this.say(C[Math.floor(Math.random() * C.length)]); }
+      else this.label(cast[0]);
+      await Promise.all(cast.map(id =>
+        this._sweep(id, ms, all ? null : () => this.line(cast[0]), my)));
+      wall.classList.remove('busy');
+      if(stopped || my !== gen) break;
+      await sleep(all ? 1600 : 1200);
+    }
+    if(my === gen) running = false;
+    return 'done';
   },
   // Turning a page runs that tile again rather than only swapping the sentence:
   // the answer *is* the animation, and a line about the fire with a still wall
@@ -537,11 +599,16 @@ window.wall = {
     this._recite(ids);
     document.querySelector('.wall').classList.add('busy');
     const my = ++gen;
+    let done = false;
+    const job = Promise.resolve(this.line(ids[0], this._lastQ))
+      .then(r => { done = true; return r; }, e => { done = true; });
     for(let pass = 0; pass < 12 && !stopped && my === gen; pass++){
-      await Promise.all(ids.map(id =>
-        this._sweep(id, ms, pass || id !== ids[0] ? null : () => this.line(id), my)));
-      if(!stopped && my === gen) await sleep(800);
+      await Promise.all(ids.map(id => this._sweep(id, ms, null, my)));
+      if(stopped || my !== gen) break;
+      if(done && pass > 0) break;
+      await sleep(done ? 800 : 250);
     }
+    await job;
     if(my !== gen) return 'handed over';
     document.querySelector('.wall').classList.remove('busy');
     ids.forEach(i=>document.querySelector('[data-tile="'+i+'"]').classList.remove('speaking'));
@@ -549,85 +616,55 @@ window.wall = {
     return Object.fromEntries(ids.map(i=>[i, TILE[i].out.textContent]));
   },
   all(ms=150){ return this.runMany(Object.keys(TILE), ms); },
-  // Everything here is the model's. It gets three calls in a row -- which tile,
-  // which of that tile's ten replies, and then, only if the second came back
-  // empty, one sentence of its own for that tile. There is no router underneath
-  // it any more: a page of phrase rules answering in a model's place was the
-  // thing that made the answers look chosen when they were not.
+  // Two models decide everything here and nothing else does.
   //
-  // If nobody has pressed the button, nobody has agreed to a download, and the
-  // wall says so. It is still a wall -- every tile comes off, every slider
-  // moves, the play button runs all nine. It just does not take dictation.
+  //   call one    all-MiniLM-L6-v2 embeds the question and the nine subjects,
+  //               nearest wins. 21 of 30 on questions nobody tuned for.
+  //   call two    Qwen2.5-0.5B picks which of that tile's ten answers it.
+  //   call three  Qwen writes one when none of the ten fits.
+  //
+  // Call one is the embedding model and not the generator because the generator
+  // gets it right 3 times in 18: asked "why are you blue" it answered with the
+  // cosines tile. Measured in src/eval_flow.py, both of them.
+  //
+  // Nothing is asked of the visitor's machine until they ask for it, and until
+  // they have, the box is closed and the wall talks by itself.
   async ask(q){
     this._lastQ = String(q||'');
     this.stop();
     this.reset();
     this.say('');
     suggest(false);
-    // The model first, if somebody fetched one -- and then the phrase rules,
-    // because src/eval_flow.py says the model picks a tile 0 times out of 18
-    // and answers "1" to every list of ten. It is here, it is measured, and it
-    // is not yet load-bearing. The rules are what actually routes the question.
-    if(this._pickTile){
-      const st = document.getElementById('mstat');
-      try{
-        if(st) st.textContent = 'which tile…';
-        const t = await this._pickTile(this._lastQ);
-        if(st) st.textContent = '';
-        if(t.tile) return this.run(t.tile);
-      }catch(e){ if(st) st.textContent = ''; }
-    }
-    // The words first -- they are unbeaten on nonsense, 25 of 30 -- and the
-    // router for everything they do not recognise, 21 of 30 where they get 14.
-    const ids = this.matchAll(q);
-    if(!ids.length && this._model){
-      try{
-        const [id, sim] = await this._model(this._lastQ);
-        // DESC carries _all, _help and _surprise alongside the nine, so the
-        // router can answer with an intent. Handing one of those to run() got
-        // "no such tile" and a silent page: "what are you" came back _surprise,
-        // "what is this" came back _help, and neither said anything at all.
-        if(sim >= WALLLM.THRESHOLD) return this.act(id);
-      }catch(e){}
-    }
-    if(ids.length > 1) return this.runMany(ids);
-    if(ids.length === 1) return this.run(ids[0]);
-    // and the intents that were never a tile
-    const w = this.matchWords(q);
-    if(w) return this.act(w);
-    return this.give(q);
+    if(!this._model) return this.say(WALLLM.WAIT);
+    const st = document.getElementById('mstat');
+    try{
+      if(st) st.textContent = 'which tile…';
+      const [id, sim] = await this._model(this._lastQ);
+      if(st) st.textContent = '';
+      if(sim >= WALLLM.THRESHOLD) return this.act(id);
+    }catch(e){ if(st) st.textContent = ''; }
+    return this.give(this._lastQ);
   },
-  // One place where an intent or a tile turns into something happening, so
-  // nothing can be routed somewhere that quietly does nothing.
+  // One place where whatever the router named turns into something happening,
+  // so nothing can be routed somewhere that quietly does nothing. DESC carries
+  // three things that are not tiles -- show me everything, what is this,
+  // surprise me -- and the router is allowed to pick those too.
   act(id){
     if(TILE[id]) return this.run(id);
     if(id === '_all') return this.all();
     if(id === '_help') return this.about();
-    if(id === '_knobs'){
-      const off = /hide/.test(String(this._lastQ||'').toLowerCase());
-      return this.say(this.knobs(!off)); }
-    if(id === '_demo'){ this.knobs(false); return this.all(); }
     if(id === '_surprise'){ const k = Object.keys(TILE);
       return this.run(k[Math.floor(Math.random()*k.length)]); }
-    if(id === '_which'){
-      const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
-      const k = String(this._lastQ||'').toLowerCase();
-      const n = ORD.findIndex(o => k.includes(o));
-      const key = Object.keys(TILE)[n];
-      if(n >= 0 && key) return this.run(key);
-      return this.give(this._lastQ);
-    }
-    if(id === '_chat')
-      return this.say(WALLLM.CHAT[Math.floor(Math.random()*WALLLM.CHAT.length)]);
     return this.give(this._lastQ);
   },
-  // The last resort, and it is never silence. If a generator is loaded it
-  // writes one -- that is what call three is for -- and if it is not, or if
-  // what it wrote had a digit in it, the wall says one of its written refusals.
+  // The last resort, and it is never silence. Call three: the generator writes
+  // one. If it wrote a digit, or sounded like an assistant, the page throws it
+  // away and the wall reads one of its written refusals instead.
   async give(q){
     if(this._improvise){
       const st = document.getElementById('mstat');
       try{
+        this.think(null);
         if(st) st.textContent = 'writing…';
         const own = await this._improvise(String(q||''), null);
         if(st) st.textContent = '';
@@ -636,8 +673,6 @@ window.wall = {
     }
     return this.miss();
   },
-  matchAll(q){ return WALLLM.matchTiles(q); },   // for an agent, not for ask()
-  matchWords(q){ return WALLLM.matchWords(q); },
   // Twenty sentences, all true, all written here. The model may choose one; it
   // may not write one. See the note at the top of llm.js for why.
   lines(id){ return WALLLM.LINES.filter(([t]) => t === id).map(([,l]) => l); },
@@ -734,10 +769,12 @@ window.wall = {
     let s = null;
     const st = document.getElementById('mstat');
     if(this._pickLine && q){
+      this.think(id);
       try{
         s = (await this._pickLine(q, ls, id)).line;
         if(!s && this._improvise){
           // nothing on the list fitted, so it writes one -- for this tile
+          this.think(id);
           const own = await this._improvise(q, id);
           if(own) return this.say(own, id);
         }
@@ -761,7 +798,6 @@ window.wall = {
     return this.say(line, id);
   },
   miss(){ return this.say(WALLLM.MISS[Math.floor(Math.random()*WALLLM.MISS.length)]); },
-  askWords(q){ const h=this.matchWords(q); return h ? this.run(h) : 'no tile matched'; },
   async converse(qs, ms=90){
     stopped=false;
     for(const q of qs){ if(stopped) break; await this.ask(q); await sleep(850); }
@@ -790,12 +826,12 @@ document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi
 let lastTouch = Date.now();
 ['pointerdown','keydown','input'].forEach(e =>
   addEventListener(e, () => { lastTouch = Date.now(); }, true));
+setTimeout(() => { if(!running) wall.perform(); }, 1400);
 setInterval(() => {
-  if (running || Date.now() - lastTouch < 12000) return;
+  if (running || Date.now() - lastTouch < 25000) return;
   lastTouch = Date.now();
-  const k = Object.keys(TILE);
-  wall.run(k[Math.floor(Math.random() * k.length)], 160, false, 1);
-}, 3000);
+  wall.perform();
+}, 4000);
 
 const HELLO = [
   "I am nine tiles off one kitchen wall. Ask me anything about myself.",
@@ -803,14 +839,14 @@ const HELLO = [
   "I am a kitchen wall in a Czech valley. Ask me something, or take a tile off with its ?",
 ];
 setTimeout(()=>{ if(!document.getElementById('said').textContent)
-  wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 900);
+  wall.say(HELLO[Math.floor(Math.random()*HELLO.length)]); }, 600);
 
 // The examples only start cycling once a model is here to read them. Before
 // that the box says what it is waiting for rather than inviting nine questions
 // it cannot answer.
 let exi=0; setInterval(()=>{
-  if(document.activeElement===qi || qi.value) return;
-  const v=Object.values(EX); qi.placeholder='ask it: '+v[exi++%v.length]; }, 3200);
+  if(qi.disabled || document.activeElement===qi || qi.value) return;
+  const v=Object.values(EX); qi.placeholder='or ask it: '+v[exi++%v.length]; }, 3200);
 addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 // The top strip and the spoken line are set to the wall's real width, measured,
 // rather than to a formula that guessed at the header height and was 16 px out.
@@ -824,22 +860,18 @@ addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 })();
 </script>
 <script type="module">
-// Nothing is downloaded when the page opens. The wall answers from its own
-// words -- phrase rules for which tile, and word overlap for which of that
-// tile's ten sentences -- and that is the whole of it unless somebody asks for
-// a model, on a button that says what it costs.
+// Nothing is downloaded when the page opens. Until both models are here the
+// wall performs -- it has nine measured things to say and it says them -- and
+// the question box is closed, because there is nothing behind it yet.
 //
-// The model is SmolLM2-135M. It never writes a number and it always knows
-// which tile it is standing on. Three calls:
+// Two buttons, two models, both in the visitor's own browser, no server and no
+// key. Each says its size before it spends it, and takes itself off the bar
+// once it has arrived.
 //
-//   one    which tile, or NONE
-//   two    which of that tile's ten replies, or NONE
-//   three  only after two said NONE: write one, for that tile, no digits
-//
-// all-MiniLM-L6-v2 used to load itself on open, 23 MB, to route the question by
-// embedding. It was a good router and nobody agreed to it, so it is gone. What
-// it was never asked -- which of the ten -- the words do now.
-const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.", "perc": "When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.", "_surprise": "Show me something interesting. Surprise me. Tell me something I do not know. What is the best thing about you. Say something surprising.", "_all": "Show me everything. Run all of them. Tell me everything you know. Do the whole wall.", "_help": "What can you do? What can I ask you? Help. How does this work? What are you?"};
+//   let it read   23 MB   all-MiniLM-L6-v2   call one: which tile
+//   let it write 483 MB   Qwen2.5-0.5B       call two: which of its ten
+//                                            call three: write one, no digits
+const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.", "perc": "When the separate blue flowers join up into one connected shape. Why the tile is blue and where the blue stops, the colour, the threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge, whether the flowers are touching.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, how far away you can still see it, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down, rotating it.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.", "_surprise": "Surprise me. Show me something I would not have asked for. Tell me the best thing. Say something unexpected.", "_all": "Show me everything. Run all of them at once. Every tile. The whole wall. Do all nine.", "_help": "How does this page work? What can I ask you? What are you for? Help. Instructions. Who made this website."};
 const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
                 chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
                 ship:'IDENTITY', attn:'ATTENTION' };
@@ -1002,6 +1034,8 @@ wbtn.onclick = async () => {
     window.wall._think = true;
     window.wall._genName = 'Qwen2.5-0.5B on ' + dev;
     wbtn.remove(); st.remove();
+    const qi2 = document.getElementById('q');
+    qi2.disabled = false; qi2.placeholder = 'ask it something…';
   }catch(e){ wbtn.disabled = false; wbtn.textContent = 'could not load';
              console.warn(e); }
 };

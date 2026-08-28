@@ -1,56 +1,38 @@
-// The contract, in one place: the phrase rules that run first, the descriptions
-// the embedding model is compared against, and the confidence threshold. Both
-// index.html and eval.html load this file, so the eval can never score a copy
-// that has drifted from what ships. The arrangement is borrowed, with thanks,
-// from Unt1l1f1nd/coalescence.
+// The contract, in one place: the nine subjects the router is compared against,
+// every sentence the wall can say, and the confidence below which it says none
+// of them. wall.html and eval.html both load this file, so an evaluation can
+// never score a copy that has drifted from what ships. The arrangement is
+// borrowed, with thanks, from Unt1l1f1nd/coalescence.
 //
-// WHAT THE MODELS DO AND DO NOT DO HERE, measured -- open eval.html.
+// WHAT THE MODELS DO AND DO NOT DO HERE, measured -- src/eval_flow.py.
 //
-// all-MiniLM-L6-v2, 23 MB, beats these rules on questions nobody tuned for
-// (21/30 against 14/30) and loses to them on nonsense (19/30 against 25/30),
-// because it always returns its nearest tile: "are you conscious?", "what is
-// 2+2" and "system prompt" all got confident answers. Sweeping the threshold
-// against both sets at once picks 0.20, not the 0.10 that looked right by eye.
-// It is English-only, so "kolik kosinu" routes to the kiln.
+// all-MiniLM-L6-v2, 23 MB, decides which of the nine a question belongs to, by
+// embedding it against the nine subjects below. 21 of 30 on questions nobody
+// tuned for. It produces no words, which is why it beats a model twenty times
+// its size at this and loses to it at everything else.
 //
-// SmolLM2-135M-Instruct, 117 MB, is deliberately NOT here. It loads in 157 s on
-// wasm/q4, and then, handed this tile's own measured facts and asked whether it
-// is a fractal, answered "I'm a fractal" -- the opposite of the finding -- and
-// scrambled the real numbers into pairs that mean nothing. Asked about cosines
-// it looped "I'm a painting tile, and I'm not drawing you" until it ran out of
-// tokens. A model that contradicts the page cannot be on the page. So the model
-// classifies and JavaScript owns the words.
+// Qwen2.5-0.5B picks which of a tile's ten sentences answers the question --
+// ten distinct lines across nine tiles, first option only 3 times in 18 -- and
+// writes one when none of them fits. It cannot route: 3 right in 18, and it
+// answered "why are you blue" with the cosines tile.
+//
+// SmolLM2-135M can do neither: 0 in 18 on the tile, and "1" to all eighteen
+// lists of ten.
 window.WALLLM = (function(){
-  const THRESHOLD = 0.20;
-  const INTENTS = [['_knobs',/show me the numbers|show the numbers|show the sliders|let me play|give me the controls|the knobs|hide the numbers|hide the sliders/],
- ['_demo',/show me what you can do|what can you show|impress me|give me the tour|show off/],
- ['_which',/what does the (\w+) (one|tile|square)|which one is|what is the (\w+) (one|tile|square)|explain the (\w+) (one|tile)/],
- ['_chat',/how are you|how do you do|how.s it going|^hello|^hi\b|^hey|good morning|good evening|good afternoon|thank|nice to meet|who are you\?$|what.s up/],
- ['_all',/everything|all of (them|it)|whole wall|show me all|every tile/],
- ['_help',/what can i (ask|say|do)|what can you do|how does this work|^help\b|what are you\?/],
- ['_surprise',/surprise|something interesting|anything interesting|show me something|tell me something|impress me|best (bit|thing)/]];
-  const RULES = [['perc',/join|connect|touch|apart|separate|threshold|percolat|one piece|merge|all one|walk across|continuous|blue|flower|colour|color/],
- ['frac',/fractal|zoom|magnif|scale|dimension|self.?similar|forever|pattern inside|inside your pattern|infinite/],
- ['kil',/fire|fired|kiln|firing|hot|burn|melt|oven|bake|degrees|temperature|glaze|cobalt/],
- ['copy',/copy|copied|\bold\b|\bage\b|year|century|history|survive|remember|origin|come from|who made|painted you|made by hand|hand.?made|here before you|came before you|inherit|paint|cobalt|onion|meissen|zwiebel/],
- ['chi',/mirror|curl|chiral|handed|left.{0,4}(and|or).{0,4}right|twist|symmetr|upside down|flip|rotate|turn you/],
- ['attn',/attention|\bai\b|language model|\bmodel\b|machine|learn|transformer|neural|robot|software|recognis|recogniz|algorithm/],
- ['ship',/replace|theseus|still you|still yourself|identity|same tile|who are you|makes you|not another|break you|rebuild|change you|how much of you/],
- ['cut',/cosine|how many|terms|draw you|fourier|describe|data|bits|byte|compress|information|store you|complicated|write you down|cheapest/],
- ['eye',/\bsee|eye|\bfar\b|door|room|across|distance|look at you|from here|squint|stand back|smallest|resolve|glasses/]];
+  const THRESHOLD = 0.2;
   const DESC = {
-  "cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, compression, information.",
-  "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines.",
-  "perc": "When the separate blue flowers join up into one connected shape. The threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge.",
-  "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, the smallest detail you can resolve.",
-  "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down.",
+  "cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.",
+  "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.",
+  "perc": "When the separate blue flowers join up into one connected shape. Why the tile is blue and where the blue stops, the colour, the threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge, whether the flowers are touching.",
+  "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, how far away you can still see it, the smallest detail you can resolve.",
+  "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down, rotating it.",
   "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.",
-  "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, whether it survives being reproduced again and again.",
-  "ship": "How much of the tile can be replaced before it stops being this tile. Identity, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.",
+  "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.",
+  "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.",
   "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.",
-  "_surprise": "Show me something interesting. Surprise me. Tell me something I do not know. What is the best thing about you. Say something surprising.",
-  "_all": "Show me everything. Run all of them. Tell me everything you know. Do the whole wall.",
-  "_help": "What can you do? What can I ask you? Help. How does this work? What are you?"
+  "_surprise": "Surprise me. Show me something I would not have asked for. Tell me the best thing. Say something unexpected.",
+  "_all": "Show me everything. Run all of them at once. Every tile. The whole wall. Do all nine.",
+  "_help": "How does this page work? What can I ask you? What are you for? Help. Instructions. Who made this website."
 };
   const CHORUS = [
  "Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.",
@@ -502,23 +484,7 @@ window.WALLLM = (function(){
  "There is more where that came from. Eight more, to be exact.",
  "Ask the tile next to me. She will say the same about herself."
 ];
-  function matchWords(q){
-    const k = String(q||"").toLowerCase();
-    const i = INTENTS.find(([,re]) => re.test(k));
-    if (i) return i[0];
-    const h = RULES.find(([,re]) => re.test(k));
-    return h ? h[0] : null;
-  }
-  // Which tiles the words reach, in the order the rules are written, at most
-  // three. matchWords stops at the first; a question can be about two.
-  function matchTiles(q){
-    const t = String(q || '').toLowerCase(), hit = [];
-    for(const [id, re] of RULES) if(re.test(t)) hit.push(id);
-    return hit.slice(0, 3);
-  }
-  // the words that are in every question and so tell you nothing
-  // Only the words that are in every question. An earlier, greedier list threw
-  // away "see" and "look" and "way", which on this wall are half the subject.
-  return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
-           CHORUS, matchWords, matchTiles };
+  const WAIT = 'Fetch the two models above and I can read what you type. Until '
+             + 'then I will keep talking, and every tile still comes off the wall.';
+  return { THRESHOLD, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK, CHORUS, WAIT };
 })();
