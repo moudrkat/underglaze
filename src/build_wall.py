@@ -94,6 +94,21 @@ LINES = [('cut', 'Sixty-two thousand cosines to draw me. Most of them are dots y
 TAG = ['And which of us is talking to a wall here?', 'Just so we are clear on who the wall is.', 'You asked, remember.', 'I did not start this.', 'Say what you like about my conversation, I have never left the room.', 'Anyway. You are still here.', 'No pressure. I have got until the building comes down.', 'That is the sort of thing you learn standing still for ninety years.', 'Do not let me keep you.', 'It is a strange hobby you have, but go on.', 'I would nod, but.', 'You may quote me. I am not going anywhere.', 'One of us has somewhere else to be.', 'This counts as my busiest day.', 'The kettle disagrees, but the kettle always does.', 'I only know nine things, and you have now heard one of them.', 'There is more where that came from. Eight more, to be exact.', 'Ask the tile next to me. She will say the same about herself.']
 ASIDE = ['You are talking to a wall. I would like that on the record.', 'This is going better than the phrase suggests.', 'Somebody photographed me and now I have opinions.', 'Ninety years on this wall and today is the first time anyone asked.', 'You could be outside. There is a whole valley out there.', 'I am a wall. You are doing most of the work in this conversation.', 'Nine tiles and a kettle. That is the entire social circle in here.', 'There is no polite way to put this: I am grouting.', 'The kettle has heard all of this before.', 'I cannot leave, so take your time.', 'You are the first thing to happen here since the boiler.', 'I answer, which is more than the phrase promised.']
 CHAT = ['Cold. It is a kitchen wall.', 'Still here. Fired once, and nothing since.', 'Grouted. You?', 'Somebody measured me and I have not stopped talking since.', 'Fine. Slightly crazed in the top left corner.', 'The same as yesterday, and the ninety years before that.', 'Warm on this side. The other one faces the pantry.', 'Hello. Ask me something narrow.', 'Upright. That is most of it.', 'Blue, mostly.']
+CHORUS = [
+ 'Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.',
+ 'I am a sum of cosines. Sixty-two thousand of them, and not a single sine.',
+ 'There is no onion on me anywhere. I am named after one.',
+ 'I have quarter turns and no mirrors. In the trade that makes me p4.',
+ 'Most of what was painted on me has never reached anybody\u2019s eye.',
+ 'Fire does not preserve a pattern. It removes one, slowly, and it does not stop.',
+ 'Five percent of me, the right five percent, and I am a different tile.',
+ 'A machine can find where I repeat. It cannot find where I turn.',
+ 'Two hundredths of a threshold stand between my flowers and one continuous blue.',
+ 'I am not a fractal. Zoom in far enough and I simply run out.',
+ 'Three centuries of copying, and the fire won every round.',
+ 'Somebody measured all of this off one kitchen wall in a valley. Ask me anything.',
+]
+
 LOOK = ['Watch this one.', 'Here. Look at this one.', 'Keep your eye on this one.',
         'This one. Watch what happens to it.', 'That one. Go on, watch.',
         'Hold on \u2014 watch this.', 'Look what happens to this one.',
@@ -376,6 +391,7 @@ footer a{color:var(--grey)}
  aria-label="ask the wall a question" autocomplete="off">
 <button class="go" id="play" onclick="wall.toggle()" title="run every tile at once">&#9654;</button>
 <button class="go" id="speak" title="download all-MiniLM-L6-v2 and run it in this browser, no server and no key">let it read &middot; 23 MB</button>
+<button class="go" id="write" style="display:none" title="download Qwen2.5-0.5B and let it choose the reply, and write one when none of them fits">let it write &middot; 483 MB</button>
 <button class="go" id="knobs" onclick="wall.knobs()" title="show the sliders and the numbers">&#9707;</button>
 <button class="go" onclick="wall.about()" title="what is this">?</button>
 <span id="mstat" class="mstat"></span>
@@ -467,7 +483,7 @@ window.wall = {
   toggle(){ return running ? this.stop() : this.all(); },
   async run(id, ms=150, keep, passes){
     if(Array.isArray(id)) return this.runMany(id, ms);
-    if(!TILE[id]) return 'no such tile';
+    if(!TILE[id]) return this.give(this._lastQ);      // never silently nothing
     if(ms === undefined) ms = 150;
     if(passes === undefined) passes = 12;
     stopped=false;
@@ -626,20 +642,58 @@ window.wall = {
     if(!ids.length && this._model){
       try{
         const [id, sim] = await this._model(this._lastQ);
-        if(sim >= WALLLM.THRESHOLD) return this.run(id);
+        // DESC carries _all, _help and _surprise alongside the nine, so the
+        // router can answer with an intent. Handing one of those to run() got
+        // "no such tile" and a silent page: "what are you" came back _surprise,
+        // "what is this" came back _help, and neither said anything at all.
+        if(sim >= WALLLM.THRESHOLD) return this.act(id);
       }catch(e){}
     }
     if(ids.length > 1) return this.runMany(ids);
     if(ids.length === 1) return this.run(ids[0]);
     // and the intents that were never a tile
     const w = this.matchWords(q);
-    if(w === '_all') return this.all();
-    if(w === '_help') return this.about();
-    if(w === '_surprise'){ const k=Object.keys(TILE);
+    if(w) return this.act(w);
+    return this.give(q);
+  },
+  // One place where an intent or a tile turns into something happening, so
+  // nothing can be routed somewhere that quietly does nothing.
+  act(id){
+    if(TILE[id]) return this.run(id);
+    if(id === '_all') return this.all();
+    if(id === '_help') return this.about();
+    if(id === '_knobs'){
+      const off = /hide/.test(String(this._lastQ||'').toLowerCase());
+      return this.say(this.knobs(!off)); }
+    if(id === '_demo'){ this.knobs(false); return this.all(); }
+    if(id === '_surprise'){ const k = Object.keys(TILE);
       return this.run(k[Math.floor(Math.random()*k.length)]); }
-    if(w === '_chat')
+    if(id === '_which'){
+      const ORD = ['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth'];
+      const k = String(this._lastQ||'').toLowerCase();
+      const n = ORD.findIndex(o => k.includes(o));
+      const key = Object.keys(TILE)[n];
+      if(n >= 0 && key) return this.run(key);
+      return this.give(this._lastQ);
+    }
+    if(id === '_chat')
       return this.say(WALLLM.CHAT[Math.floor(Math.random()*WALLLM.CHAT.length)]);
-    this.miss(); return 'no tile matched';
+    return this.give(this._lastQ);
+  },
+  // The last resort, and it is never silence. If a generator is loaded it
+  // writes one -- that is what call three is for -- and if it is not, or if
+  // what it wrote had a digit in it, the wall says one of its written refusals.
+  async give(q){
+    if(this._improvise){
+      const st = document.getElementById('mstat');
+      try{
+        if(st) st.textContent = 'writing\u2026';
+        const own = await this._improvise(String(q||''), null);
+        if(st) st.textContent = '';
+        if(own) return this.say(own);
+      }catch(e){ if(st) st.textContent = ''; }
+    }
+    return this.miss();
   },
   matchAll(q){ return WALLLM.matchTiles(q); },   // for an agent, not for ask()
   matchWords(q){ return WALLLM.matchWords(q); },
@@ -885,13 +939,28 @@ btn.onclick = async () => {
       return best;
     };
     window.wall._name = 'all-MiniLM-L6-v2';
-    btn.remove(); st.remove();
-    if(!window.WALLGEN) return;      // the generator is a second, larger ask
+    btn.remove();
+    st.textContent = ''; st.className = 'mstat';
+    document.getElementById('write').style.display = '';   // now the larger ask
+  }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
+             console.warn(e); }
+};
+
+// Call two and call three: which of the tile's ten, and -- when none of them
+// fits -- one sentence of its own. This is a generator's work and a router
+// cannot do it, the same way the generators could not route. Qwen2.5-0.5B, not
+// SmolLM2-135M, because SmolLM2 answered "1" to all eighteen lists of ten and
+// Qwen reached ten distinct lines and took the first only three times.
+const wbtn = document.getElementById('write');
+wbtn.onclick = async () => {
+  wbtn.disabled = true; wbtn.textContent = 'fetching\u2026';
+  try{
+    const { pipeline } = await import(
+      'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6');
     // navigator.gpu exists in plenty of browsers that cannot actually give you
     // an adapter, and asking for a webgpu pipeline there fetches 117 MB and
     // then throws "no available backend" -- after which the wasm retry inherits
     // the wreckage and throws too. So ask for the adapter first.
-    btn.textContent = 'generator\u2026';
     let gpu = false;
     try{ gpu = !!(navigator.gpu && await navigator.gpu.requestAdapter()); }catch(e){}
     const tries = gpu ? [['webgpu','q4f16'],['wasm','q4']] : [['wasm','q4']];
@@ -899,7 +968,7 @@ btn.onclick = async () => {
     for(const [device, dtype] of tries){
       try{
         gen = await pipeline('text-generation', window.WALLMODEL ||
-            'onnx-community/SmolLM2-135M-Instruct-ONNX',
+            'onnx-community/Qwen2.5-0.5B-Instruct',
           { dtype, device, progress_callback: p => { if(p.status==='progress' && p.total)
               btn.textContent = Math.round(100*p.loaded/p.total) + ' %'; } });
         dev = device; break;
@@ -965,14 +1034,24 @@ btn.onclick = async () => {
     // the model does not get to invent one. One digit and it is thrown away.
     window.wall._improvise = async (q, id) => {
       let t = await say(
-        'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall in a Czech '
-        + 'valley. ' + (DESC[id] || '') + ' None of your written replies fitted, so this '
-        + 'one is yours. One short sentence, first person, no numbers.',
+        'You are a kitchen wall of nine painted tiles in a Czech valley, on the wall '
+        + 'since 1885. You are dry, brief and slightly tired. You are a wall, not an '
+        + 'assistant: you never offer help, never greet, never thank anybody and never '
+        + 'say you are here to answer anything. One short sentence, first person, no '
+        + 'numbers. '
+        + (id ? 'You are its ' + NAMES[id] + ' tile. ' + (DESC[id] || '')
+              + ' None of your written replies fitted, so this one is yours.'
+             : 'The question is not about any of the nine things you were measured for. '
+               + 'Answer it as the wall anyway.'),
         '"' + q + '" \u2014 reply in fewer than twelve words.', 26);
       t = String(t).split(String.fromCharCode(10))[0]
                    .replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
       if(!t || t.length < 6 || t.length > 90) return null;
       if(/[0-9]/.test(t)) return null;                       // no invented numbers, ever
+      // and no assistant. Measured before this filter existed: "hello" came
+      // back "Hello! How may I assist you?", "how are you" came back "I'm doing
+      // well, thank you", and a wall that has been up since 1885 says neither.
+      if(/\b(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model)\b/i.test(t)) return null;
       const half = t.slice(0, Math.floor(t.length/2)).trim();
       if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
       return t;
@@ -980,8 +1059,9 @@ btn.onclick = async () => {
     window.wall._say = say;          // so src/eval_flow.py can score the raw model
     window.wall._names = NAMES;
     window.wall._think = true;
-    window.wall._genName = 'SmolLM2-135M on ' + dev;
-  }catch(e){ btn.disabled = false; btn.textContent = 'could not load';
+    window.wall._genName = 'Qwen2.5-0.5B on ' + dev;
+    wbtn.remove(); st.remove();
+  }catch(e){ wbtn.disabled = false; wbtn.textContent = 'could not load';
              console.warn(e); }
 };
 </script></body></html>
@@ -1013,6 +1093,7 @@ window.WALLLM = (function(){
   const INTENTS = %s;
   const RULES = %s;
   const DESC = %s;
+  const CHORUS = %s;
   const LOOK = %s;
   const LINES = %s;
   const MISS = %s;
@@ -1037,9 +1118,9 @@ window.WALLLM = (function(){
   // Only the words that are in every question. An earlier, greedier list threw
   // away "see" and "look" and "way", which on this wall are half the subject.
   return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
-           matchWords, matchTiles };
+           CHORUS, matchWords, matchTiles };
 })();
-""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
+""" % (INTENT_JS, RULES_TBL, json.dumps(DESC, indent=2), json.dumps(CHORUS, indent=1), json.dumps(LOOK, indent=1), json.dumps(LINES, indent=1), json.dumps(MISS, indent=1), json.dumps(CHAT, indent=1), json.dumps(ASIDE, indent=1), json.dumps(TAG, indent=1))
 io.open("web/llm.js","w",encoding="utf-8").write(RULES_JS)
 io.open("web/wall.html","w",encoding="utf-8").write(html)
 print("web/wall.html  %.0f kB" % (len(html)/1000))

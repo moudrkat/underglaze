@@ -52,6 +52,20 @@ window.WALLLM = (function(){
   "_all": "Show me everything. Run all of them. Tell me everything you know. Do the whole wall.",
   "_help": "What can you do? What can I ask you? Help. How does this work? What are you?"
 };
+  const CHORUS = [
+ "Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.",
+ "I am a sum of cosines. Sixty-two thousand of them, and not a single sine.",
+ "There is no onion on me anywhere. I am named after one.",
+ "I have quarter turns and no mirrors. In the trade that makes me p4.",
+ "Most of what was painted on me has never reached anybody\u2019s eye.",
+ "Fire does not preserve a pattern. It removes one, slowly, and it does not stop.",
+ "Five percent of me, the right five percent, and I am a different tile.",
+ "A machine can find where I repeat. It cannot find where I turn.",
+ "Two hundredths of a threshold stand between my flowers and one continuous blue.",
+ "I am not a fractal. Zoom in far enough and I simply run out.",
+ "Three centuries of copying, and the fire won every round.",
+ "Somebody measured all of this off one kitchen wall in a valley. Ask me anything."
+];
   const LOOK = [
  "Watch this one.",
  "Here. Look at this one.",
@@ -506,5 +520,5 @@ window.WALLLM = (function(){
   // Only the words that are in every question. An earlier, greedier list threw
   // away "see" and "look" and "way", which on this wall are half the subject.
   return { THRESHOLD, INTENTS, RULES, DESC, LINES, MISS, CHAT, ASIDE, TAG, LOOK,
-           matchWords, matchTiles };
+           CHORUS, matchWords, matchTiles };
 })();
