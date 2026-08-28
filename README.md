@@ -50,20 +50,53 @@ no copyist at all, which may be a fact or may be an artefact of the measure. Whe
 tiles are one print or nine is undecided: tile-to-tile correlation came out at +0.006 against
 +0.132 for a meaningless shift, which measures a failed registration and nothing else.
 
-## Which model drives it?
+## How it works
 
-Nothing is downloaded when the page opens. That was not true until today: **all-MiniLM-L6-v2**,
-23 MB, fetched itself the moment anybody arrived. It was a good router and nobody agreed to it.
+Nothing is downloaded when the page opens. The wall talks anyway: it has nine measured things
+to say and it says them, all nine tiles moving at once for the ones the whole wall can say, one
+at a time for the rest, until somebody touches something. The question box is shut until both
+models are here, and says so.
 
-There is a button now — **let it read · 23 MB** — and once the model is here the button and the
-notice take themselves off the bar. Before it is pressed, phrase rules route the question and
-the tile answers with its own headline sentence. No model, no download, no waiting.
+Two buttons, two models, both running in the visitor's own browser. No server, no key, nothing
+leaves the page. Each says its size before it spends it and removes itself once it has arrived.
+
+```mermaid
+flowchart TD
+  Q(["a visitor types a question"]) --> C1
+
+  C1["<b>call one</b> · all-MiniLM-L6-v2 · 23 MB<br/>embed the question against the nine subjects<br/><i>nearest one wins, or none of them does</i>"]
+  C2["<b>call two</b> · Qwen2.5-0.5B · 483 MB<br/>that tile's ten written replies, numbered<br/><i>answer with one number, or NONE</i>"]
+  C3["<b>call three</b> · Qwen2.5-0.5B<br/>write one, for this tile<br/><i>one sentence, first person</i>"]
+
+  C1 -->|a tile| C2
+  C1 -->|nothing above 0.20| C3
+  C2 -->|a number| OUT
+  C2 -->|NONE| C3
+  C3 --> F{"a digit in it?<br/>an assistant in it?<br/>looped? wrong length?"}
+  F -->|no| OWN
+  F -->|yes| MISS
+
+  OUT(["a line somebody measured and wrote"])
+  OWN(["the model's own sentence"])
+  MISS(["thrown away — a written refusal instead"])
+
+  classDef page fill:#eef3fb,stroke:#213660,color:#213660
+  classDef model fill:#fff,stroke:#b0554a,color:#b0554a
+  class C1,C2,C3,F model
+  class Q,OUT,OWN,MISS page
+```
+
+Call one takes about fifty milliseconds. Calls two and three take about thirty-five seconds on a
+machine with no GPU, so the tile does not stand still through it: it is already chosen, so it
+runs — out to the far end and back, over and over, the rest of the wall in shadow — with the
+line above it reading *WHEN I JOIN UP is thinking…* until the sentence lands. The animation is
+the answer arriving. The sentence is the caption.
+
+**Nothing but the models decides.** There were phrase rules in front of them and they are gone,
+from the code and from the comments. What is left to tune is the nine subjects the router
+embeds against, and tuning those took call one from 3/27 to 23/27.
 
 ## What a small model can and cannot do here, measured
-
-The design was three calls in a row: *which tile*, then *which of that tile's ten written
-replies*, then — only if the second came back empty — *one sentence of its own for that tile*.
-It never writes a number: a digit in call three and the sentence is thrown away.
 
 `src/eval_flow.py` presses the real button in a real browser and scores the real calls, so it
 cannot drift from what ships. Twenty-seven questions: the nine tiles asked plainly twice over,
@@ -71,53 +104,39 @@ and nine that are not about this wall at all.
 
 | call one — which of the nine tiles | on the wall | should refuse |
 |---|---|---|
-| SmolLM2-135M-Instruct, 117 MB | **0 / 18** | 9 / 9 |
-| Qwen2.5-0.5B-Instruct, 483 MB | **3 / 18** | 0 / 9 |
-| all-MiniLM-L6-v2, 23 MB | **21 / 30** ¹ | — |
-| the phrase rules | 14 / 30 ¹ | **25 / 30** |
-
-¹ on the fresh and weird sets in `src/eval_wall.py`, which are larger and harder.
+| SmolLM2-135M-Instruct, 117 MB | 0 / 18 | 9 / 9 |
+| Qwen2.5-0.5B-Instruct, 483 MB | 3 / 18 | 0 / 9 |
+| **all-MiniLM-L6-v2, 23 MB** | **15 / 18** | **8 / 9** |
 
 Neither generator can pick a tile. SmolLM2 restates the question; Qwen latches onto one number
 and gives it to everything — ATTENTION to all twenty-seven, then 8 to everything, then 3. Seven
 prompt shapes were tried across the two: bare names, names with glosses, an options list, a
 labels list, numbered names, numbered subjects, and the nine headline sentences numbered. The
-best reached 5 of 12. Asked whether it is a fractal, SmolLM2 still answers *"I'm a fractal"*.
+best reached 5 of 12. Asked whether it is a fractal, SmolLM2 still answers *"I'm a fractal"*,
+which is the one thing this page spends a page disproving.
 
-**The one they can do is the next one down.** Given the tile, Qwen2.5-0.5B picks which of its
-ten sentences answers the question, and picks well:
+**The one they can do is the next one down.** Given the tile, Qwen picks which of its ten
+sentences answers the question, and picks well:
 
 | call two — which of that tile's ten | distinct lines reached | took the first |
 |---|---|---|
-| SmolLM2-135M | 9 of 9 tiles, always line 0 | **18 / 18** |
-| Qwen2.5-0.5B | **10** | 3 / 18 |
+| SmolLM2-135M | 9 of 9 tiles, always line 0 | 18 / 18 |
+| **Qwen2.5-0.5B** | **10** | **3 / 18** |
 
 *who painted you?* → "Printed from steel, copied from a painting, copied from a Chinese bowl."
 *do you repeat at every scale?* → "A fractal is equally rough at every zoom."
 
 That is the shape of it: **a 23 MB model that produces no words beats a 483 MB one at deciding
 what a question is about, and loses to it at deciding which sentence answers it.** Routing is a
-nearest-neighbour lookup in an embedding space — nothing has to be said. Choosing a reply is
+nearest-neighbour lookup in an embedding space and nothing has to be said. Choosing a reply is
 reading. They are not the same job and they do not want the same model.
 
-So the button fetches the router, at 23 MB, because that is the job the page cannot do without.
-The generator is in the code, measured, and off. `evals/flow.md` and `evals/flow-qwen05b.md`
-have every answer either of them gave.
-
-**The rules, for comparison.** Four question sets, in `src/eval_wall.py`. The first 51 were
-written next to the patterns; the next 30 blind; the next 30 after both routers existed and
-shown to neither while being written; the last 30 are what people actually type — one word,
-typos, Czech, emoji, boredom, prompt injection, nothing at all.
-
-| | 30 fresh questions | 30 weird inputs | total |
-|---|---|---|---|
-| regular expression alone | 14 | **25** | 39 |
-| all-MiniLM-L6-v2 alone | **21** | 19 | 40 |
-| words first, model for the rest | 20 | 25 | **45** |
-
-The regex scores 81/81 on the sets it was tuned on and 47 % on fresh ones, which is what
-overfitting looks like from the inside. The page runs the cascade — words first, router for
-what they do not recognise, at a confidence of 0.20 — but only once you have said yes to it.
+**Call three, the one that writes.** It works, and its voice was the problem. *who cleans you?*
+came back "The wall cleans itself" and *what is behind you?* came back "The walls hold stories
+and memories" — but *hello* came back "Hello! How may I assist you?" and *how are you* came back
+"I'm doing well, thank you." A wall that has been up since 1885 says neither, so the same trick
+as the digits: the prompt names the voice, and the page throws away anything with an assistant
+in it. `evals/flow.md` and `evals/flow-qwen05b.md` have every answer either model gave.
 
 ## The wall opens as a wall
 
@@ -136,45 +155,6 @@ and what is behind it is the mortar bed it was set into, with the writing on a p
 limewash. The mortar is generated (`src/plaster.py`) rather than drawn in CSS, because CSS
 gradients cannot do relief, and its colour is the lit face of the real grout in `web/wall.jpg`
 divided by the white of the tile beside it.
-
-## Three prompts, and not one of them writes the answer
-
-This is the shape, and the measurement above is what happens when a 135M model is asked to walk
-it. The point of the shape is that no call is ever asked to compose a claim: two of the three
-are a choice out of a short list, and the third may not contain a digit.
-
-```mermaid
-flowchart TD
-  Q(["a visitor types a question"]) --> P1
-
-  P1["<b>call one</b> — which tile?<br/>nine tile names, or NONE<br/><i>answer with one word</i>"]
-  P2["<b>call two</b> — which reply?<br/>that tile's ten written lines,<br/>numbered, or NONE<br/><i>answer with one number</i>"]
-  P3["<b>call three</b> — now it may compose<br/><i>one short sentence, first person</i>"]
-
-  P1 -->|a tile| P2
-  P1 -->|NONE| P3
-  P2 -->|a number| OUT
-  P2 -->|NONE| P3
-  P3 --> F{"a digit in it?<br/>looped? wrong length?"}
-  F -->|no| OWN
-  F -->|yes| MISS
-
-  SM["SmolLM2 not loaded:<br/>regex, then MiniLM"] -.-> P2
-
-  OUT(["a line somebody measured and wrote"])
-  OWN(["the model's own sentence"])
-  MISS(["thrown away — a written refusal instead"])
-
-  classDef page fill:#eef3fb,stroke:#213660,color:#213660
-  classDef model fill:#fff,stroke:#b0554a,color:#b0554a
-  class P1,P2,P3,F model
-  class Q,OUT,OWN,MISS,SM page
-```
-
-I tried it the other way first and let the model write the answers. Asked whether it was a
-fractal it said *"I'm a fractal"* — the one thing the page had just spent a page disproving.
-**Classify, do not compose.** Which is the right lesson, and the eval above is the bill for
-finding out that this model cannot do the classifying either.
 
 ## Files
 

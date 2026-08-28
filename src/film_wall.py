@@ -42,7 +42,6 @@ TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question
 # somebody actually types at a wall.
 SCRIPT = [
     ("why are you blue?", 1, 0),
-    ("who painted you?", 1, 0),
 ]
 
 PERFORM_MS = 13000     # of the wall talking to itself before anybody types
@@ -114,11 +113,18 @@ def film():
         print("fetching both models…")
         pg.click("#speak")
         pg.wait_for_function("() => !!window.wall._model", timeout=600000)
-        pg.click("#write")
-        pg.wait_for_function(
-            "() => !!window.wall._improvise || (document.getElementById('write')"
-            " && document.getElementById('write').textContent === 'could not load')",
-            timeout=1800000)
+        # the 483 MB fetch fails about one attempt in two from a headless
+        # browser, so it gets three
+        for attempt in range(3):
+            pg.click("#write")
+            pg.wait_for_function(
+                "() => !!window.wall._improvise || (document.getElementById('write')"
+                " && document.getElementById('write').textContent === 'could not load')",
+                timeout=1800000)
+            if pg.evaluate("() => !!window.wall._improvise"):
+                break
+            print("  writer attempt %d failed, retrying" % (attempt + 1))
+            pg.wait_for_timeout(2000)
         if not pg.evaluate("() => !!window.wall._improvise"):
             raise SystemExit("the writer did not load")
         print("both up")
@@ -185,13 +191,35 @@ def compose(take, raw=RAW):
     x0, y0, x1, y1 = crop
     cw, ch = x1 - x0, y1 - y0
     print("page %dx%d -> fills %dx%d at %.2fx" % (cw, ch, OW, OH, min(OW / cw, OH / ch)))
+
+    # The waiting is real and it is long: the tile runs for half a minute while
+    # a 0.5B model reads ten sentences on somebody's CPU. Nothing is cut out and
+    # nothing is faked, but those stretches run at 8x, because a minute of a
+    # tile going out and back says the same thing as five seconds of it. The
+    # typing, the sentence landing, and the wall's own performance stay at 1x.
+    fast = [(b["ask"] + 1.6, b["answer"] - 0.8) for b in beats
+            if b["answer"] - b["ask"] > 4.4]
+    segs, filt, k, t = [], [], 0, 0.0
+    for a, z in fast + [(dur, dur)]:
+        for lo, hi, rate in ((t, a, 1.0), (a, z, 8.0)):
+            if hi - lo <= 0.04:
+                continue
+            filt.append("[0:v]trim=%.3f:%.3f,setpts=(PTS-STARTPTS)/%.1f[v%d]"
+                        % (lo, hi, rate, k))
+            segs.append("[v%d]" % k); k += 1
+        t = z
+    graph = ";".join(filt) + ";" + "".join(segs) + \
+            "concat=n=%d:v=1:a=0[cut];" % len(segs)
+    print("%d segments, %d of them at 8x" % (len(segs), len(fast)))
+
     subprocess.run([
         "ffmpeg", "-v", "error", "-y",
         "-ss", "%.2f" % ss, "-t", "%.2f" % dur, "-i", raw,
-        "-vf", ("fps=%d,crop=%d:%d:%d:%d,"
+        "-filter_complex", graph + ("[cut]fps=%d,crop=%d:%d:%d:%d,"
                 "scale=%d:%d:force_original_aspect_ratio=decrease:flags=lanczos,"
-                "pad=%d:%d:(ow-iw)/2:(oh-ih)/2:color=0x%02x%02x%02x,format=yuv420p"
+                "pad=%d:%d:(ow-iw)/2:(oh-ih)/2:color=0x%02x%02x%02x,format=yuv420p[out]"
                 % (FPS, cw, ch, x0, y0, OW, OH, OW, OH, *PAPER)),
+        "-map", "[out]",
         "-c:v", "libx264", "-profile:v", "high", "-level", "4.0",
         "-preset", "slow", "-crf", "19",
         "-movflags", "+faststart", "-an", OUT,

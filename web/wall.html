@@ -781,6 +781,14 @@ window.wall = {
   },
   async line(id, q){
     const ls = this.lines(id); if(!ls.length) return null;
+    // Whatever this turns into must not be said if the wall has moved on. The
+    // performance starts a call, somebody types a question, and twenty-five
+    // seconds later the performance's answer lands on top of the question --
+    // which is what the film caught: "the wall is thinking" replaced by the
+    // last thing it had been saying to itself, under a question nobody had
+    // answered yet.
+    const mine = gen;
+    const speak = (t, who) => (gen === mine) ? this.say(t, who) : null;
     let s = null;
     const st = document.getElementById('mstat');
     if(this._pickLine && q){
@@ -791,7 +799,7 @@ window.wall = {
           // nothing on the list fitted, so it writes one -- for this tile
           this.think(id);
           const own = await this._improvise(q, id);
-          if(own) return this.say(own, id);
+          if(own) return speak(own, id);
         }
       }catch(e){ if(st) st.textContent = ''; }
     }
@@ -810,7 +818,7 @@ window.wall = {
       const a = WALLLM.ASIDE.filter(x => x.length + line.length < 168);
       if(a.length) line += ' … ' + a[Math.floor(Math.random()*a.length)];
     }
-    return this.say(line, id);
+    return speak(line, id);
   },
   miss(){ return this.say(WALLLM.MISS[Math.floor(Math.random()*WALLLM.MISS.length)]); },
   async converse(qs, ms=90){
