@@ -1057,13 +1057,22 @@ btn.onclick = async () => {
     // its subject given, because the same ten sentences mean different things
     // depending on which tile is saying them.
     window.wall._pickLine = async (q, opts, id) => {
-      const numbered = opts.map((l,i) => (i+1) + '. ' + l).join(' ');
+      const numbered = opts.map((l,i) => (i+1) + '. ' + l).join('
+');
+      // NONE has to be a real option or it is never taken. Measured before this
+      // was rewritten: "hello", "what are you" and "what is 2+2" all came back
+      // with the same sentence about standing four metres away, because the
+      // model was picking the least wrong of ten rather than saying none of
+      // them answered the question. It is asked whether one answers it first.
       const said = await say(
         'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall. '
-        + (DESC[id] || '') + ' The tile is already chosen. Now pick its reply by number. '
-        + 'If none of them fits, answer NONE and you will get to write your own instead. '
-        + 'Answer with one number, or NONE.',
-        'A visitor asks: "' + q + '" — which reply? ' + numbered + ' or NONE', 4);
+        + (DESC[id] || '') + ' Below are the only ten things you are able to say. '
+        + 'If one of them answers the visitor's question, reply with its number. '
+        + 'If none of them answers it, reply NONE. Do not force one. '
+        + 'Reply with a single number, or the word NONE.',
+        'Question: "' + q + '"
+' + numbered + '
+Number or NONE:', 4);
       if(/NONE/i.test(said)) return { raw: 'NONE', line: null };
       const d = (said.match(/[1-9]/) || [])[0];
       const i = d ? (+d - 1) : -1;
