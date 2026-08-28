@@ -41,7 +41,8 @@ TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question
 # (question, how many tiles it should reach). Short, and the sort of thing
 # somebody actually types at a wall.
 SCRIPT = [
-    ("why are you blue?", 1, 0),
+    ("how many cosines does it take to draw you?", 1, 0),
+    ("how are you?", 0, 0),        # nothing on the wall answers this; call three writes one
 ]
 
 PERFORM_MS = 13000     # of the wall talking to itself before anybody types
