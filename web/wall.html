@@ -438,7 +438,6 @@ window.wall = {
     cell.classList.add('speaking');
     const r0=document.getElementById(id+'r');
     if(r0) this.set(id, +r0.defaultValue);
-    this.line(id, this._lastQ);
     const t=TILE[id];
     if(!keep){ this._said = [id]; this._at = 0; }
     document.querySelector('.wall').classList.add('busy');
@@ -565,8 +564,12 @@ window.wall = {
       else this.label(cast[0]);
       await Promise.all(cast.map(id =>
         this._sweep(id, ms, all ? null : () => this.line(cast[0]), my)));
+      // only if it is still our turn: a question started while this was mid
+      // sweep, and the loop was taking the spotlight back off the tile that
+      // had just been asked about
+      if(my !== gen) break;
       wall.classList.remove('busy');
-      if(stopped || my !== gen) break;
+      if(stopped) break;
       await sleep(all ? 1600 : 1200);
     }
     if(my === gen) running = false;
