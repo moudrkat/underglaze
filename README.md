@@ -99,44 +99,76 @@ embeds against, and tuning those took call one from 3/27 to 23/27.
 ## What a small model can and cannot do here, measured
 
 `src/eval_flow.py` presses the real button in a real browser and scores the real calls, so it
-cannot drift from what ships. Twenty-seven questions: the nine tiles asked plainly twice over,
-and nine that are not about this wall at all.
+cannot drift from what ships. It puts **every question anybody has written for this wall**
+through call one — 141 of them, over four sets.
 
-| call one — which of the nine tiles | on the wall | should refuse |
+| set | what it is | on the wall | refuses |
+|---|---|---|---|
+| CASES | written next to the patterns | 37 / 49 | 2 / 2 |
+| HARD | written blind | 23 / 30 | — |
+| FRESH | shown to neither router while being written | 20 / 30 | — |
+| WEIRD | what people actually type | 10 / 14 | 12 / 16 |
+| **all** | | **90 / 123** | **14 / 18** |
+
+Two things moved that number a long way, and neither was the model.
+
+**The router was comparing against twelve things, not nine.** Three of them were not tiles at
+all — *show me everything*, *what is this*, *surprise me* — and they were winning: "who are you
+really?", "what makes you you?" and "what was here before you?" all went to *surprise me*
+rather than to a tile. They have buttons of their own. Out of the pool, and the nine went up.
+
+**The confidence threshold was set for a different router.** Swept over all 141:
+
+| threshold | on the wall | refuses | total |
+|---|---|---|---|
+| 0.10 | 94 / 123 | 9 / 18 | 103 |
+| **0.12** | **90 / 123** | **14 / 18** | **104** |
+| 0.14 | 87 / 123 | 15 / 18 | 102 |
+| 0.20 | 75 / 123 | 17 / 18 | 92 |
+
+Higher refuses nonsense better and answers real questions worse. 0.12 is where the two stop
+paying for each other. The page ran at 0.20.
+
+### Neither generator can pick a tile
+
+| call one — which of the nine | on the wall | should refuse |
 |---|---|---|
 | SmolLM2-135M-Instruct, 117 MB | 0 / 18 | 9 / 9 |
 | Qwen2.5-0.5B-Instruct, 483 MB | 3 / 18 | 0 / 9 |
-| **all-MiniLM-L6-v2, 23 MB** | **15 / 18** | **8 / 9** |
+| **all-MiniLM-L6-v2, 23 MB** | **90 / 123** | **14 / 18** |
 
-Neither generator can pick a tile. SmolLM2 restates the question; Qwen latches onto one number
-and gives it to everything — ATTENTION to all twenty-seven, then 8 to everything, then 3. Seven
-prompt shapes were tried across the two: bare names, names with glosses, an options list, a
-labels list, numbered names, numbered subjects, and the nine headline sentences numbered. The
-best reached 5 of 12. Asked whether it is a fractal, SmolLM2 still answers *"I'm a fractal"*,
-which is the one thing this page spends a page disproving.
+SmolLM2 restates the question; Qwen latches onto one number and gives it to everything —
+ATTENTION to all twenty-seven, then 8 to everything, then 3. Seven prompt shapes were tried
+across the two: bare names, names with glosses, an options list, a labels list, numbered names,
+numbered subjects, and the nine headline sentences numbered. The best reached 5 of 12. Asked
+whether it is a fractal, SmolLM2 still answers *"I'm a fractal"*, which is the one thing this
+page spends a page disproving.
 
-**The one they can do is the next one down.** Given the tile, Qwen picks which of its ten
-sentences answers the question, and picks well:
+### The one they can do is the next one down
 
-| call two — which of that tile's ten | distinct lines reached | took the first |
+Given the tile, Qwen picks which of its ten sentences answers the question, and picks well:
+
+| call two — which of that tile's ten | distinct lines | took the first |
 |---|---|---|
-| SmolLM2-135M | 9 of 9 tiles, always line 0 | 18 / 18 |
-| **Qwen2.5-0.5B** | **10** | **3 / 18** |
+| SmolLM2-135M | always line 0 | 18 / 18 |
+| **Qwen2.5-0.5B** | **9 of 9 tiles, 9 different lines** | **2 / 9** |
 
 *who painted you?* → "Printed from steel, copied from a painting, copied from a Chinese bowl."
-*do you repeat at every scale?* → "A fractal is equally rough at every zoom."
+*when does your blue join up?* → "Push it a little further and I stop being flowers."
 
-That is the shape of it: **a 23 MB model that produces no words beats a 483 MB one at deciding
-what a question is about, and loses to it at deciding which sentence answers it.** Routing is a
-nearest-neighbour lookup in an embedding space and nothing has to be said. Choosing a reply is
-reading. They are not the same job and they do not want the same model.
+**A 23 MB model that produces no words beats a 483 MB one at deciding what a question is about,
+and loses to it at deciding which sentence answers it.** Routing is a nearest-neighbour lookup
+in an embedding space and nothing has to be said. Choosing a reply is reading. They are not the
+same job and they do not want the same model.
 
 **Call three, the one that writes.** It works, and its voice was the problem. *who cleans you?*
 came back "The wall cleans itself" and *what is behind you?* came back "The walls hold stories
 and memories" — but *hello* came back "Hello! How may I assist you?" and *how are you* came back
 "I'm doing well, thank you." A wall that has been up since 1885 says neither, so the same trick
 as the digits: the prompt names the voice, and the page throws away anything with an assistant
-in it. `evals/flow.md` and `evals/flow-qwen05b.md` have every answer either model gave.
+in it.
+
+`evals/flow.md` has all 141 answers call one gave, with the nearest tile and the score for each.
 
 ## The wall opens as a wall
 

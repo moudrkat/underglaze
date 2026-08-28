@@ -19,7 +19,7 @@
 // SmolLM2-135M can do neither: 0 in 18 on the tile, and "1" to all eighteen
 // lists of ten.
 window.WALLLM = (function(){
-  const THRESHOLD = 0.2;
+  const THRESHOLD = 0.12;
   const DESC = {
   "cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.",
   "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.",
@@ -29,10 +29,7 @@ window.WALLLM = (function(){
   "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.",
   "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.",
   "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.",
-  "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.",
-  "_surprise": "Surprise me. Show me something I would not have asked for. Tell me the best thing. Say something unexpected.",
-  "_all": "Show me everything. Run all of them at once. Every tile. The whole wall. Do all nine.",
-  "_help": "How does this page work? What can I ask you? What are you for? Help. Instructions. Who made this website."
+  "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses."
 };
   const CHORUS = [
  "Nine tiles, one photograph. Every number on me was measured off it and not one was chosen.",

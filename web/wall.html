@@ -547,13 +547,16 @@ window.wall = {
   // visitor does anything -- types, drags a slider, takes a tile off the wall
   // -- and the question box is there for following it up, not for starting it.
   async perform(ms=95){
-    if(running) return 'busy';
+    if(running || this._asked) return 'busy';
     const my = ++gen;
     stopped = false; running = true;
     const ids = Object.keys(TILE);
     const wall = document.querySelector('.wall');
     for(let n = 0; !stopped && my === gen && n < 30; n++){
       const all = (n === 0) || Math.random() < 0.25;     // it opens as a chorus
+      // checked again here and not only in the loop condition: a question can
+      // arrive between the two, and then this beat takes the wall back off it
+      if(this._asked || my !== gen) break;
       const cast = all ? ids : [ids[Math.floor(Math.random() * ids.length)]];
       document.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
       cast.forEach(i => document.querySelector('[data-tile="'+i+'"]').classList.add('speaking'));
@@ -645,7 +648,10 @@ window.wall = {
     // that in the same frame -- otherwise the last thing the wall said sits
     // there under a typed question for as long as the router takes to answer,
     // and it reads as the answer.
-    gen++;                     // whatever the wall was doing on its own is over
+    // whatever the wall was doing on its own is over, and it does not start
+    // again by itself once somebody has spoken to it
+    gen++;
+    this._asked = true;
     document.querySelectorAll('.tile').forEach(c =>
       c.classList.remove('speaking','current'));
     document.querySelector('.wall').classList.add('busy');
@@ -851,7 +857,7 @@ let lastTouch = Date.now();
   addEventListener(e, () => { lastTouch = Date.now(); }, true));
 setTimeout(() => { if(!running) wall.perform(); }, 1400);
 setInterval(() => {
-  if (running || Date.now() - lastTouch < 25000) return;
+  if (running || wall._asked || Date.now() - lastTouch < 25000) return;
   lastTouch = Date.now();
   wall.perform();
 }, 4000);
@@ -894,7 +900,7 @@ addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 //   let it read   23 MB   all-MiniLM-L6-v2   call one: which tile
 //   let it write 483 MB   Qwen2.5-0.5B       call two: which of its ten
 //                                            call three: write one, no digits
-const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.", "perc": "When the separate blue flowers join up into one connected shape. Why the tile is blue and where the blue stops, the colour, the threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge, whether the flowers are touching.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, how far away you can still see it, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down, rotating it.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses.", "_surprise": "Surprise me. Show me something I would not have asked for. Tell me the best thing. Say something unexpected.", "_all": "Show me everything. Run all of them at once. Every tile. The whole wall. Do all nine.", "_help": "How does this page work? What can I ask you? What are you for? Help. Instructions. Who made this website."};
+const DESC = {"cut": "How many cosines does it take to draw this tile? The Fourier series, the number of terms, how much data it costs to write the pattern down, how it is drawn, compression, information.", "kil": "What the kiln and the firing do to the tile. Heat, fire, the oven, glaze melting, temperature, how baking blurs and erases the painted lines, how the cobalt creeps.", "perc": "When the separate blue flowers join up into one connected shape. Why the tile is blue and where the blue stops, the colour, the threshold, percolation, whether the ink is one piece or many, whether it spans edge to edge, whether the flowers are touching.", "eye": "What a human eye actually receives from a distance. Visual acuity, standing back, across the room, from the doorway, squinting, how far away you can still see it, the smallest detail you can resolve.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, whether the pattern is symmetric, flipping it, turning it upside down, rotating it.", "frac": "Whether the pattern is a fractal. Zooming in, magnification, self-similarity, box dimension, a pattern inside the pattern, structure repeating at every scale forever.", "copy": "The history of the pattern and three centuries of being copied. Who painted it, how old it is, where it came from, why it is blue and white, cobalt, the onion it is named after, Meissen, China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, who it is, what it is, the ship of Theseus, swapping coefficients, what makes it itself and not another pattern.", "attn": "What a machine learning model finds in the tile. Attention, neural networks, transformers, software recognising the pattern, what an AI notices and what it misses."};
 const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
                 chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
                 ship:'IDENTITY', attn:'ATTENTION' };
