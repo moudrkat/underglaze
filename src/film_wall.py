@@ -49,7 +49,7 @@ OPEN_AT_ONE = 6.2      # of the opening kept; the rest of it is cut out
 
 TYPE_MS = 42
 HOLD_OPEN = 1000       # on the bare wall before anything is typed
-HOLD_READ = 700        # after each finished pass
+HOLD_READ = 2600       # on the answer, once it has landed
 HOLD_PAGE = 700        # after each answer paged to
 HOLD_END = 1400        # on the last one
 
@@ -62,23 +62,22 @@ def touch(pg):
     pg.evaluate("dispatchEvent(new KeyboardEvent('keydown'))")
 
 
-def wait_pass(pg, timeout=40.0):
-    """Wait for exactly one sweep: out to the far end and back.
+def wait_answer(pg, timeout=90.0):
+    """Wait for the sentence, not for the sweep.
 
-    The page no longer stops after a pass -- it loops until somebody touches
-    something -- so waiting for the wall to go quiet waits for twelve of them.
-    A pass is over when every slider is back on the value it was authored with,
-    which is where the return leg puts it and where nothing else does.
+    The tile loops now, so "the sliders have come back to where they started"
+    happens at the end of every pass and says nothing about whether the model
+    has finished. What ends is the line above the wall: it reads "... is
+    thinking" until the answer replaces it.
     """
-    ALL = "[...document.querySelectorAll('.tile input[type=range]')]"
-    at_rest = "() => %s.every(r => r.value === r.defaultValue)" % ALL
-    moved = "() => %s.some(r => r.value !== r.defaultValue)" % ALL
-    pg.wait_for_function(moved, timeout=int(timeout * 1000))
+    said = "() => document.querySelector('.said').textContent"
+    pg.wait_for_function(
+        "() => { const t = document.querySelector('.said').textContent;"
+        "        return t && t.indexOf('thinking') < 0; }",
+        timeout=int(timeout * 1000))
     lit = pg.evaluate(
         "[...document.querySelectorAll('.tile.speaking')].map(t=>t.dataset.tile)")
-    started = time.monotonic()
-    pg.wait_for_function(at_rest, timeout=int(timeout * 1000))
-    return lit, started
+    return lit, time.monotonic()
 
 
 def film():
@@ -152,7 +151,7 @@ def film():
             pg.type("#q", q, delay=TYPE_MS)
             t_ask = time.monotonic() - clock
             pg.keyboard.press("Enter")
-            lit, t_lit = wait_pass(pg)
+            lit, t_lit = wait_answer(pg)
             pg.wait_for_timeout(HOLD_READ)
             beats.append({"q": q, "wanted": want, "lit": lit,
                           "ask": round(t_ask - start, 2),
@@ -196,8 +195,8 @@ def compose(take, raw=RAW):
     # nothing is faked, but those stretches run at 8x, because a minute of a
     # tile going out and back says the same thing as five seconds of it. The
     # typing, the sentence landing, and the wall's own performance stay at 1x.
-    fast = [(b["ask"] + 1.6, b["answer"] - 0.8, 8.0) for b in beats
-            if b["answer"] - b["ask"] > 4.4]
+    fast = [(b["ask"] + 1.8, b["answer"] - 1.0, 6.0) for b in beats
+            if b["answer"] - b["ask"] > 5.0]
     # The wall's opening performance is the point of the film, but not all of
     # it. Sampled frame by frame: the first chorus line finishes landing at
     # 5.5 s and then nothing changes for four seconds before the second one

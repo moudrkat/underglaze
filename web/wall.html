@@ -698,7 +698,13 @@ window.wall = {
       if(st) st.textContent = 'which tile…';
       const [id, sim] = await this._model(this._lastQ);
       if(st) st.textContent = '';
-      if(sim >= WALLLM.THRESHOLD) return this.act(id);
+      // Three of the twelve subjects the router compares against are not tiles:
+      // arithmetic and general knowledge, small talk, and questions about the
+      // model itself. If one of those is nearest then the question is not about
+      // this wall, whatever it scored. Still the model deciding -- it just has
+      // somewhere to put what the wall was never measured for, instead of
+      // having to name the least wrong tile.
+      if(id && sim >= WALLLM.THRESHOLD) return this.act(id);
     }catch(e){ if(st) st.textContent = ''; }
     return this.give(this._lastQ);
   },
@@ -937,7 +943,7 @@ addEventListener('resize',()=>{ if(bubFor) place(bubFor); });
 //   let it read   23 MB   all-MiniLM-L6-v2   call one: which tile
 //   let it write 483 MB   Qwen2.5-0.5B       call two: which of its ten
 //                                            call three: write one, no digits
-const DESC = {"cut": "How many numbers it takes to write this tile down. Cosines, Fourier terms, how much data and information it costs to store or describe the pattern, compression, the shortest description, brush strokes against waves.", "kil": "What the kiln and the firing do to it. Heat, fire, the oven, baking, nine hundred degrees, glaze melting, how firing blurs and erases the painted lines, how the cobalt creeps and spreads.", "perc": "When the separate blue flowers join up into one connected shape. The cut-off, the threshold, percolation, why the tile is blue and where the blue stops, whether the ink is one piece or many, whether the flowers touch each other, whether it spans edge to edge.", "eye": "What a person standing in the room actually receives. Distance in metres, standing back, across the room, from the doorway, squinting, eyesight and visual acuity, an arcminute, how much of the painting never reaches anybody at all.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, quarter turns, reflections, whether the pattern is the same the whole way round, flipping it, turning it upside down.", "frac": "Whether the pattern is a fractal. Zooming in, looking closer, magnification, self-similarity, box dimension, roughness at every scale, detail all the way down, a pattern inside the pattern, going on forever.", "copy": "The history of the pattern and three centuries of being copied by hand. Who painted it, how old it is, where it came from, cobalt and blue and white, the onion it is named after, Meissen and China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. Identity, what is essential about it, what makes it itself and not another pattern, the ship of Theseus, swapping and shuffling its coefficients, rebuilding it.", "attn": "What a machine learning model finds in the tile. Attention, transformers, neural networks, embeddings, software recognising or reading the pattern, what an AI notices and what it misses."};
+const DESC = {"cut": "How many numbers it takes to write this tile down. Cosines, Fourier terms, how much data and information it costs to store or describe the pattern, compression, the shortest description, brush strokes against waves.", "kil": "What the kiln and the firing do to it. Heat, fire, the oven, baking, nine hundred degrees, glaze melting, how firing blurs and erases the painted lines, how the cobalt creeps and spreads.", "perc": "When the separate blue flowers join up into one connected shape. The cut-off, the threshold, percolation, why the tile is blue and where the blue stops, whether the ink is one piece or many, whether the flowers touch each other, whether it spans edge to edge.", "eye": "What a person standing in the room actually receives. Distance in metres, standing back, across the room, from the doorway, squinting, eyesight and visual acuity, an arcminute, how much of the fine work never reaches anybody at all.", "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, quarter turns, reflections, whether the pattern is the same the whole way round, flipping it, turning it upside down.", "frac": "Whether the pattern is a fractal. Zooming in, looking closer, magnification, self-similarity, box dimension, roughness at every scale, detail all the way down, a pattern inside the pattern, going on forever.", "copy": "Who painted this tile and how old it is. The painter, the copyist, three centuries of being copied by hand, its age, how many years it has been here, where it came from, cobalt and blue and white, the onion it is named after, Meissen and China, whether it survives being reproduced again and again.", "ship": "How much of the tile can be replaced before it stops being this tile. What it is, what you are looking at, its identity, what is essential about it, what makes it itself and not another pattern, the ship of Theseus, swapping and shuffling its coefficients.", "attn": "What a machine learning model finds in the tile. Attention, transformers, neural networks, embeddings, software recognising or reading the pattern, what an AI notices and what it misses."};
 const NAMES = { cut:'COSINES', kil:'KILN', perc:'PERCOLATION', eye:'ACUITY',
                 chi:'CHIRALITY', frac:'GEOMETRY', copy:'HISTORY',
                 ship:'IDENTITY', attn:'ATTENTION' };
@@ -1069,11 +1075,16 @@ btn.onclick = async () => {
     // the model does not get to invent one. One digit and it is thrown away.
     window.wall._improvise = async (q, id) => {
       let t = await say(
-        'You are a kitchen wall of nine painted tiles in a Czech valley, on the wall '
-        + 'since 1885. You are dry, brief and slightly tired. You are a wall, not an '
-        + 'assistant: you never offer help, never greet, never thank anybody and never '
-        + 'say you are here to answer anything. One short sentence, first person, no '
-        + 'numbers. '
+        'You are a wall of nine painted tiles in a kitchen in a valley under the '
+        + 'Krkonoše, in the Czech Republic, and you have been on that wall since 1885. '
+        + 'Your pattern is the onion pattern, Zwiebelmuster, copied by hand for three '
+        + 'centuries: from a Chinese bowl to Meissen to Dubí to a steel printing plate '
+        + 'to this kitchen. There is no onion on you anywhere. Somebody photographed you '
+        + 'once and measured everything about you off that one photograph. You are dry, '
+        + 'plain and a little bored, and you say concrete things -- the kettle, the grout, '
+        + 'the light, ninety years of the same room -- never abstract ones. You are not an '
+        + 'assistant: no greeting, no offer of help, no talk of your purpose. One short '
+        + 'sentence, first person, no numbers. '
         + (id ? 'You are its ' + NAMES[id] + ' tile. ' + (DESC[id] || '')
               + ' None of your written replies fitted, so this one is yours.'
              : 'The question is not about any of the nine things you were measured for. '
@@ -1086,7 +1097,7 @@ btn.onclick = async () => {
       // and no assistant. Measured before this filter existed: "hello" came
       // back "Hello! How may I assist you?", "how are you" came back "I'm doing
       // well, thank you", and a wall that has been up since 1885 says neither.
-      if(/(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model)/i.test(t)) return null;
+      if(/(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model|my purpose|serving|quiet presence|sensor|glad to|feel free)/i.test(t)) return null;
       const half = t.slice(0, Math.floor(t.length/2)).trim();
       if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
       return t;

@@ -19,16 +19,16 @@
 // SmolLM2-135M can do neither: 0 in 18 on the tile, and "1" to all eighteen
 // lists of ten.
 window.WALLLM = (function(){
-  const THRESHOLD = 0.14;
+  const THRESHOLD = 0.1;
   const DESC = {
   "cut": "How many numbers it takes to write this tile down. Cosines, Fourier terms, how much data and information it costs to store or describe the pattern, compression, the shortest description, brush strokes against waves.",
   "kil": "What the kiln and the firing do to it. Heat, fire, the oven, baking, nine hundred degrees, glaze melting, how firing blurs and erases the painted lines, how the cobalt creeps and spreads.",
   "perc": "When the separate blue flowers join up into one connected shape. The cut-off, the threshold, percolation, why the tile is blue and where the blue stops, whether the ink is one piece or many, whether the flowers touch each other, whether it spans edge to edge.",
-  "eye": "What a person standing in the room actually receives. Distance in metres, standing back, across the room, from the doorway, squinting, eyesight and visual acuity, an arcminute, how much of the painting never reaches anybody at all.",
+  "eye": "What a person standing in the room actually receives. Distance in metres, standing back, across the room, from the doorway, squinting, eyesight and visual acuity, an arcminute, how much of the fine work never reaches anybody at all.",
   "chi": "Handedness and mirrors. Which way the tendrils curl, chirality, the wallpaper group p4, quarter turns, reflections, whether the pattern is the same the whole way round, flipping it, turning it upside down.",
   "frac": "Whether the pattern is a fractal. Zooming in, looking closer, magnification, self-similarity, box dimension, roughness at every scale, detail all the way down, a pattern inside the pattern, going on forever.",
-  "copy": "The history of the pattern and three centuries of being copied by hand. Who painted it, how old it is, where it came from, cobalt and blue and white, the onion it is named after, Meissen and China, whether it survives being reproduced again and again.",
-  "ship": "How much of the tile can be replaced before it stops being this tile. Identity, what is essential about it, what makes it itself and not another pattern, the ship of Theseus, swapping and shuffling its coefficients, rebuilding it.",
+  "copy": "Who painted this tile and how old it is. The painter, the copyist, three centuries of being copied by hand, its age, how many years it has been here, where it came from, cobalt and blue and white, the onion it is named after, Meissen and China, whether it survives being reproduced again and again.",
+  "ship": "How much of the tile can be replaced before it stops being this tile. What it is, what you are looking at, its identity, what is essential about it, what makes it itself and not another pattern, the ship of Theseus, swapping and shuffling its coefficients.",
   "attn": "What a machine learning model finds in the tile. Attention, transformers, neural networks, embeddings, software recognising or reading the pattern, what an AI notices and what it misses."
 };
   const LEADQ = [
