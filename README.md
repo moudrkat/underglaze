@@ -70,7 +70,7 @@ flowchart TD
   C3["<b>call three</b> · Qwen2.5-0.5B<br/>write one, for this tile<br/><i>one sentence, first person</i>"]
 
   C1 -->|a tile| C2
-  C1 -->|nothing above 0.20| C3
+  C1 -->|nothing above 0.10| C3
   C2 -->|a number| OUT
   C2 -->|NONE| C3
   C3 --> F{"a digit in it?<br/>an assistant in it?<br/>looped? wrong length?"}
@@ -87,8 +87,11 @@ flowchart TD
   class Q,OUT,OWN,MISS page
 ```
 
-Call one takes about fifty milliseconds. Calls two and three take about thirty-five seconds on a
-machine with no GPU, so the tile does not stand still through it: it is already chosen, so it
+Call one takes about fifty milliseconds. Calls two and three take about fifteen seconds on a
+machine with no GPU — and they run in a worker, because on the main thread they froze the whole
+page for the length of every answer: the tile stopped mid-sweep, the caret stopped blinking, and
+a return key pressed during it waited in the queue until the model had finished. So the tile
+does not stand still through it: it is already chosen, so it
 runs — out to the far end and back, over and over, the rest of the wall in shadow — with the
 line above it reading *WHEN I JOIN UP is thinking…* until the sentence lands. The animation is
 the answer arriving. The sentence is the caption.
@@ -122,19 +125,39 @@ rather than to a tile. They have buttons of their own. Out of the pool, and the 
 
 | threshold | on the wall | refuses | total |
 |---|---|---|---|
-| 0.10 | 98 / 123 | 9 / 18 | 107 |
+| **0.10** | **98 / 123** | 9 / 18 | 107 |
 | 0.12 | 95 / 123 | 11 / 18 | 106 |
-| **0.14** | **95 / 123** | **14 / 18** | **109** |
+| 0.14 | 95 / 123 | 14 / 18 | 109 |
 | 0.20 | 82 / 123 | 17 / 18 | 99 |
 
-Higher refuses nonsense better and answers real questions worse. 0.14 is where the two stop
-paying for each other. The page ran at 0.20.
+0.14 lands the most, and the page runs at 0.10 anyway, which is the more interesting decision.
+
+**Refusing is not the router's job.** It cannot read; it can only say which of nine subjects a
+sentence lands nearest. Asked to also decide whether a question belongs here at all, it takes
+questions off tiles that were measured for them. Three decoy subjects went into the pool to
+catch arithmetic, greetings and prompt-injection, and they caught them — 17 refusals of 18 —
+while dropping the blind set from 25 to 15. A margin reined them in and they still took *can I
+see you from the door*, because a greeting and a question to a wall both open with "are you".
+
+So the threshold is low, a tile is nearly always chosen, and **call two does the refusing**: it
+is looking at ten actual sentences and can say that none of them answers the question, and then
+call three writes one. That is what the second and third calls were put there for.
+
+Measured on the live page before that was fixed: *hello*, *what are you*, *how are you* and
+*what is 2+2* all came back with the same sentence about standing four metres away, because
+call two was picking the least wrong of ten rather than taking NONE. The prompt asks first
+whether one of them answers it, and names NONE as the reply rather than mentioning it in
+passing. **That rewrite is not yet measured** — the 483 MB fetch failed three times running from
+a headless browser — and the risk runs both ways: a call two that says NONE to everything would
+replace measured sentences with invented ones.
 
 **And the nine subjects were overlapping.** *from across the room* said "the smallest detail you
 can resolve", so it took *does it repeat if I look closer?*, *is there detail all the way down?*
 and *what if I keep magnifying?* — all of which belong to the fractal — plus *how much
 information is in you?*, which belongs to the cosines. Rewritten so the nine stop reaching into
-each other, the blind set went 23 to 25 and the fresh set 20 to 24.
+each other, the blind set went 23 to 25 and the fresh set 20 to 24. It took two more passes:
+*from across the room* also said "painting", and so took *who painted you*; and the history tile
+had to be told that "how old are you" is about it.
 
 ### Neither generator can pick a tile
 
