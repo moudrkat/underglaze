@@ -1230,16 +1230,20 @@ btn.onclick = async () => {
              : 'The question is not about any of the nine things you were measured for. '
                + 'Answer it as the wall anyway.'),
         '"' + q + '" \u2014 reply in fewer than twelve words.', 26);
+      // Which test a sentence failed is known only here, and the eval was
+      // reduced to guessing at it from the outside. The page says so itself.
+      const toss = (why) => { window.wall._lastToss = why; return null; };
+      window.wall._lastToss = null;
       t = String(t).split(String.fromCharCode(10))[0]
                    .replace(/^["\u201c]+|["\u201d]+$/g, '').trim();
-      if(!t || t.length < 6 || t.length > 90) return null;
-      if(/[0-9]/.test(t)) return null;                       // no invented numbers, ever
+      if(!t || t.length < 6 || t.length > 90) return toss('length');
+      if(/[0-9]/.test(t)) return toss('digit');              // no invented numbers, ever
       // and no assistant. Measured before this filter existed: "hello" came
       // back "Hello! How may I assist you?", "how are you" came back "I'm doing
       // well, thank you", and a wall that has been up since 1885 says neither.
-      if(/\\b(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model|my purpose|serving|quiet presence|sensor|glad to|feel free)\\b/i.test(t)) return null;
+      if(/\\b(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model|my purpose|serving|quiet presence|sensor|glad to|feel free)\\b/i.test(t)) return toss('assistant');
       const half = t.slice(0, Math.floor(t.length/2)).trim();
-      if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
+      if(half.length > 11 && t.indexOf(half, half.length) !== -1) return toss('loop');
       return t;
     };
     window.wall._say = say;          // so src/eval_flow.py can score the raw model
