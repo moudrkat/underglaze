@@ -122,6 +122,7 @@ body.knobs .wall{aspect-ratio:.845}
 .more a{color:var(--warm);cursor:pointer;border-bottom:1px solid rgba(176,85,74,.45)}
 .more a:hover{border-bottom-color:var(--warm);background:rgba(176,85,74,.07)}
 .more b{font-weight:400;margin:0 .7em;color:var(--grey)}
+.said .think b{font-weight:400;font-style:normal;margin-left:.6em;color:var(--grey)}
 /* the arrows are the same circle as the ? on a tile, so they read as controls
    the moment you have seen one */
 .pg{margin-right:1.15em;white-space:nowrap;display:inline-flex;align-items:center;gap:.3em}
@@ -519,9 +520,17 @@ window.wall = {
     const el = document.getElementById('said');
     const tag = id && document.querySelector('[data-tile="'+id+'"] .tag');
     clearInterval(this._typing);
+    // Fifteen seconds of a page saying nothing but "thinking" reads as broken.
+    // The first estimate is the one answer that has been timed end to end --
+    // 14.5 s, headless, on a laptop with no GPU -- and it is replaced by this
+    // visitor's own machine as soon as that machine has answered once.
+    this._thinkAt = Date.now();
+    const eta = this._lastMs
+      ? '(about ' + Math.round(this._lastMs / 1000) + ' s, going by the last one)'
+      : '(about 15 s the first time — it is running on your machine)';
     el.innerHTML = (tag ? '<em class="think">the tile ' + this.place(id) + ' is thinking'
                         : '<em class="think">the wall is thinking')
-      + '<i>.</i><i>.</i><i>.</i></em>';
+      + '<i>.</i><i>.</i><i>.</i><b>' + eta + '</b></em>';
     el.classList.add('on');
     return 'thinking';
   },
@@ -547,21 +556,31 @@ window.wall = {
   // "Far" is whichever end is further from where this slider rests, so the
   // cosines build up from one ripple and the kiln fires from cold, each in the
   // direction its own number runs.
-  async _sweep(id, ms, atTurn, my){
+  async _sweep(id, ms, atTurn, my, passes){
     const dead = () => stopped || (my !== undefined && my !== gen);
     const t = TILE[id];
     const r = document.getElementById(id+'r');
     const rest = r ? +r.defaultValue : 0;
     const far = rest * 2 < t.n ? t.n - 1 : 0;
     const d = far > rest ? 1 : -1;
-    for(let i = rest; d > 0 ? i <= far : i >= far; i += d){
-      if(dead()) return; this.set(id, i); await sleep(ms); }
-    if(dead()) return;
-    if(atTurn) await atTurn();               // the model may take a while; wait
-    if(dead()) return;
-    await sleep(atTurn ? 1100 : 340);        // long enough to read what arrived
-    for(let i = far; d > 0 ? i >= rest : i <= rest; i -= d){
-      if(dead()) return; this.set(id, i); await sleep(ms); }
+    if(passes === undefined) passes = 1;
+    const leg = async (from, to, step) => {
+      for(let i = from; step > 0 ? i <= to : i >= to; i += step){
+        if(dead()) return true; this.set(id, i); await sleep(ms); }
+      return false;
+    };
+    for(let p = 0; p < passes; p++){
+      if(await leg(rest, far, d)) return;
+      // The sentence lands at the turn of the first pass and the tile goes on
+      // moving underneath it. A line with a still wall under it is half an
+      // answer -- so the wait at the far end is long enough to read the
+      // sentence twice over, and a tile that is speaking gets more than one
+      // pass to say it in.
+      if(p === 0 && atTurn) await atTurn();  // the model may take a while; wait
+      if(dead()) return;
+      await sleep(p === 0 && atTurn ? 2200 : 680);   // to read what arrived
+      if(await leg(far, rest, -d)) return;
+    }
     if(!dead()) this.set(id, rest);
   },
   // With more than one tile moving there is no single speaker. This used to
@@ -589,30 +608,55 @@ window.wall = {
     const ids = Object.keys(TILE);
     const wall = document.querySelector('.wall');
     for(let n = 0; !stopped && my === gen && n < 30; n++){
-      const all = (n === 0) || Math.random() < 0.25;     // it opens as a chorus
+      // It does not open as a chorus. Nine tiles moving at once is an
+      // animation; one tile moving is a wall with something to say and eight
+      // others waiting their turn. So it takes turns first, now and then two
+      // at a time, and the chorus arrives a few beats in -- where it reads as
+      // a change rather than as the state the page happened to load in.
+      const all = n === 2 || (n > 2 && Math.random() < 0.25);
+      const pair = !all && n > 2 && Math.random() < 0.25;
       // checked again here and not only in the loop condition: a question can
       // arrive between the two, and then this beat takes the wall back off it
       if(this._asked || my !== gen) break;
-      const cast = all ? ids : [ids[Math.floor(Math.random() * ids.length)]];
+      const bag = ids.slice();
+      for(let i = bag.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        const swap = bag[i]; bag[i] = bag[j]; bag[j] = swap; }
+      // and not the tile that just spoke: picking at random out of nine gave
+      // the same one twice in a row often enough to read as the wall being
+      // stuck rather than as it choosing
+      if(!all && bag[0] === this._lastSolo && bag.length > 1) bag.push(bag.shift());
+      const cast = all ? ids : bag.slice(0, pair ? 2 : 1);
+      if(!all) this._lastSolo = cast[0];
+      // one speaker or none: two tiles moving have no single line between them,
+      // so a pair is handled the way the chorus is
+      const many = cast.length > 1;
       document.querySelectorAll('.tile').forEach(c => c.classList.remove('speaking'));
       cast.forEach(i => document.querySelector('[data-tile="'+i+'"]').classList.add('speaking'));
       wall.classList.add('busy');
-      this._said = all ? [] : cast.slice(); this._at = 0;
-      if(all){ const C = WALLLM.CHORUS;
-               this.spot(null); this.hint(null);
-               this.say(C[Math.floor(Math.random() * C.length)]); }
+      this._said = many ? [] : cast.slice(); this._at = 0;
+      if(many){ const C = WALLLM.CHORUS;
+                this.spot(null); this.hint(null);
+                this.say(C[Math.floor(Math.random() * C.length)]); }
       else this.label(cast[0]);
       await Promise.all(cast.map(id =>
-        this._sweep(id, ms, all ? null : () => this.line(cast[0]), my)));
+        this._sweep(id, ms, many ? null : () => this.line(cast[0]), my)));
       // only if it is still our turn: a question started while this was mid
       // sweep, and the loop was taking the spotlight back off the tile that
       // had just been asked about
       if(my !== gen) break;
       wall.classList.remove('busy');
       if(stopped) break;
-      await sleep(all ? 1600 : 1200);
+      await sleep(many ? 1600 : 1200);
     }
-    if(my === gen) running = false;
+    // A pass cut off by stop() leaves its tile part-way along its slider. The
+    // wall is meant to be found the way it was left, so anything still lit is
+    // put back -- unless a question has taken the wall over, in which case the
+    // tile belongs to whoever asked.
+    if(my === gen){ running = false;
+      document.querySelectorAll('.tile.speaking').forEach(c => {
+        const r = document.getElementById(c.dataset.tile + 'r');
+        if(r) this.set(c.dataset.tile, +r.defaultValue); }); }
     return 'done';
   },
   // Turning a page runs that tile again rather than only swapping the sentence:
@@ -757,6 +801,9 @@ window.wall = {
     const el = document.getElementById('said');
     const cell = who && document.querySelector('[data-tile="'+who+'"] .tag');
     clearInterval(this._typing);
+    // whatever the estimate said, this is what it was
+    if(text && this._thinkAt){ this._lastMs = Date.now() - this._thinkAt;
+                               this._thinkAt = 0; }
     el.classList.toggle('on', !!text);
     if(!text){ el.innerHTML = ''; return text; }
     const body = String(text).replace(/[<>]/g,'');
@@ -796,7 +843,14 @@ window.wall = {
           + '<a onclick="wall.page(1)" title="the next tile">&rsaquo;</a></span>'
         : '')
       + '<a data-t="'+id+'" onclick="wall.tell(this.dataset.t)">'
-      + 'find out more</a>';
+      + 'find out more</a>'
+      // Without a model the whole page is this link and the tiles' own ?, and
+      // the sliders were reachable only through a bar button whose meaning
+      // lived in a tooltip. tryit() has been sitting here unreferenced since
+      // it was written; this is what was supposed to call it.
+      + '<b>&middot;</b>'
+      + '<a data-t="'+id+'" onclick="wall.tryit(this.dataset.t)">'
+      + 'move it yourself</a>';
     el.className = 'more on';
     this.spot(id);
     return id;
@@ -1057,8 +1111,7 @@ btn.onclick = async () => {
     // its subject given, because the same ten sentences mean different things
     // depending on which tile is saying them.
     window.wall._pickLine = async (q, opts, id) => {
-      const numbered = opts.map((l,i) => (i+1) + '. ' + l).join('
-');
+      const numbered = opts.map((l,i) => (i+1) + '. ' + l).join('\n');
       // NONE has to be a real option or it is never taken. Measured before this
       // was rewritten: "hello", "what are you" and "what is 2+2" all came back
       // with the same sentence about standing four metres away, because the
@@ -1067,12 +1120,10 @@ btn.onclick = async () => {
       const said = await say(
         'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall. '
         + (DESC[id] || '') + ' Below are the only ten things you are able to say. '
-        + 'If one of them answers the visitor's question, reply with its number. '
+        + 'If one of them answers the visitor\'s question, reply with its number. '
         + 'If none of them answers it, reply NONE. Do not force one. '
         + 'Reply with a single number, or the word NONE.',
-        'Question: "' + q + '"
-' + numbered + '
-Number or NONE:', 4);
+        'Question: "' + q + '"\n' + numbered + '\nNumber or NONE:', 4);
       if(/NONE/i.test(said)) return { raw: 'NONE', line: null };
       const d = (said.match(/[1-9]/) || [])[0];
       const i = d ? (+d - 1) : -1;
@@ -1106,7 +1157,7 @@ Number or NONE:', 4);
       // and no assistant. Measured before this filter existed: "hello" came
       // back "Hello! How may I assist you?", "how are you" came back "I'm doing
       // well, thank you", and a wall that has been up since 1885 says neither.
-      if(/(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model|my purpose|serving|quiet presence|sensor|glad to|feel free)/i.test(t)) return null;
+      if(/\b(assist|help you|how may i|how can i|thank you|you'?re welcome|happy to|here to (answer|help)|as an ai|language model|my purpose|serving|quiet presence|sensor|glad to|feel free)\b/i.test(t)) return null;
       const half = t.slice(0, Math.floor(t.length/2)).trim();
       if(half.length > 11 && t.indexOf(half, half.length) !== -1) return null;  // no loops
       return t;

@@ -1,20 +1,31 @@
-"""Film the wall answering three questions, for a post.
+"""Film the wall answering two questions, for a post.
 
 Not a slideshow of stills. A real screen recording of the real page: headless
 Chromium loads web/wall.html, waits until MiniLM has actually arrived so the
-status line is never caught saying "loading a model", types three short
-questions at human speed, and waits for each answer to finish playing.
+status line is never caught saying "loading a model", types two short questions
+at human speed, and waits for each answer to finish playing.
 
-The three escalate -- one tile, then three, then the whole wall -- and *which*
-tiles each one reaches is a fact about the router, not a script. The run checks
-it and says MISMATCH if the wall answers differently, which it is free to do.
+The two are the two halves of the flow. The first is the question the page is
+named after and one tile answers it. The second is one no tile answers, so call
+two says NONE and call three writes a sentence. *Which* tiles each one reaches
+is a fact about the router, not a script. The run checks it and says MISMATCH if
+the wall answers differently, which it is free to do.
+
+The take opens on the wall standing still for a beat -- long enough to read as a
+wall and not as an animation -- and then it starts moving on its own, uninvited.
+After the first answer the take clicks the page's own "find out more", which
+swings that tile's face open like a door and puts the measured paragraph behind
+it on screen. That is the best motion the page has and no film has used it.
 
 Two things are honest to state if anyone asks:
 
-  - The page is filmed at 920x560 and scaled up, not rendered at 1080. Below
-    900 px the page reflows to a phone layout, so 920 is as small -- and the
-    type therefore as large -- as it can be filmed and still be the wall. Every
-    word in the film is the page's own, at about twice the size it is authored.
+  - The page is laid out at 920x560 and drawn at twice that. Below 900 px it
+    reflows to a phone layout, so 920 is as small -- and the type therefore as
+    large -- as it can be filmed and still be the wall; --force-device-scale-
+    factor=2 then renders those 920 CSS px into 1840 real ones, so the 818x1096
+    column the film keeps is upscaled 1.23x to the frame instead of 2.46x.
+    Every word in the film is the page's own, at about twice the size it is
+    authored.
 
     python -m http.server 8777          # from the repo root
     python src/film_wall.py             # -> out/talk_to_a_brick_wall.mp4
@@ -30,29 +41,45 @@ from playwright.sync_api import sync_playwright
 URL = os.environ.get("WALL_URL", "http://localhost:8777/web/wall.html")
 
 VW, VH = 920, 560               # smallest viewport that is still the desktop wall
+DSF = 2                         # ... rendered at twice that, so the crop is sharp
 OW, OH = 1080, 1350             # 4:5, the shape a feed gives the most room to
 FPS = 30
+RAMP = 9.0                      # the waiting runs this many times over
 PAPER = (247, 245, 240)
 
 OUT = "out/talk_to_a_brick_wall.mp4"
 RAW = "out/talk_to_a_brick_wall.webm"
 TAKE = "out/talk_to_a_brick_wall.json"   # crop, timings, and what each question lit
 
-# (question, how many tiles it should reach). Short, and the sort of thing
-# somebody actually types at a wall.
+# --chorus: ten seconds of the whole wall moving at once and nothing else, for
+# somewhere that autoplays a loop and gives it no caption.
+CHORUS_OUT = "out/whole_wall_10s.mp4"
+CHORUS_MS = 8200
+
+# (question, how many tiles it should reach, whether to open the tile after).
+# Short, and the sort of thing somebody actually types at a wall.
 SCRIPT = [
-    ("how many cosines does it take to draw you?", 1, 0),
-    ("how are you?", 0, 0),        # nothing on the wall answers this; call three writes one
+    ("how many cosines does it take to draw you?", 1, True),
+    ("how are you?", 0, False),    # nothing on the wall answers this; call three writes one
 ]
 
+STILL_MS = 1200        # of the wall just being a wall, before it moves at all
 PERFORM_MS = 13000     # of the wall talking to itself before anybody types
-OPEN_AT_ONE = 6.2      # of the opening kept; the rest of it is cut out
+OPEN_AT_ONE = STILL_MS / 1000 + 6.2   # of the opening kept; the rest is cut out
 
 TYPE_MS = 42
 HOLD_OPEN = 1000       # on the bare wall before anything is typed
 HOLD_READ = 2600       # on the answer, once it has landed
 HOLD_PAGE = 700        # after each answer paged to
 HOLD_END = 1400        # on the last one
+HOLD_OPEN_TILE = 3400  # on the tile hanging open with its paragraph showing
+
+# --wall-only: no models, no questions, nothing downloaded. Just the thing the
+# page does the moment it is opened and nobody touches it, and then one tile
+# coming off the wall. Everything in it runs at 1x -- there is no waiting in it
+# to speed up, because nothing in it is waiting on a model.
+WALL_ONLY_MS = 45000   # longest the chorus may take to come round
+OPEN_TILE = "cut"      # the one that swings open at the end
 
 READ = ("() => [...document.querySelectorAll('.tile input[type=range]')]"
         ".map(r => r.value).join(',')")
@@ -81,8 +108,12 @@ def wait_answer(pg, timeout=90.0):
     return lit, time.monotonic()
 
 
-def film():
+def film(wall_only=False, chorus=False):
     """Roll on the wall talking to itself, then ask it two things.
+
+    With wall_only the second half never happens: no button is pressed, no model
+    is fetched, and the film is the wall performing uninvited and then one tile
+    hinging off it. That take needs nothing but the page.
 
     Both models are fetched before the camera starts, because 506 MB of progress
     bar is not the film. What is filmed is the wall performing without being
@@ -101,51 +132,78 @@ def film():
     beats = []
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--force-color-profile=srgb",
-                                    "--font-render-hinting=none"])
+                                    "--font-render-hinting=none",
+                                    "--force-device-scale-factor=%d" % DSF])
         ctx = b.new_context(viewport={"width": VW, "height": VH},
-                            device_scale_factor=2,
+                            device_scale_factor=DSF,
                             record_video_dir=vdir,
-                            record_video_size={"width": VW, "height": VH})
+                            record_video_size={"width": VW * DSF,
+                                               "height": VH * DSF})
         pg = ctx.new_page()
         clock = time.monotonic()
         pg.goto(URL)
-        pg.wait_for_timeout(1000)
+        # the page starts performing by itself 1.4 s after it loads. Stopping at
+        # 1.0 s stopped nothing and the take opened part way into a beat, so the
+        # wait here has to outlast that timer.
+        pg.wait_for_timeout(2200)
         pg.evaluate("wall.stop()")
-        print("fetching both models…")
-        # one button, both models; the 483 MB half fails about one attempt in
-        # two from a headless browser, so it gets three
-        for attempt in range(3):
-            pg.click("#speak")
-            pg.wait_for_function(
-                "() => !!window.wall._improvise || (document.getElementById('speak')"
-                " && document.getElementById('speak').textContent === 'could not load')",
-                timeout=1800000)
-            if pg.evaluate("() => !!window.wall._improvise"):
-                break
-            print("  attempt %d failed, retrying" % (attempt + 1))
-            pg.wait_for_timeout(2000)
-        if not pg.evaluate("() => !!window.wall._improvise"):
-            raise SystemExit("the models did not load")
-        print("both up")
+        if not (wall_only or chorus):
+            print("fetching both models…")
+            # one button, both models; the 483 MB half fails about one attempt
+            # in two from a headless browser, so it gets three
+            for attempt in range(3):
+                pg.click("#speak")
+                pg.wait_for_function(
+                    "() => !!window.wall._improvise || (document.getElementById('speak')"
+                    " && document.getElementById('speak').textContent === 'could not load')",
+                    timeout=1800000)
+                if pg.evaluate("() => !!window.wall._improvise"):
+                    break
+                print("  attempt %d failed, retrying" % (attempt + 1))
+                pg.wait_for_timeout(2000)
+            if not pg.evaluate("() => !!window.wall._improvise"):
+                raise SystemExit("the models did not load")
+            print("both up")
         pg.evaluate("wall.stop(); wall.reset(); wall.say('')")
-        pg.wait_for_timeout(500)
-
+        pg.wait_for_timeout(400)
         bar = pg.locator(".bar").first.bounding_box()
         wall = pg.locator(".wall").first.bounding_box()
-        crop = (int(bar["x"]) - 2, int(bar["y"]) - 6,
-                int(bar["x"] + bar["width"]) + 2,
-                int(wall["y"] + wall["height"]) + 4)
+        # boxes come back in CSS px; the video is DSF times that
+        crop = (int(bar["x"] * DSF) - 4, int(bar["y"] * DSF) - 12,
+                int((bar["x"] + bar["width"]) * DSF) + 4,
+                int((wall["y"] + wall["height"]) * DSF) + 8)
 
         start = time.monotonic() - clock
         print("rolling at +%.1f s, crop %s" % (start, crop))
 
-        # the wall, uninvited
-        pg.evaluate("() => { wall.perform(); }")
-        pg.wait_for_timeout(PERFORM_MS)
-        pg.evaluate("wall.stop()")
-        pg.wait_for_timeout(500)
+        # a wall, and then -- with nobody having touched anything -- a wall
+        # that moves
+        pg.wait_for_timeout(STILL_MS)
+        if chorus:
+            # the play button's own function: every tile at once, which is the
+            # one thing the wall does that reads at the size of a thumbnail
+            pg.evaluate("() => { wall.all(); }")
+            pg.wait_for_timeout(CHORUS_MS)
+            pg.evaluate("wall.stop()")
+            pg.wait_for_timeout(600)
+        elif wall_only:
+            pg.evaluate("() => { wall.perform(); }")
+            lit9 = "() => document.querySelectorAll('.tile.speaking').length === 9"
+            rest = ("() => [...document.querySelectorAll('.tile input[type=range]')]"
+                    ".every(r => r.value === r.defaultValue)")
+            pg.wait_for_function(lit9, timeout=WALL_ONLY_MS)   # one tile, another, then all
+            pg.wait_for_timeout(700)                           # it is moving now
+            pg.wait_for_function(rest, timeout=30000)          # and it has come back
+            pg.wait_for_timeout(HOLD_END)
+            pg.evaluate("wall.stop()")
+            pg.wait_for_timeout(400)
+        else:
+            pg.evaluate("() => { wall.perform(); }")
+            pg.wait_for_timeout(PERFORM_MS)
+            pg.evaluate("wall.stop()")
+            pg.wait_for_timeout(500)
 
-        for i, (q, want, pages) in enumerate(SCRIPT):
+        for i, (q, want, tell) in enumerate([] if (wall_only or chorus) else SCRIPT):
             touch(pg)
             pg.click("#q")
             pg.fill("#q", "")
@@ -154,6 +212,12 @@ def film():
             pg.keyboard.press("Enter")
             lit, t_lit = wait_answer(pg)
             pg.wait_for_timeout(HOLD_READ)
+            if tell:
+                # the page's own link, under the sentence it just handed over
+                touch(pg)
+                pg.click(".more a[data-t]")
+                pg.wait_for_selector(".tile.open", timeout=5000)
+                pg.wait_for_timeout(HOLD_OPEN_TILE)
             beats.append({"q": q, "wanted": want, "lit": lit,
                           "ask": round(t_ask - start, 2),
                           "answer": round(t_lit - clock - start, 2),
@@ -172,11 +236,11 @@ def film():
     take = {"crop": list(crop), "start": round(start, 2),
             "dur": round(end - start, 2), "beats": beats}
     json.dump(take, open(TAKE, "w"), indent=1)
-    compose(take)
+    compose(take, out=CHORUS_OUT if chorus else OUT)
     return beats
 
 
-def compose(take, raw=RAW):
+def compose(take, raw=RAW, out=OUT):
     """Crop the page column out of the capture and let it fill the frame.
 
     There used to be a caption band under the wall with the question and the
@@ -193,10 +257,10 @@ def compose(take, raw=RAW):
 
     # The waiting is real and it is long: the tile runs for half a minute while
     # a 0.5B model reads ten sentences on somebody's CPU. Nothing is cut out and
-    # nothing is faked, but those stretches run at 8x, because a minute of a
+    # nothing is faked, but those stretches run at RAMP times over, because a minute of a
     # tile going out and back says the same thing as five seconds of it. The
     # typing, the sentence landing, and the wall's own performance stay at 1x.
-    fast = [(b["ask"] + 1.8, b["answer"] - 1.0, 6.0) for b in beats
+    fast = [(b["ask"] + 1.8, b["answer"] - 1.0, RAMP) for b in beats
             if b["answer"] - b["ask"] > 5.0]
     # The wall's opening performance is the point of the film, but not all of
     # it. Sampled frame by frame: the first chorus line finishes landing at
@@ -231,12 +295,12 @@ def compose(take, raw=RAW):
         "-map", "[out]",
         "-c:v", "libx264", "-profile:v", "high", "-level", "4.0",
         "-preset", "slow", "-crf", "19",
-        "-movflags", "+faststart", "-an", OUT,
+        "-movflags", "+faststart", "-an", out,
     ], check=True)
     print(subprocess.run(["ffprobe", "-v", "error",
                           "-show_entries", "stream=width,height,r_frame_rate",
                           "-show_entries", "format=duration,size",
-                          "-of", "default=nw=1", OUT],
+                          "-of", "default=nw=1", out],
                          capture_output=True, text=True).stdout.strip())
 
 
@@ -247,7 +311,8 @@ if __name__ == "__main__":
         compose(take)
         rows = take["beats"]
     else:
-        rows = film()
+        rows = film(wall_only="--wall-only" in sys.argv,
+                    chorus="--chorus" in sys.argv)
     for row in rows:
         ok = "ok" if len(row["lit"]) == row["wanted"] else "MISMATCH"
         print("  %-8s %d/%d  %s" % (ok, len(row["lit"]), row["wanted"], row["q"]))
