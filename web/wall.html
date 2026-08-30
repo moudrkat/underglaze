@@ -911,13 +911,13 @@ window.wall = {
     // matcher pretending to have read the question either. If you want one of
     // the other nine chosen for you, there is a button for that.
     let line = s || ls[0];
-    if(line.length < 62 && Math.random() < 0.28){
+    if(line.length < 78 && Math.random() < 0.45){
       const t = WALLLM.TAG.filter(x => x.length + line.length < 118);
       if(t.length) line += ' ' + t[Math.floor(Math.random()*t.length)];
     }
     // The aside is an aside. It used to arrive *instead of* the measurement,
     // which is the one thing on this page nobody should have to gamble for.
-    if(Math.random() < 0.13){
+    if(Math.random() < 0.26){
       const a = WALLLM.ASIDE.filter(x => x.length + line.length < 168);
       if(a.length) line += ' … ' + a[Math.floor(Math.random()*a.length)];
     }

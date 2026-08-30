@@ -153,18 +153,40 @@ def main():
         # NONE. Both are put to it here, and what comes back is the page's own
         # _improvise -- including its reason for throwing a sentence away,
         # which only the page knows.
-        print("\ncall three -- its own sentence, where nothing was written for it")
+        # The whole flow, on the eighteen nothing was written for -- which is
+        # the only set where call three is reached at all. Walked the way the
+        # page walks it and not the way it is convenient to measure: an earlier
+        # run put all eighteen straight to the writer, but twelve of them were
+        # routed to a tile by call one and in the page those go to call two
+        # first. Whether call two then says NONE is the whole claim being made
+        # for it, and sending them past it measures nothing.
+        print("\nthe whole flow, on the %d nothing was written for"
+              % len([r for r in rows if not r[1]]))
         t2 = time.monotonic()
         three_rows = []
-        asks = [(q, None) for q, g, _hit, _w, _id, _sim in rows if not g]
-        asks += [(q, g) for q, g, i, l in line_rows if i is None]
-        for q, tile in asks:
-            t, why = pg.evaluate(
-                "([q,t]) => wall._improvise(q, t).then(s => [s, wall._lastToss])",
-                [q, tile])
-            three_rows.append((q, tile, t, why))
-            print("  %-40s -> %s" % ((q[:40] or "(empty)"),
-                                     (t[:52] if t else "thrown away (%s)" % why)))
+        for q, gold, hit, which, id_, sim in rows:
+            if gold:
+                continue
+            if hit is None:                       # call one refused it outright
+                t, why = pg.evaluate(
+                    "([q,t]) => wall._improvise(q, t).then(s => [s, wall._lastToss])",
+                    [q, None])
+                end = "own" if t else "tossed"
+                three_rows.append((q, None, end, t, why))
+            else:
+                ls = pg.evaluate("t => wall.lines(t)", hit)
+                r = pg.evaluate("([q,ls,t]) => wall._pickLine(q, ls, t)", [q, ls, hit])
+                if r["line"]:                     # call two handed over a written one
+                    three_rows.append((q, hit, "written", r["line"], None))
+                else:                             # call two said NONE, so call three
+                    t, why = pg.evaluate(
+                        "([q,t]) => wall._improvise(q, t).then(s => [s, wall._lastToss])",
+                        [q, hit])
+                    end = "own" if t else "tossed"
+                    three_rows.append((q, hit, end, t, why))
+            q_, tile_, end_, t_, why_ = three_rows[-1]
+            print("  %-38s %-8s %s" % ((q_[:38] or "(empty)"), end_,
+                                       (t_[:46] if t_ else "(%s)" % why_)))
         three = time.monotonic() - t2
         b.close()
 
@@ -226,19 +248,22 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
            "| distinct lines reached, over %d tiles | **%d** |" % (len(lines_seen), picked),
            "| took the first option | **%d / %d** |" % (first_pick, len(line_rows)),
            "", "%.1f s a question.\n" % (two / max(1, len(line_rows))),
-           "## Call three, the one that writes: Qwen2.5-0.5B, 483 MB\n",
-           "Put to it: every question call one refused, and every tile question",
-           "call two answered NONE. A sentence is thrown away for a digit, for an",
-           "assistant, for looping, or for coming out the wrong length -- and the",
-           "reason is the page's own, not this file's guess at it.\n",
-           "| | |", "|---|---|",
-           "| asked | **%d** |" % len(three_rows),
-           "| kept | **%d** |" % sum(1 for r in three_rows if r[2]),
-           "| thrown away | **%d** |" % sum(1 for r in three_rows if not r[2])]
+           "## The whole flow, on what nothing was written for\n",
+           "The %d questions with no tile behind them, walked the way the page" % len(three_rows),
+           "walks them: call one, then call two if a tile was chosen, then call",
+           "three only where call two came back empty. A written sentence handed",
+           "to one of these is call two failing to refuse.\n",
+           "| where it ended | |", "|---|---|",
+           "| a written sentence, from call two | **%d** |"
+           % sum(1 for r in three_rows if r[2] == "written"),
+           "| the model's own sentence, from call three | **%d** |"
+           % sum(1 for r in three_rows if r[2] == "own"),
+           "| thrown away, and a written refusal instead | **%d** |"
+           % sum(1 for r in three_rows if r[2] == "tossed")]
     for why in ("digit", "assistant", "loop", "length"):
-        n = sum(1 for r in three_rows if not r[2] and r[3] == why)
+        n = sum(1 for r in three_rows if r[2] == "tossed" and r[4] == why)
         if n:
-            md.append("| ... for a %s | %d |" % (why, n))
+            md.append("| ... thrown for a %s | %d |" % (why, n))
     md += ["", "%.1f s a question.\n" % (three / max(1, len(three_rows))),
            "## What the threshold is worth\n",
            "Swept over the same 141, no model re-run. The page ships 0.10.\n",
@@ -258,12 +283,12 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
     for q, g, i, l in line_rows:
         md.append("| %s | %s | %s -- %s |" % (q, g, i, str(l)[:70]))
     if three_rows:
-        md += ["", "## Every sentence call three wrote\n",
-               "| question | tile | what came back |", "|---|---|---|"]
-        for q, tile, t, why in three_rows:
-            md.append("| %s | %s | %s |"
-                      % ((q or "(empty)").replace("|", "\\|"), tile or "--",
-                         t if t else "*thrown away -- %s*" % why))
+        md += ["", "## Where each of them ended\n",
+               "| question | tile | ended | what came back |", "|---|---|---|---|"]
+        for q, tile, end, t, why in three_rows:
+            md.append("| %s | %s | %s | %s |"
+                      % ((q or "(empty)").replace("|", "\\|"), tile or "--", end,
+                         (t or "*%s*" % why).replace("|", "\\|")))
     open(OUT, "w").write("\n".join(md) + "\n")
 
     print("\n  call one   on the wall %d/%d, refuses %d/%d, %d questions"
@@ -271,15 +296,12 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
     print("  call two   %d distinct lines over %d tiles, first option %d/%d"
           % (picked, len(lines_seen), first_pick, len(line_rows)))
     if three_rows:
-        kept = sum(1 for r in three_rows if r[2])
-        why = {}
+        ends = {}
         for r in three_rows:
-            if not r[2]:
-                why[r[3]] = why.get(r[3], 0) + 1
-        print("  call three kept %d of %d%s"
-              % (kept, len(three_rows),
-                 (", thrown away for " + ", ".join("%s x%d" % (k, v)
-                  for k, v in sorted(why.items()))) if why else ""))
+            ends[r[2]] = ends.get(r[2], 0) + 1
+        print("  off-wall   %d questions -> %s"
+              % (len(three_rows),
+                 ", ".join("%s %d" % (k, v) for k, v in sorted(ends.items()))))
     print("  threshold  " + "  ".join("%.2f:%d+%d" % (t, a, b_) for t, a, b_ in sweep(rows)))
     print("  wrote", OUT)
 

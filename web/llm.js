@@ -505,7 +505,15 @@ window.WALLLM = (function(){
  "The kettle has heard all of this before.",
  "I cannot leave, so take your time.",
  "You are the first thing to happen here since the boiler.",
- "I answer, which is more than the phrase promised."
+ "I answer, which is more than the phrase promised.",
+ "Nobody in this kitchen has ever asked me twice.",
+ "The boiler is the only other thing in here with an opinion.",
+ "Ninety years, and the most exciting event was a leak.",
+ "Thousands have looked at me. One has asked.",
+ "You are not the first to talk to a wall. You are the first to wait for the answer.",
+ "The kettle boils, the fridge hums, and I do this.",
+ "I was put up straight, which is more than can be said for the shelf.",
+ "Whatever you were doing before this, it was probably load-bearing."
 ];
   const TAG = [
  "And which of us is talking to a wall here?",
@@ -525,7 +533,19 @@ window.WALLLM = (function(){
  "The kettle disagrees, but the kettle always does.",
  "I only know nine things, and you have now heard one of them.",
  "There is more where that came from. Eight more, to be exact.",
- "Ask the tile next to me. She will say the same about herself."
+ "Ask the tile next to me. She will say the same about herself.",
+ "None of this was my idea.",
+ "You did ask.",
+ "I have had ninety years to think about it.",
+ "I would shrug.",
+ "Take it up with whoever fired me.",
+ "The grout knows more than it lets on.",
+ "That is one of nine. Pace yourself.",
+ "Somebody wrote that down so you would not have to.",
+ "Do not ask the kettle. The kettle exaggerates.",
+ "I am at my most eloquent on this particular subject.",
+ "It took a camera and a great deal of arithmetic to get that out of me.",
+ "Riveting, I know."
 ];
   const WAIT = 'Press “let it think” above and I can read what you type. '
              + 'Until then I will keep talking, and every tile still comes off the wall.';
