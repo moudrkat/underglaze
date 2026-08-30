@@ -49,7 +49,9 @@ def question_sets(path="src/eval_wall.py"):
 
 
 MODEL = os.environ.get("WALL_MODEL", "")
-THRESH = 0.12
+THRESH = None      # read off the page below; a copy kept here is the drift
+                   # this file exists to prevent, and the copy read 0.12 to
+                   # the page's 0.10
 
 
 def load_router(pg, timeout=900000):
@@ -68,13 +70,18 @@ def load_writer(pg, tries=3, timeout=1800000):
     """The 483 MB one. Fails about one attempt in two from a headless browser,
     so calls two and three are scored only if it turns up."""
     for _ in range(tries):
-        pg.click("#write")
+        # There is no second button any more: one press of #speak fetches both
+        # models. This waits on the fetch the router already started rather
+        # than pressing anything. It used to click #write, which has not
+        # existed since the two buttons became one, and that is the reason
+        # calls two and three have never once been scored.
         pg.wait_for_function(
-            "() => !!window.wall._improvise || (document.getElementById('write')"
-            " && document.getElementById('write').textContent === 'could not load')",
+            "() => !!window.wall._improvise || (document.getElementById('speak')"
+            " && document.getElementById('speak').textContent === 'could not load')",
             timeout=timeout)
         if pg.evaluate("() => !!window.wall._improvise"):
             return True
+        pg.click("#speak")          # it said it could not; ask it again
         pg.wait_for_timeout(2000)
     return False
 
@@ -89,7 +96,9 @@ def main():
         b = p.chromium.launch()
         pg = b.new_page(viewport={"width": 1280, "height": 900})
         secs = load_router(pg)
-        print("router up in %.0f s" % secs)
+        global THRESH
+        THRESH = pg.evaluate("() => WALLLM.THRESHOLD")
+        print("router up in %.0f s, page threshold %.2f" % (secs, THRESH))
 
         # Call one is the router, and it is fast enough to put every question
         # through it. This is the real one in the real page, not a copy.

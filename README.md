@@ -50,8 +50,9 @@ flowchart TD
 
 A 23 MB model that produces no words beats a 483 MB one at deciding what a question is about,
 and loses to it at deciding which sentence answers it. `src/eval_flow.py` presses the real button
-in a real browser, so it cannot drift from what ships: **95 of 123** land on the right tile over
-141 questions, all of them in `evals/flow.md`.
+in a real browser, so it cannot drift from what ships. Over 141 questions, call one lands
+**99 of 123** on the right tile at 13 ms each; call two reaches **9 distinct lines over 9 tiles**
+and takes the first option 4 of 9 times. All of it is in `evals/flow.md`.
 
 Press **▶** instead and the wall runs on its own — every tile at once, no model, no download.
 
