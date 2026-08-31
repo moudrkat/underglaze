@@ -60,12 +60,15 @@ ships. One run, 141 questions:
 A 23 MB model that produces no words beats a 483 MB one at deciding what a question is about,
 and loses to it at deciding which sentence answers it.
 
-**And call two cannot refuse.** Refusing here is a handover: when none of a tile's ten written
-lines answers the question, call two is meant to come back empty so call three writes one. It
-does that 6 times out of 18 — the other 12 get a measured sentence that does not answer them.
-It never refuses wrongly either, 0 of 27. Its whole bias is to answer. Three prompt shapes were
-measured and none worked; `src/eval_gate.py` puts five of them to the model on their own, and
-what comes back does not depend on the question. All of it is in `evals/flow.md`.
+**And call two never refuses at all.** Refusing here is a handover: when none of a tile's ten
+written lines answers the question, call two is meant to come back empty so call three writes
+one. Of the 18 questions this wall was never measured for, **call one refuses 6 outright** and
+those reach call three. The other 12 go to a tile, call two sees them, and hands over **0 of
+12** — every one gets a measured sentence that does not answer it. Across all 39 questions ever
+put to it, on wall and off, call two has returned NONE zero times. It is not that the option is
+rarely taken; it is never taken. Three prompt shapes were measured and none worked, and
+`src/eval_gate.py` puts five of them to the model alone: what comes back does not depend on the
+question. All of it is in `evals/flow.md`.
 
 Press **▶** instead and the wall runs on its own — every tile at once, no model, no download.
 

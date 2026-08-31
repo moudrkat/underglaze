@@ -311,9 +311,17 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
         ends = {}
         for r in three_rows:
             ends[r[2]] = ends.get(r[2], 0) + 1
+        # attributed to the call that actually saw the question: the ones call
+        # one refused never reach call two, and crediting call two with them
+        # is how "call two hands over 6 of 18" got written down once
+        seen2 = [r for r in three_rows if r[1]]
         print("  off-wall   %d questions -> %s"
               % (len(three_rows),
                  ", ".join("%s %d" % (k, v) for k, v in sorted(ends.items()))))
+        print("             call one refused %d outright; call two saw %d and "
+              "handed over %d"
+              % (len(three_rows) - len(seen2), len(seen2),
+                 sum(1 for r in seen2 if r[2] != "written")))
     print("  threshold  " + "  ".join("%.2f:%d+%d" % (t, a, b_) for t, a, b_ in sweep(rows)))
     print("  wrote", OUT)
 
