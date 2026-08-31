@@ -426,6 +426,15 @@ window.wall = {
   },
   stop(){ stopped=true; clearInterval(this._rt); clearInterval(this._typing);
     this.hint(null);
+    // A sweep cut off part way leaves its tile somewhere along its slider, and
+    // the wall is meant to be found the way it was left. This is the one place
+    // every way of stopping goes through -- the play button pressed twice, a
+    // question arriving, the film -- so it is the one place that has to put it
+    // back. Measured before it was here: pressing play a second time left all
+    // nine sliders off their rest positions and nothing ever moved them back.
+    document.querySelectorAll('.tile.speaking').forEach(c => {
+      const r = document.getElementById(c.dataset.tile + 'r');
+      if(r) this.set(c.dataset.tile, +r.defaultValue); });
     document.querySelector('.wall').classList.remove('busy');
     document.getElementById('play').innerHTML='&#9654;'; return 'stopped'; },
   toggle(){ return running ? this.stop() : this.all(); },
@@ -649,14 +658,7 @@ window.wall = {
       if(stopped) break;
       await sleep(many ? 1600 : 1200);
     }
-    // A pass cut off by stop() leaves its tile part-way along its slider. The
-    // wall is meant to be found the way it was left, so anything still lit is
-    // put back -- unless a question has taken the wall over, in which case the
-    // tile belongs to whoever asked.
-    if(my === gen){ running = false;
-      document.querySelectorAll('.tile.speaking').forEach(c => {
-        const r = document.getElementById(c.dataset.tile + 'r');
-        if(r) this.set(c.dataset.tile, +r.defaultValue); }); }
+    if(my === gen) running = false;   // putting the wall back is stop()'s job
     return 'done';
   },
   // Turning a page runs that tile again rather than only swapping the sentence:
