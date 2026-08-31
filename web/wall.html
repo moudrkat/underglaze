@@ -204,7 +204,10 @@ body:not(.knobs) .tag{opacity:0}
  text-transform:uppercase;color:var(--warm)}
 #bub .now{margin:7px 0 0;padding-top:7px;border-top:1px solid var(--rule);
  font:12px 'DejaVu Sans',system-ui,sans-serif;color:var(--dark)}
-#bub .x{position:absolute;top:5px;right:9px;color:var(--grey);cursor:pointer;font:14px sans-serif}
+#bub .x{position:absolute;top:5px;right:9px;color:var(--grey);cursor:pointer;
+ font:14px sans-serif;background:none;border:0;padding:2px 4px;line-height:1}
+#bub .x:hover{color:var(--ink)}
+#bub .x:focus-visible{outline:2px solid var(--warm);outline-offset:1px}
 #bub:after{content:"";position:absolute;width:11px;height:11px;background:#fff;
  border-left:1px solid var(--ink);border-bottom:1px solid var(--ink);transform:rotate(45deg)}
 #bub.left:after{right:-6.5px;top:22px;transform:rotate(225deg)}
@@ -346,7 +349,7 @@ footer a{color:var(--grey)}
 </div>
 
 <div id="sug"></div>
-<div id="bub"><span class="x" onclick="wall.close()">&#215;</span><h4 id="bubh"></h4>
+<div id="bub"><button type="button" class="x" onclick="wall.close()" aria-label="close">&#215;</button><h4 id="bubh"></h4>
 <div id="bubt"></div><p class="now" id="bubn"></p></div>
 
 <script type="application/json" id="wall-api">{"cut": {"name": "how many cosines I take", "field": "HOW I'M DRAWN", "steps": 25}, "kil": {"name": "what the fire does to me", "field": "THE FIRE", "steps": 25}, "perc": {"name": "when my blue joins up", "field": "WHEN I JOIN UP", "steps": 26}, "eye": {"name": "what you actually see of me", "field": "FROM ACROSS THE ROOM", "steps": 26}, "chi": {"name": "which way I curl", "field": "WHICH WAY I CURL", "steps": 31}, "frac": {"name": "the fractal I am not", "field": "AM I A FRACTAL", "steps": 26}, "copy": {"name": "three centuries of being copied", "field": "THREE CENTURIES", "steps": 26}, "ship": {"name": "how much of me can be replaced", "field": "HOW MUCH OF ME", "steps": 26}, "attn": {"name": "what attention finds in me", "field": "WHAT AN AI SEES", "steps": 26}}</script>
@@ -954,6 +957,20 @@ document.addEventListener('click',e=>{ if(!sug.contains(e.target)&&e.target!==qi
 let lastTouch = Date.now();
 ['pointerdown','keydown','input'].forEach(e =>
   addEventListener(e, () => { lastTouch = Date.now(); }, true));
+// A panel that covers the wall has to be dismissable the two ways everybody
+// tries first. Measured on the deployed page before this: escape did nothing,
+// clicking away did nothing, and the x was a span, so it was not reachable by
+// keyboard either.
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('bub').classList.contains('on'))
+    wall.close();
+});
+document.addEventListener('click', e => {
+  const b = document.getElementById('bub');
+  if(!b.classList.contains('on') || b.contains(e.target)) return;
+  if(e.target.closest && e.target.closest('button')) return;   // let the bar work
+  wall.close();
+});
 setTimeout(() => { if(!running) wall.perform(); }, 1400);
 setInterval(() => {
   if (running || wall._asked || Date.now() - lastTouch < 25000) return;
