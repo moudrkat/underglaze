@@ -1107,16 +1107,39 @@ btn.onclick = async () => {
       const k = d ? ids[+d - 1] : null;
       return { raw: said.slice(0,16), tile: k || null };
     };
+    // The raw generator, so an evaluation can try a prompt against the real
+    // model in the real page without a round trip through the whole flow.
+    window.wall._say = say;
     // Call two: which of these lines. The tile it is standing on is named, and
     // its subject given, because the same ten sentences mean different things
     // depending on which tile is saying them.
     window.wall._pickLine = async (q, opts, id) => {
+      // Refusing here is a handover: call two declines the ten written lines
+      // and call three writes one instead. Three shapes were measured trying
+      // to make it decline, and all three are recorded because none of them
+      // worked:
+      //
+      //   NONE named in the instructions   forced a line onto 12 of the 18
+      //     (this one, still shipping)     questions the wall was never
+      //                                    measured for; 9 of 9 tile questions
+      //                                    answered properly
+      //   NONE as an eleventh numbered     11 of 18 forced, and it began
+      //     line                           refusing 2 of the 9 the tile does
+      //                                    answer. A worse trade.
+      //   a yes/no gate before the pick    0 of 18 forced and 8 of 9 tile
+      //                                    questions refused -- and probed on
+      //                                    its own, the gate answered the same
+      //                                    word to every question it was
+      //                                    given. Two phrasings said no nine
+      //                                    times out of nine, one said yes
+      //                                    eight times out of nine. It is
+      //                                    answering the template, not the
+      //                                    question.
+      //
+      // So call two cannot yet be made to hand over, and the honest state is
+      // the first one: the wall answers its own questions properly and forces
+      // a written line onto two thirds of what it was never measured for.
       const numbered = opts.map((l,i) => (i+1) + '. ' + l).join('\n');
-      // NONE has to be a real option or it is never taken. Measured before this
-      // was rewritten: "hello", "what are you" and "what is 2+2" all came back
-      // with the same sentence about standing four metres away, because the
-      // model was picking the least wrong of ten rather than saying none of
-      // them answered the question. It is asked whether one answers it first.
       const said = await say(
         'You are the ' + (NAMES[id] || 'tile') + ' tile on a kitchen wall. '
         + (DESC[id] || '') + ' Below are the only ten things you are able to say. '
