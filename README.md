@@ -48,11 +48,24 @@ flowchart TD
   class Q,OUT,OWN,MISS page
 ```
 
+`src/eval_flow.py` presses the real button in a real browser, so it cannot drift from what
+ships. One run, 141 questions:
+
+| | |
+|---|---|
+| **call one** · 23 MB · 13 ms | 99 of 123 land on the right tile |
+| **call two** · 483 MB · 14 s | 13 distinct lines over 27 questions, takes the first 11 times |
+| **call three** · 483 MB · 15 s | writes for 4 of the 18 that reach it, 2 thrown away |
+
 A 23 MB model that produces no words beats a 483 MB one at deciding what a question is about,
-and loses to it at deciding which sentence answers it. `src/eval_flow.py` presses the real button
-in a real browser, so it cannot drift from what ships. Over 141 questions, call one lands
-**99 of 123** on the right tile at 13 ms each; call two reaches **9 distinct lines over 9 tiles**
-and takes the first option 4 of 9 times. All of it is in `evals/flow.md`.
+and loses to it at deciding which sentence answers it.
+
+**And call two cannot refuse.** Refusing here is a handover: when none of a tile's ten written
+lines answers the question, call two is meant to come back empty so call three writes one. It
+does that 6 times out of 18 — the other 12 get a measured sentence that does not answer them.
+It never refuses wrongly either, 0 of 27. Its whole bias is to answer. Three prompt shapes were
+measured and none worked; `src/eval_gate.py` puts five of them to the model on their own, and
+what comes back does not depend on the question. All of it is in `evals/flow.md`.
 
 Press **▶** instead and the wall runs on its own — every tile at once, no model, no download.
 
@@ -62,6 +75,7 @@ Press **▶** instead and the wall runs on its own — every tile at once, no mo
 - `Ea` for Co²⁺ in a glaze melt moves the predicted bleed width by 40×, so no length is quoted.
 - The Porod slope could not tell a fractal from a smooth boundary.
 - A copyist who only remembers, with no original on the desk, does worse than no copyist at all.
+- Call two cannot be made to hand over. Every shape tried is in the comment above it.
 - Whether the nine tiles are one print or nine is undecided: +0.006 against +0.132 for a
   meaningless shift, which measures a failed registration and nothing else.
 

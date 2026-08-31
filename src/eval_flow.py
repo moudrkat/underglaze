@@ -48,6 +48,7 @@ def question_sets(path="src/eval_wall.py"):
     return out
 
 
+PER_TILE = 3       # questions per tile put to call two
 MODEL = os.environ.get("WALL_MODEL", "")
 THRESH = None      # read off the page below; a copy kept here is the drift
                    # this file exists to prevent, and the copy read 0.12 to
@@ -131,11 +132,17 @@ def main():
             two = 0.0
             report(rows, lines_seen, first_pick, line_rows, sets, one, two)
             return rows
+        # Three questions a tile rather than one. With one, "nine distinct
+        # lines over nine tiles" is the only number it can produce and it
+        # produces it whatever the model does, because one question cannot
+        # repeat itself.
         print("\ncall two -- which of that tile's ten, with the tile given")
         t1 = time.monotonic()
-        seen = set()
-        sample = [(q, g) for q, g, _ in every
-                  if g and not (g in seen or seen.add(g))]
+        per, sample = {}, []
+        for q, g, _w in every:
+            if g and per.get(g, 0) < PER_TILE:
+                per[g] = per.get(g, 0) + 1
+                sample.append((q, g))
         for q, gold in sample:
             if not gold:
                 continue
@@ -242,11 +249,14 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
     md += ["| **all** | | **%d / %d** | **%d / %d** |" % (onhit, len(onw), offhit, len(off)),
            "", "%.0f ms a question.\n" % (1000 * one / max(1, len(rows))),
            "## Call two, the reply: Qwen2.5-0.5B, 483 MB\n",
-           "One question per tile. Scored on whether it chooses at all, since ten",
+           "%d questions a tile. Scored on whether it chooses at all, since ten" % PER_TILE,
            "sentences about one subject have no single right answer.\n",
            "| | |", "|---|---|",
-           "| distinct lines reached, over %d tiles | **%d** |" % (len(lines_seen), picked),
+           "| questions | **%d**, over %d tiles |" % (len(line_rows), len(lines_seen)),
+           "| distinct lines reached | **%d** |" % picked,
            "| took the first option | **%d / %d** |" % (first_pick, len(line_rows)),
+           "| said NONE to a question its tile answers | **%d / %d** |"
+           % (sum(1 for r in line_rows if r[2] is None), len(line_rows)),
            "", "%.1f s a question.\n" % (two / max(1, len(line_rows))),
            "## The whole flow, on what nothing was written for\n",
            "The %d questions with no tile behind them, walked the way the page" % len(three_rows),
@@ -263,7 +273,7 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
     for why in ("digit", "assistant", "loop", "length"):
         n = sum(1 for r in three_rows if r[2] == "tossed" and r[4] == why)
         if n:
-            md.append("| ... thrown for a %s | %d |" % (why, n))
+            md.append("| ... thrown for %s | %d |" % (why, n))
     md += ["", "%.1f s a question.\n" % (three / max(1, len(three_rows))),
            "## What the threshold is worth\n",
            "Swept over the same 141, no model re-run. The page ships 0.10.\n",
@@ -293,8 +303,10 @@ def report(rows, lines_seen, first_pick, line_rows, sets, one, two,
 
     print("\n  call one   on the wall %d/%d, refuses %d/%d, %d questions"
           % (onhit, len(onw), offhit, len(off), len(rows)))
-    print("  call two   %d distinct lines over %d tiles, first option %d/%d"
-          % (picked, len(lines_seen), first_pick, len(line_rows)))
+    print("  call two   %d questions over %d tiles, %d distinct lines, "
+          "first option %d, NONE where it should not %d"
+          % (len(line_rows), len(lines_seen), picked, first_pick,
+             sum(1 for r in line_rows if r[2] is None)))
     if three_rows:
         ends = {}
         for r in three_rows:
